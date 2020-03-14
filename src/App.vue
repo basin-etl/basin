@@ -26,7 +26,6 @@ v-app
   //- main layout
   //-
   v-app-bar(app,dense,color="white",:clipped-left="drawer")
-    v-toolbar-side-icon(@click.stop='drawer = !drawer')
     v-toolbar-title.mr-2(style="height:100%")
       a(href="/")
         img(src="@/assets/images/logo.png",style="height:100%")
@@ -67,6 +66,7 @@ export default {
 
   data: () => ({
     //
+    drawer: false
   }),
 };
 </script>

@@ -1,12 +1,18 @@
 <template lang="pug">
 .vue-block(:class='{selected: selected}',:style='style')
-  v-sheet(:class='{selected: selected, "elevation-2":!selected }')
-    v-col
-      v-row.px-3
-        | {{title}}
+  v-sheet(
+    :class='{selected: selected, "elevation-2":!selected }',
+  )
+    v-col.pt-0
+      v-row.titlebar.pl-2(align="center",
+        :style="{'background-color':color}"
+      )
+        .typeicon
+          v-icon(color="white",small,dense) {{icon}}
+        .pl-2 {{title}}
         v-spacer
-        v-btn(icon='', small='', @click='deleteBlock')
-          v-icon(small='') delete
+        v-btn(icon, small, @click='deleteBlock')
+          v-icon(small) delete
       v-row
         v-col.pa-0
           .inputs
@@ -49,7 +55,13 @@ export default {
       type: String,
       default: 'Title'
     },
-
+    icon: {
+      type: String,
+    },
+    color: {
+      type: String,
+      default: 'white'
+    },
     inputLinks: {
       type: Object,
       default: () => { return {} }
@@ -205,7 +217,16 @@ export default {
   @circleNewColor: #00FF00;
   @circleRemoveColor: #FF0000;
   @circleConnectedColor: #FFFF00;
-
+  .typeicon {
+    border-radius: 8px;
+    background-color: grey;
+    height: 16px;
+    width: 16px;
+    display:flex
+  }
+  .titlebar {
+    border-radius: 4px 4px 0 0 
+  }
   .vue-block {
     position: absolute;
     box-sizing: border-box;

@@ -12,6 +12,7 @@
               @linkingBreak="linkingBreak(block, $event)"
               @select="blockSelect(block)"
               @delete="blockDelete(block)"
+              v-on:dblclick.native ="blockDblClick(block)"
     />
   </div>
 </template>
@@ -22,6 +23,7 @@
 
   import VueBlock from './VueBlock'
   import VueLink from './VueLink'
+  import blockTypes from '@/components/blockTypes.ts'
 
   export default {
     name: 'VueBlockContainer',
@@ -196,6 +198,11 @@
     methods: {
       getBlock(id) {
         return this.$refs[`block${id}`][0]
+      },
+      blockDblClick(block) {
+        console.log('block doubleclicked')
+        console.log(block)
+        this.$emit('blockproperties', block)
       },
       // Events
       /** @param e {MouseEvent} */
@@ -401,46 +408,17 @@
       createBlock (node, id) {
         let inputs = []
         let outputs = []
-        let values = {}
-
-        node.fields.forEach(field => {
-          if (field.attr === 'input') {
-            inputs.push({
-              name: field.name,
-              label: field.label || field.name
-            })
-          } else if (field.attr === 'output') {
-            outputs.push({
-              name: field.name,
-              label: field.label || field.name
-            })
-          } else {
-            if (!values[field.attr]) {
-              values[field.attr] = {}
-            }
-
-            let newField = merge({}, field)
-            delete newField['name']
-            delete newField['attr']
-
-            if (!values[field.attr][field.name]) {
-              values[field.attr][field.name] = {}
-            }
-
-            values[field.attr][field.name] = newField
-          }
-        })
 
         return {
           id: id,
           x: 0,
           y: 0,
           selected: false,
-          name: node.name,
-          title: node.title || node.name,
+          type: node.type,
+          title: node.title || node.type,
           inputs: inputs,
           outputs: outputs,
-          values: values
+          properties: {}
         }
       },
       deselectAll (withoutID = null) {
@@ -455,7 +433,7 @@
         block.selected = true
         this.selectedBlock = block
         this.deselectAll(block.id)
-        this.$emit('blockSelect', block)
+        this.$emit('blockselect', block)
       },
       blockDeselect (block) {
         block.selected = false
@@ -467,7 +445,7 @@
           this.selectedBlock = null
         }
 
-        this.$emit('blockDeselect', block)
+        this.$emit('blockdeselect', block)
       },
       blockDelete (block) {
         if (block.selected) {
@@ -486,25 +464,27 @@
       //
       prepareBlocks (blocks) {
         return blocks.map(block => {
-          let node = this.nodes.find(n => {
-            return n.name === block.name
-          })
-
-          if (!node) {
-            return null
+          let color = 'white'
+          let icon = 'add'
+          let blockType = blockTypes[block.type]
+          if (blockType) {
+            // pick up properties from the block type definition
+            color = blockType.color
+            icon = blockType.icon
           }
-
-          let newBlock = this.createBlock(node, block.id)
-
-          newBlock = merge(newBlock, block, {
-            arrayMerge: (d, s) => {
-              return s.length === 0 ? d : s
-            }
-          })
-
-          return newBlock
-        }).filter(b => {
-          return !!b
+          return {
+            id: block.id,
+            x: block.x,
+            y: block.y,
+            selected: false,
+            color: color,
+            icon: icon,
+            type: block.type,
+            title: block.title,
+            inputs: [],
+            outputs: [],
+            properties: {"myprop":"yes!"}
+          }
         })
       },
       prepareBlocksLinking (blocks, links) {

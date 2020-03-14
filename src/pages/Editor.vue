@@ -1,14 +1,12 @@
 <template lang="pug">
 v-row.fill-height.flex-column.flex-nowrap
   v-row
-    VueBlocksContainer.blocks-container(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :blocksContent='blocks' :scene.sync='scene' @blockselect='selectBlock' @blockdeselect='deselectBlock')
-      VueBlockProperty(:property='selectedBlockProperty' @save='saveProperty')
+    VueBlocksContainer.blocks-container(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :blocksContent='blocks' :scene.sync='scene' 
+      @blockselect='selectBlock' 
+      @blockdeselect='deselectBlock'
+      @blockproperties='showProperties'
+      )
   v-row
-    label
-      select(name='type' v-model='selectedType')
-        template(v-for='type in selectBlocksType')
-          optgroup(:label='type' :key='type')
-            option(v-for='block in filteredBlocks(type)' :value='block.name' :key='block') {{block.title || block.name}}
     v-btn(@click.stop='addBlock') Add
       v-icon add
   label(for='useContextMenu')
@@ -17,94 +15,56 @@ v-row.fill-height.flex-column.flex-nowrap
   ul#contextMenu(ref='contextMenu' tabindex='-1' v-show='contextMenu.isShow' @blur='closeContextMenu' :style="{top: contextMenu.top + 'px', left: contextMenu.left + 'px'}")
     template(v-for='type in selectBlocksType')
       li.label(:key='type') {{type}}
-      li(v-for='block in filteredBlocks(type)' :key='block' @click='addBlockContextMenu(block.name)')
+      li(v-for='block in filteredBlocks(type)' :key='block.id' @click='addBlockContextMenu(block.name)')
         | {{block.title || block.name}}
-</template>
+  v-navigation-drawer(
+      v-model="showPropertiesPanel"
+      absolute
+      v-if="selectedBlock",
+      temporary
+      stateless
+      right
+      width="400"
+  )
+      component(
+        v-bind:is="selectedBlockType",:blockId="selectedBlock.id")
+      template(v-slot:append)
+        v-row.py-3(justify="center")
+          v-btn(@click.stop="saveProperties()") Save
+
+  </template>
 
 <script>
-  import merge from 'deepmerge'
-
-  import VueBlocksContainer from '@/components/VueBlocksContainer'
-  import VueBlockProperty from '@/components/VueBlockProperty'
+import blockTypes from '@/components/blockTypes.ts'
+import VueBlocksContainer from '@/components/VueBlocksContainer'
+  import BlockProperties from '@/components/BlockProperties'
   import domHelper from '@/helpers/dom'
 
   export default {
     name: 'App',
     components: {
       VueBlocksContainer,
-      VueBlockProperty
+      BlockProperties
     },
     data: function () {
       return {
+        selectedBlockType: "BlockProperties",
+        selectedBlockId: 20,
+        showPropertiesPanel: false,
         blocks: [
           {
             name: 'text',
+            type: 'extract',
             title: 'Text',
             family: 'Animations',
             description: 'Show text',
-            fields: [
-              {
-                name: 'text',
-                label: 'Text',
-                type: 'string',
-                attr: 'property'
-              },
-              {
-                name: 'delay',
-                label: 'Delay (s)',
-                type: 'number',
-                attr: 'property'
-              },
-              {
-                name: 'Show',
-                type: 'event',
-                attr: 'input'
-              },
-              {
-                name: 'Hide',
-                type: 'event',
-                attr: 'input'
-              },
-              {
-                name: 'onShow',
-                type: 'event',
-                attr: 'output'
-              },
-              {
-                name: 'onHide',
-                type: 'event',
-                attr: 'output'
-              }
-            ]
           },
           {
             name: 'animation',
+            type: 'join',
             title: 'Animation',
             family: 'Animations',
             description: 'Show animation',
-            fields: [
-              {
-                name: 'animation',
-                label: 'Animation',
-                type: 'animation',
-                attr: 'property'
-              },
-              {
-                name: 'Play',
-                type: 'event',
-                attr: 'input'
-              },
-              {
-                name: 'Stop',
-                type: 'event',
-                attr: 'input'
-              },
-              {
-                name: 'onEnd',
-                type: 'event',
-                attr: 'output'
-              }
-            ]
           },
           {
             name: 'Chat message',
@@ -208,31 +168,19 @@ v-row.fill-height.flex-column.flex-nowrap
               id: 2,
               x: -700,
               y: -69,
-              name: 'Chat message',
-              title: 'Chat message',
-              values: {
-                property: [
-                  {
-                    name: 'message',
-                    type: 'string'
-                  }
-                ]
-              }
+              type:'extract',
+              name: 'extract cobol',
+              title: 'extract cobol',
+              properties: {}
             },
             {
               id: 4,
               x: -157,
               y: -68.5,
-              name: 'text',
-              title: 'Text',
-              values: {
-                property: {
-                  text: {
-                    label: 'Text',
-                    type: 'string'
-                  }
-                }
-              }
+              type:'join',
+              name: 'join',
+              title: 'join a to b',
+              properties: {}
             },
             {
               id: 5,
@@ -575,13 +523,6 @@ v-row.fill-height.flex-column.flex-nowrap
       }
     },
     computed: {
-      selectedBlockProperty () {
-        if (!this.selectedBlock || !this.selectedBlock.values || !this.selectedBlock.values.property) {
-          return null
-        }
-
-        return this.selectedBlock.values.property
-      },
       selectBlocksType () {
         return this.blocks.map(b => {
           return b.family
@@ -591,6 +532,9 @@ v-row.fill-height.flex-column.flex-nowrap
       }
     },
     methods: {
+      showProperties(block) {
+        this.showPropertiesPanel = true
+      },
       selectBlock (block) {
         console.log('select', block)
         this.selectedBlock = block
@@ -608,16 +552,8 @@ v-row.fill-height.flex-column.flex-nowrap
         console.log(this.selectedType)
         this.$refs.container.addNewBlock(this.selectedType)
       },
-      saveProperty (val) {
-        console.log(val)
-
-        let scene = this.scene
-        let block = scene.blocks.find(b => {
-          return b.id === this.selectedBlock.id
-        })
-        block.values.property = val
-
-        this.scene = merge({}, scene)
+      saveProperties() {
+        this.showPropertiesPanel = false
       },
       showContextMenu (e) {
         if (!this.useContextMenu) return
