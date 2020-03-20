@@ -23,7 +23,7 @@
 
   import VueBlock from './VueBlock'
   import VueLink from './VueLink'
-  import blockTypes from '@/components/blockTypes.ts'
+  import blockTypes from '@/blocks/blockTypes.ts'
 
   export default {
     name: 'VueBlockContainer',
@@ -99,7 +99,8 @@
         //
         tempLink: null,
         selectedBlock: null,
-        hasDragged: false
+        hasDragged: false,
+        blockTypes: blockTypes
       }
     },
     computed: {
@@ -376,19 +377,12 @@
         })
       },
       // Blocks
-      addNewBlock (nodeName, x, y) {
+      addNewBlock (blockType, x, y) {
         let maxID = Math.max(0, ...this.blocks.map(function (o) {
           return o.id
         }))
-
-        let node = this.nodes.find(n => {
-          return n.name === nodeName
-        })
-
-        if (!node) {
-          return
-        }
-        let block = this.createBlock(node, maxID + 1)
+        let blockTypeObj = this.blockTypes[blockType]
+        let block = this.createBlock(blockTypeObj, maxID + 1)
 
         // if x or y not set, place block to center
         if (x === undefined || y === undefined) {

@@ -13,6 +13,8 @@
         v-spacer
         v-btn(icon, small, @click='deleteBlock')
           v-icon(small) delete
+        v-btn(icon, small)
+          v-icon(small) more_vert
       v-row
         v-col.pa-0
           .inputs

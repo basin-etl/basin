@@ -1,22 +1,39 @@
 <template lang="pug">
 v-row.fill-height.flex-column.flex-nowrap
+  v-row.flex-grow-0
+    v-toolbar(dense)
+      v-toolbar-title Title
+      v-spacer
+      v-btn(@click.stop='addBlock') Add
+        v-icon add
   v-row
-    VueBlocksContainer.blocks-container(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :blocksContent='blocks' :scene.sync='scene' 
-      @blockselect='selectBlock' 
-      @blockdeselect='deselectBlock'
-      @blockproperties='showProperties'
+    v-col.flex-grow-0
+      div(
+        :style="{'background-color':'blue'}",
+        draggable="true",
+        v-on:dragstart="newBlockDragStart(blockType, $event)" 
+        v-on:dragend="newBlockDragEnd(this, $event)" 
+        v-for="blockType in blockTypes"
       )
-  v-row
-    v-btn(@click.stop='addBlock') Add
-      v-icon add
+        | {{blockType.type}}
+      div.block-type-ghost(
+        ref="bla"
+      )
+        | New {{newBlockType}} block
+    v-col
+      VueBlocksContainer.blocks-container(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :blocksContent='blocks' :scene.sync='scene' 
+        @blockselect='selectBlock' 
+        @blockdeselect='deselectBlock'
+        @blockproperties='showProperties'
+        )
   label(for='useContextMenu')
     input#useContextMenu(type='checkbox' v-model='useContextMenu')
     | Use right click for Add blocks
   ul#contextMenu(ref='contextMenu' tabindex='-1' v-show='contextMenu.isShow' @blur='closeContextMenu' :style="{top: contextMenu.top + 'px', left: contextMenu.left + 'px'}")
     template(v-for='type in selectBlocksType')
       li.label(:key='type') {{type}}
-      li(v-for='block in filteredBlocks(type)' :key='block.id' @click='addBlockContextMenu(block.name)')
-        | {{block.title || block.name}}
+      //- li(v-for='block in filteredBlocks(type)' :key='block.id' @click='addBlockContextMenu(block.name)')
+      //-   | {{block.title || block.name}}
   v-navigation-drawer(
       v-model="showPropertiesPanel"
       absolute
@@ -35,7 +52,7 @@ v-row.fill-height.flex-column.flex-nowrap
   </template>
 
 <script>
-import blockTypes from '@/components/blockTypes.ts'
+import blockTypes from '@/blocks/blockTypes.ts'
 import VueBlocksContainer from '@/components/VueBlocksContainer'
   import BlockProperties from '@/components/BlockProperties'
   import domHelper from '@/helpers/dom'
@@ -50,118 +67,9 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
       return {
         selectedBlockType: "BlockProperties",
         selectedBlockId: 20,
+        blockTypes: blockTypes,
+        newBlockType: null,
         showPropertiesPanel: false,
-        blocks: [
-          {
-            name: 'text',
-            type: 'extract',
-            title: 'Text',
-            family: 'Animations',
-            description: 'Show text',
-          },
-          {
-            name: 'animation',
-            type: 'join',
-            title: 'Animation',
-            family: 'Animations',
-            description: 'Show animation',
-          },
-          {
-            name: 'Chat message',
-            family: 'Events',
-            description: '',
-            fields: [
-              {
-                name: 'message',
-                label: 'Activation message',
-                type: 'string',
-                attr: 'property'
-              },
-              {
-                name: 'onMessage',
-                type: 'event',
-                attr: 'output'
-              }
-            ]
-          },
-          {
-            name: 'delay',
-            title: 'Delay',
-            family: 'Time',
-            description: '',
-            fields: [
-              {
-                name: 'delay',
-                label: 'Delay (s)',
-                type: 'number',
-                attr: 'property',
-                value: 1.0
-              },
-              {
-                name: 'input',
-                type: 'event',
-                attr: 'input'
-              },
-              {
-                name: 'output',
-                type: 'event',
-                attr: 'output'
-              }
-            ]
-          },
-          {
-            name: 'shortcuts',
-            title: 'Shortcuts',
-            family: 'Events',
-            description: 'Press shortcut for call event',
-            fields: [
-              {
-                name: 'keys',
-                label: 'Activation keys',
-                type: 'keys',
-                attr: 'property'
-              },
-              {
-                name: 'onPress',
-                type: 'event',
-                attr: 'output'
-              }
-            ]
-          },
-          {
-            name: 'splitter',
-            title: 'Splitter',
-            family: 'Helpers',
-            description: 'Press shortcut for call event',
-            fields: [
-              {
-                name: 'input',
-                type: 'event',
-                attr: 'input'
-              },
-              {
-                name: 'output',
-                type: 'event',
-                attr: 'output'
-              },
-              {
-                name: 'output',
-                type: 'event',
-                attr: 'output'
-              },
-              {
-                name: 'output',
-                type: 'event',
-                attr: 'output'
-              },
-              {
-                name: 'output',
-                type: 'event',
-                attr: 'output'
-              }
-            ]
-          }
-        ],
         scene: {
           blocks: [
             {
@@ -524,14 +432,25 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
     },
     computed: {
       selectBlocksType () {
-        return this.blocks.map(b => {
-          return b.family
-        }).filter((value, index, array) => {
-          return array.indexOf(value) === index
-        })
+        return Object.entries(blockTypes).map(b => b.type)
       }
     },
     methods: {
+      newBlockDragStart(item, $event) {
+        this.newBlockType = item.type
+        console.log(item)
+        this.$refs["bla"].style.top = $event.srcElement.offsetTop + "px"
+        $event.dataTransfer.setDragImage(this.$refs["bla"], 5, 5)
+      },
+      newBlockDragEnd(item, $event) {
+        console.log('end')
+        this.$refs.container.addNewBlock(
+          this.newBlockType,
+          $event.offsetX-this.$refs["container"].$el.offsetLeft,
+          $event.offsetY
+        )
+        console.log($event)
+      },
       showProperties(block) {
         this.showPropertiesPanel = true
       },
@@ -543,14 +462,9 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
         console.log('deselect', block)
         this.selectedBlock = null
       },
-      filteredBlocks (type) {
-        return this.blocks.filter(value => {
-          return value.family === type
-        })
-      },
       addBlock () {
         console.log(this.selectedType)
-        this.$refs.container.addNewBlock(this.selectedType)
+        this.$refs.container.addNewBlock("extract")
       },
       saveProperties() {
         this.showPropertiesPanel = false
@@ -597,9 +511,6 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
       }
     },
     watch: {
-      blocks (newValue) {
-        console.log('blocks', JSON.stringify(newValue))
-      },
       scene (newValue) {
         console.log('scene', JSON.stringify(newValue))
       }
@@ -608,26 +519,15 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
 </script>
 
 <style lang="less">
-  html, body {
-    margin: 0;
-    padding: 0;
-  }
-
-  html {
-    width: 100vw;
-    height: 100vh;
-  }
-
-  body {
-    width: 100%;
-    height: 100%;
-  }
-
   .blocks-container {
     width: 100%;
     height: ~"calc(100% - 50px)";
   }
 
+  .block-type-ghost {
+    position: absolute;
+    z-index: -1;
+}
   #contextMenu {
     position: absolute;
     z-index: 1000;
