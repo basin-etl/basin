@@ -7,21 +7,39 @@ v-row.fill-height.flex-column.flex-nowrap
       v-btn(@click.stop='addBlock') Add
         v-icon add
   v-row
-    v-col.flex-grow-0
-      div(
-        :style="{'background-color':'blue'}",
-        draggable="true",
-        v-on:dragstart="newBlockDragStart(blockType, $event)" 
-        v-on:dragend="newBlockDragEnd(this, $event)" 
-        v-for="blockType in blockTypes"
+    v-col.flex-grow-0.block-picker-bar
+      v-list-group(value="true",dark)
+        template(v-slot:activator)
+          v-list-item-title(color="white") Dataframe
+        div(
+          :style="{'background-color':'lightgrey'}",
+          draggable="true",
+          v-on:dragstart="newBlockDragStart(blockType, $event)" 
+          v-for="blockType in blockTypes"
+          :key="blockType.type"
+        )
+          v-list-item(link)
+            v-list-item-icon
+              v-icon {{blockType.icon}}
+            v-list-item-content {{blockType.type}}
+          v-divider
+      v-list-group()
+        template(v-slot:activator)
+          v-list-item-title Column
+        v-list-item(link) add column
+        v-list-item(link) drop column
+        v-list-item(link) test
+      
+      transition(name="revert")
+      div.py-1.px-2.block-type-ghost(
+        ref="newGhost",
+        v-if="dragAdding",
+        :style="{'background-color':newBlockType.color}"
       )
-        | {{blockType.type}}
-      div.block-type-ghost(
-        ref="bla"
-      )
-        | New {{newBlockType}} block
+        v-icon {{newBlockType.icon}}
+        span.ml-2 New {{newBlockType.type}}
     v-col
-      VueBlocksContainer.blocks-container(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :blocksContent='blocks' :scene.sync='scene' 
+      VueBlocksContainer.blocks-container(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :scene.sync='scene' 
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'
@@ -53,9 +71,10 @@ v-row.fill-height.flex-column.flex-nowrap
 
 <script>
 import blockTypes from '@/blocks/blockTypes.ts'
+import jobContent from './demoJob.ts'
 import VueBlocksContainer from '@/components/VueBlocksContainer'
-  import BlockProperties from '@/components/BlockProperties'
-  import domHelper from '@/helpers/dom'
+import BlockProperties from '@/components/BlockProperties'
+import domHelper from '@/helpers/dom'
 
   export default {
     name: 'App',
@@ -65,361 +84,15 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
     },
     data: function () {
       return {
+        dragAdding: false,
+        scolor:"blue",
         selectedBlockType: "BlockProperties",
         selectedBlockId: 20,
         blockTypes: blockTypes,
         newBlockType: null,
         showPropertiesPanel: false,
-        scene: {
-          blocks: [
-            {
-              id: 2,
-              x: -700,
-              y: -69,
-              type:'extract',
-              name: 'extract cobol',
-              title: 'extract cobol',
-              properties: {}
-            },
-            {
-              id: 4,
-              x: -157,
-              y: -68.5,
-              type:'join',
-              name: 'join',
-              title: 'join a to b',
-              properties: {}
-            },
-            {
-              id: 5,
-              x: 136,
-              y: -48.5,
-              name: 'text',
-              title: 'Text',
-              values: {
-                property: {
-                  text: {
-                    label: 'Text',
-                    type: 'string'
-                  }
-                }
-              }
-            },
-            {
-              id: 6,
-              x: -440,
-              y: -15.5,
-              name: 'delay',
-              title: 'Delay',
-              values: {
-                property: {
-                  delay: {
-                    label: 'Delay (s)',
-                    type: 'number',
-                    value: 1
-                  }
-                }
-              }
-            },
-            {
-              id: 7,
-              x: -694,
-              y: 60.5,
-              name: 'shortcuts',
-              title: 'Shortcuts',
-              values: {
-                property: {
-                  keys: {
-                    label: 'Activation keys',
-                    type: 'keys'
-                  }
-                }
-              }
-            },
-            {
-              id: 8,
-              x: -163,
-              y: 59.5,
-              name: 'text',
-              title: 'Text',
-              values: {
-                property: {
-                  text: {
-                    label: 'Text',
-                    type: 'string'
-                  }
-                }
-              }
-            },
-            {
-              id: 9,
-              x: -429,
-              y: 125.5,
-              name: 'delay',
-              title: 'Delay',
-              values: {
-                property: {
-                  delay: {
-                    label: 'Delay (s)',
-                    type: 'number',
-                    value: 1
-                  }
-                }
-              }
-            },
-            {
-              id: 10,
-              x: 126,
-              y: 127.5,
-              name: 'text',
-              title: 'Text',
-              values: {
-                property: {
-                  text: {
-                    label: 'Text',
-                    type: 'string'
-                  }
-                }
-              }
-            },
-            {
-              id: 11,
-              x: -856,
-              y: 252.5,
-              name: 'shortcuts',
-              title: 'Shortcuts',
-              values: {
-                property: {
-                  keys: {
-                    label: 'Activation keys',
-                    type: 'keys'
-                  }
-                }
-              }
-            },
-            {
-              id: 12,
-              x: -616,
-              y: 319.5,
-              name: 'delay',
-              title: 'Delay',
-              values: {
-                property: {
-                  delay: {
-                    label: 'Delay (s)',
-                    type: 'number',
-                    value: 1
-                  }
-                }
-              }
-            },
-            {
-              id: 13,
-              x: -381,
-              y: 252.5,
-              name: 'text',
-              title: 'Text',
-              values: {
-                property: {
-                  text: {
-                    label: 'Text',
-                    type: 'string'
-                  }
-                }
-              }
-            },
-            {
-              id: 14,
-              x: 166,
-              y: 266.5,
-              name: 'text',
-              title: 'Text',
-              values: {
-                property: {
-                  text: {
-                    label: 'Text',
-                    type: 'string'
-                  }
-                }
-              }
-            },
-            {
-              id: 15,
-              x: -149,
-              y: 269.5,
-              name: 'delay',
-              title: 'Delay',
-              values: {
-                property: {
-                  delay: {
-                    label: 'Delay (s)',
-                    type: 'number',
-                    value: 1
-                  }
-                }
-              }
-            },
-            {
-              id: 16,
-              x: 413,
-              y: 267.5,
-              name: 'animation',
-              title: 'Animation',
-              values: {
-                property: {
-                  animation: {
-                    label: 'Animation',
-                    type: 'animation'
-                  }
-                }
-              }
-            },
-            {
-              id: 17,
-              x: 13,
-              y: 380.5,
-              name: 'delay',
-              title: 'Delay',
-              values: {
-                property: {
-                  delay: {
-                    label: 'Delay (s)',
-                    type: 'number',
-                    value: 1
-                  }
-                }
-              }
-            }
-          ],
-          links: [
-            {
-              id: 3,
-              originID: 2,
-              originSlot: 0,
-              targetID: 4,
-              targetSlot: 0
-            },
-            {
-              id: 6,
-              originID: 7,
-              originSlot: 0,
-              targetID: 8,
-              targetSlot: 0
-            },
-            {
-              id: 7,
-              originID: 7,
-              originSlot: 0,
-              targetID: 9,
-              targetSlot: 0
-            },
-            {
-              id: 8,
-              originID: 9,
-              originSlot: 0,
-              targetID: 10,
-              targetSlot: 0
-            },
-            {
-              id: 9,
-              originID: 9,
-              originSlot: 0,
-              targetID: 8,
-              targetSlot: 1
-            },
-            {
-              id: 10,
-              originID: 2,
-              originSlot: 0,
-              targetID: 6,
-              targetSlot: 0
-            },
-            {
-              id: 11,
-              originID: 6,
-              originSlot: 0,
-              targetID: 4,
-              targetSlot: 1
-            },
-            {
-              id: 12,
-              originID: 4,
-              originSlot: 1,
-              targetID: 5,
-              targetSlot: 0
-            },
-            {
-              id: 13,
-              originID: 11,
-              originSlot: 0,
-              targetID: 13,
-              targetSlot: 0
-            },
-            {
-              id: 14,
-              originID: 11,
-              originSlot: 0,
-              targetID: 12,
-              targetSlot: 0
-            },
-            {
-              id: 15,
-              originID: 12,
-              originSlot: 0,
-              targetID: 13,
-              targetSlot: 1
-            },
-            {
-              id: 16,
-              originID: 13,
-              originSlot: 1,
-              targetID: 15,
-              targetSlot: 0
-            },
-            {
-              id: 17,
-              originID: 15,
-              originSlot: 0,
-              targetID: 14,
-              targetSlot: 0
-            },
-            {
-              id: 18,
-              originID: 14,
-              originSlot: 0,
-              targetID: 16,
-              targetSlot: 0
-            },
-            {
-              id: 19,
-              originID: 14,
-              originSlot: 1,
-              targetID: 16,
-              targetSlot: 1
-            },
-            {
-              id: 20,
-              originID: 15,
-              originSlot: 0,
-              targetID: 17,
-              targetSlot: 0
-            },
-            {
-              id: 21,
-              originID: 17,
-              originSlot: 0,
-              targetID: 14,
-              targetSlot: 1
-            }
-          ],
-          container: {
-            centerX: 1042,
-            centerY: 140,
-            scale: 1
-          }
-        },
+        scene: jobContent,
         selectedBlock: null,
-        selectedType: 'delay',
         useContextMenu: false,
         contextMenu: {
           isShow: false,
@@ -436,20 +109,14 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
       }
     },
     methods: {
-      newBlockDragStart(item, $event) {
-        this.newBlockType = item.type
-        console.log(item)
-        this.$refs["bla"].style.top = $event.srcElement.offsetTop + "px"
-        $event.dataTransfer.setDragImage(this.$refs["bla"], 5, 5)
-      },
-      newBlockDragEnd(item, $event) {
-        console.log('end')
-        this.$refs.container.addNewBlock(
-          this.newBlockType,
-          $event.offsetX-this.$refs["container"].$el.offsetLeft,
-          $event.offsetY
-        )
-        console.log($event)
+      async newBlockDragStart(blockType, event) {
+        this.newBlockType = blockType
+        this.dragAdding = true
+        await this.$nextTick()
+        let ghostElement = this.$refs["newGhost"]
+        ghostElement.style.top = event.srcElement.offsetTop + "px"
+        event.dataTransfer.setDragImage(ghostElement, 5, 5)
+        event.dataTransfer.setData("text/plain",blockType.type);
       },
       showProperties(block) {
         this.showPropertiesPanel = true
@@ -463,7 +130,6 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
         this.selectedBlock = null
       },
       addBlock () {
-        console.log(this.selectedType)
         this.$refs.container.addNewBlock("extract")
       },
       saveProperties() {
@@ -512,22 +178,34 @@ import VueBlocksContainer from '@/components/VueBlocksContainer'
     },
     watch: {
       scene (newValue) {
-        console.log('scene', JSON.stringify(newValue))
+        // console.log('scene', JSON.stringify(newValue))
+        console.log('scene changed')
       }
     }
   }
 </script>
 
 <style lang="less">
+  .block-picker-bar {
+    min-width: 200px;
+    padding:0;
+    background-color:#EEEEEE
+  }
   .blocks-container {
     width: 100%;
     height: ~"calc(100% - 50px)";
   }
-
+  .revert-enter-active {
+    transition: opacity 1s
+  }
+  .revert-enter {
+    opacity: 0
+  }
   .block-type-ghost {
     position: absolute;
     z-index: -1;
-}
+    border-radius: 5px
+  }
   #contextMenu {
     position: absolute;
     z-index: 1000;

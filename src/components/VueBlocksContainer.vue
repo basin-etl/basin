@@ -1,7 +1,10 @@
-<template>
-  <div class="vue-container">
-    <VueLink :lines="lines"/>
-    <VueBlock v-for="block in blocks"
+<template lang="pug">
+.vue-container(
+  v-on:drop="blockDropped($event)"
+  v-on:dragover="dragOver($event)"
+)
+  VueLink(:lines="lines")
+  VueBlock(v-for="block in blocks"
               :key="block.id"
               :ref="`block${block.id}`"
               v-bind.sync="block"
@@ -13,8 +16,7 @@
               @select="blockSelect(block)"
               @delete="blockDelete(block)"
               v-on:dblclick.native ="blockDblClick(block)"
-    />
-  </div>
+  )
 </template>
 
 <script>
@@ -32,12 +34,6 @@
       VueLink
     },
     props: {
-      blocksContent: {
-        type: Array,
-        default () {
-          return []
-        }
-      },
       scene: {
         type: Object,
         default: {blocks: [], links: [], container: {}}
@@ -55,7 +51,6 @@
       this.centerX = this.$el.clientWidth / 2
       this.centerY = this.$el.clientHeight / 2
 
-      this.importBlocksContent()
       this.importScene()
   },
     beforeDestroy () {
@@ -197,6 +192,16 @@
       }
     },
     methods: {
+      blockDropped(event) {
+        this.addNewBlock(
+          event.dataTransfer.getData("text"),
+          event.offsetX,
+          event.offsetY
+        )
+      },
+      dragOver(event) {
+        event.preventDefault() 
+      },
       getBlock(id) {
         return this.$refs[`block${id}`][0]
       },
@@ -513,11 +518,6 @@
 
         return newBlocks
       },
-      importBlocksContent () {
-        if (this.blocksContent) {
-          this.nodes = merge([], this.blocksContent)
-        }
-      },
       importScene: async function () {
         const vm = this
         let scene = merge(this.defaultScene, this.scene)
@@ -572,9 +572,6 @@
       }
     },
     watch: {
-      blocksContent () {
-        this.importBlocksContent()
-      },
       scene () {
         this.importScene()
       }
