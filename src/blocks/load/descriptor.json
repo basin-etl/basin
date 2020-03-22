@@ -1,0 +1,12 @@
+{
+    "title": "load",
+    "type": "load",
+    "description": "load data into a datasource",
+    "color": "lightgreen",
+    "icon": "cloud_upload",
+    "inputs": [
+        {"label":"df", "type": "dataframe"}
+    ],
+    "outputs": [
+    ]
+}

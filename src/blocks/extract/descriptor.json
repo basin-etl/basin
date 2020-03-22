@@ -3,5 +3,9 @@
     "type": "extract",
     "description": "extract data from a datasource into a dataframe",
     "color": "grey",
-    "icon": "system_update"
+    "icon": "system_update",
+    "inputs": [],
+    "outputs": [
+        {"label":"df", "type": "dataframe"}
+    ]
 }

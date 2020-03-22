@@ -28,7 +28,7 @@
   import blockTypes from '@/blocks/blockTypes.ts'
 
   export default {
-    name: 'VueBlockContainer',
+    name: 'BlocksContainer',
     components: {
       VueBlock,
       VueLink
@@ -469,7 +469,7 @@
           if (blockType) {
             // pick up properties from the block type definition
             color = blockType.color
-            icon = blockType.icon
+            icon = blockType.icon            
           }
           return {
             id: block.id,
@@ -480,8 +480,8 @@
             icon: icon,
             type: block.type,
             title: block.title,
-            inputs: [],
-            outputs: [],
+            inputs: blockType? blockType.inputs : [],
+            outputs: blockType? blockType.outputs : [],
             properties: {"myprop":"yes!"}
           }
         })
@@ -582,7 +582,6 @@
 <style lang="less" scoped>
   .vue-container {
     position: relative;
-    overflow: hidden;
-    box-sizing: border-box;
+    overflow: auto;
   }
 </style>

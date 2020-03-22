@@ -1,57 +1,30 @@
 <template lang="pug">
-v-row.fill-height.flex-column.flex-nowrap
-  v-row.flex-grow-0
-    v-toolbar(dense)
-      v-toolbar-title Title
+v-row.ma-0.fill-height.flex-column.flex-nowrap
+  v-row.flex-grow-0.flex-column
+    v-toolbar(dense,flat)
+      v-toolbar-title New job
       v-spacer
-      v-btn(@click.stop='addBlock') Add
-        v-icon add
-  v-row
-    v-col.flex-grow-0.block-picker-bar
-      v-list-group(value="true",dark)
-        template(v-slot:activator)
-          v-list-item-title(color="white") Dataframe
-        div(
-          :style="{'background-color':'lightgrey'}",
-          draggable="true",
-          v-on:dragstart="newBlockDragStart(blockType, $event)" 
-          v-for="blockType in blockTypes"
-          :key="blockType.type"
-        )
-          v-list-item(link)
-            v-list-item-icon
-              v-icon {{blockType.icon}}
-            v-list-item-content {{blockType.type}}
-          v-divider
-      v-list-group()
-        template(v-slot:activator)
-          v-list-item-title Column
-        v-list-item(link) add column
-        v-list-item(link) drop column
-        v-list-item(link) test
-      
-      transition(name="revert")
-      div.py-1.px-2.block-type-ghost(
-        ref="newGhost",
-        v-if="dragAdding",
-        :style="{'background-color':newBlockType.color}"
-      )
-        v-icon {{newBlockType.icon}}
-        span.ml-2 New {{newBlockType.type}}
-    v-col
-      VueBlocksContainer.blocks-container(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :scene.sync='scene' 
+      v-btn(icon,small,@click.stop='addBlock')
+        v-icon(small) save
+    v-divider
+  v-row.ma-0
+    //-
+    //- side bar
+    //-
+    .flex-grow-0.block-picker-bar
+      EditorBlocksBar
+    //-
+    //- blocks editor
+    //-
+    v-col.pa-0.d-flex
+      BlocksContainer.flex-grow-1(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :scene.sync='scene' 
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'
         )
-  label(for='useContextMenu')
-    input#useContextMenu(type='checkbox' v-model='useContextMenu')
-    | Use right click for Add blocks
-  ul#contextMenu(ref='contextMenu' tabindex='-1' v-show='contextMenu.isShow' @blur='closeContextMenu' :style="{top: contextMenu.top + 'px', left: contextMenu.left + 'px'}")
-    template(v-for='type in selectBlocksType')
-      li.label(:key='type') {{type}}
-      //- li(v-for='block in filteredBlocks(type)' :key='block.id' @click='addBlockContextMenu(block.name)')
-      //-   | {{block.title || block.name}}
+  //-
+  //- properties panel
+  //-
   v-navigation-drawer(
       v-model="showPropertiesPanel"
       absolute
@@ -72,24 +45,23 @@ v-row.fill-height.flex-column.flex-nowrap
 <script>
 import blockTypes from '@/blocks/blockTypes.ts'
 import jobContent from './demoJob.ts'
-import VueBlocksContainer from '@/components/VueBlocksContainer'
+import BlocksContainer from '@/components/BlocksContainer'
 import BlockProperties from '@/components/BlockProperties'
 import domHelper from '@/helpers/dom'
-
-  export default {
+import EditorBlocksBar from './EditorBlocksBar'
+export default {
     name: 'App',
     components: {
-      VueBlocksContainer,
-      BlockProperties
+      BlocksContainer,
+      BlockProperties,
+      EditorBlocksBar
     },
     data: function () {
       return {
         dragAdding: false,
-        scolor:"blue",
         selectedBlockType: "BlockProperties",
         selectedBlockId: 20,
         blockTypes: blockTypes,
-        newBlockType: null,
         showPropertiesPanel: false,
         scene: jobContent,
         selectedBlock: null,
@@ -109,15 +81,6 @@ import domHelper from '@/helpers/dom'
       }
     },
     methods: {
-      async newBlockDragStart(blockType, event) {
-        this.newBlockType = blockType
-        this.dragAdding = true
-        await this.$nextTick()
-        let ghostElement = this.$refs["newGhost"]
-        ghostElement.style.top = event.srcElement.offsetTop + "px"
-        event.dataTransfer.setDragImage(ghostElement, 5, 5)
-        event.dataTransfer.setData("text/plain",blockType.type);
-      },
       showProperties(block) {
         this.showPropertiesPanel = true
       },
@@ -190,21 +153,6 @@ import domHelper from '@/helpers/dom'
     min-width: 200px;
     padding:0;
     background-color:#EEEEEE
-  }
-  .blocks-container {
-    width: 100%;
-    height: ~"calc(100% - 50px)";
-  }
-  .revert-enter-active {
-    transition: opacity 1s
-  }
-  .revert-enter {
-    opacity: 0
-  }
-  .block-type-ghost {
-    position: absolute;
-    z-index: -1;
-    border-radius: 5px
   }
   #contextMenu {
     position: absolute;

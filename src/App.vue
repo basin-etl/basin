@@ -26,9 +26,10 @@ v-app
   //- main layout
   //-
   v-app-bar(app,dense,color="white",:clipped-left="drawer")
-    v-toolbar-title.mr-2(style="height:100%")
+    v-toolbar-title.mr-2.pa-2(style="height:100%")
       a(href="/")
         img(src="@/assets/images/logo.png",style="height:100%")
+    span(:style="{'font-weight':'bold'}") SuperGlue Studio
     v-spacer
     //- authentication
     //- template(v-if='$auth.check()')
@@ -47,7 +48,7 @@ v-app
       div(v-show="$root.$data.$loading || !$auth.ready()")
         v-progress-circular(indeterminate,color="primary")
   v-content
-    v-container(fluid,fill-height)
+    v-container.ma-0.pa-0(fluid,fill-height)
       router-view
   v-footer
     v-spacer
@@ -55,14 +56,9 @@ v-app
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
 
 export default {
   name: 'App',
-
-  components: {
-    HelloWorld,
-  },
 
   data: () => ({
     //

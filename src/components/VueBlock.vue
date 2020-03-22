@@ -1,5 +1,5 @@
 <template lang="pug">
-.vue-block(:class='{selected: selected}',:style='style')
+.vue-block(:class='{selected: selected,running: running}',:style='style')
   v-sheet(
     :class='{selected: selected, "elevation-2":!selected }',
   )
@@ -53,6 +53,7 @@ export default {
       }
     },
     selected: Boolean,
+    running: Boolean,
     title: {
       type: String,
       default: 'Title'
@@ -63,6 +64,12 @@ export default {
     color: {
       type: String,
       default: 'white'
+    },
+    inputs: {
+      type: Array,
+    },
+    outputs: {
+      type: Array,
     },
     inputLinks: {
       type: Object,
@@ -100,14 +107,6 @@ export default {
     return {
       width: this.options.width,
       hasDragged: false,
-      inputs: [
-        {"label":"df", "active": true},
-        {"label":"df", "active": true}
-      ],
-      outputs: [
-        {"label":"dfout", "active": true},
-        {"label":"dfout", "active": true}
-      ],
     }
   },
   methods: {
@@ -220,8 +219,6 @@ export default {
   @circleRemoveColor: #FF0000;
   @circleConnectedColor: #FFFF00;
   .typeicon {
-    border-radius: 8px;
-    background-color: grey;
     height: 16px;
     width: 16px;
     display:flex
@@ -273,5 +270,34 @@ export default {
       margin-right: -(@circleSize/2 + @blockBorder);
     }
 
+
   }
+.running {
+  &::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to right, 
+      rgba(#ffffff,0), 
+      rgba(#ffffff,0) 10%,
+      rgba(#ffffff,.75) 50%,
+      rgba(#ffffff,0) 90%,
+      rgba(#ffffff,0),
+    );
+    background-size: 200px 100%;
+    animation: shimmer 2s linear infinite;
+    content: '';
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: 200px 0;
+    }
+  }
+}
 </style>
