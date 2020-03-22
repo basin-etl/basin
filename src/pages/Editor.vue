@@ -43,6 +43,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
   </template>
 
 <script>
+import jupyterUtils from './jupyterUtils.ts'
 import blockTypes from '@/blocks/blockTypes.ts'
 import jobContent from './demoJob.ts'
 import BlocksContainer from '@/components/BlocksContainer'
@@ -138,6 +139,11 @@ export default {
       closeContextMenu () {
         this.contextMenu.isShow = false
       }
+    },
+    async mounted () {
+      console.log("mounted")
+      console.log(jupyterUtils)
+      await jupyterUtils.getKernel()
     },
     watch: {
       scene (newValue) {
