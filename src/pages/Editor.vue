@@ -66,14 +66,6 @@ export default {
         showPropertiesPanel: false,
         scene: jobContent,
         selectedBlock: null,
-        useContextMenu: false,
-        contextMenu: {
-          isShow: false,
-          mouseX: 0,
-          mouseY: 0,
-          top: 0,
-          left: 0
-        }
       }
     },
     computed: {
@@ -99,46 +91,6 @@ export default {
       saveProperties() {
         this.showPropertiesPanel = false
       },
-      showContextMenu (e) {
-        if (!this.useContextMenu) return
-        if (e.preventDefault) e.preventDefault()
-
-        this.contextMenu.isShow = true
-        this.contextMenu.mouseX = e.x
-        this.contextMenu.mouseY = e.y
-
-        this.$nextTick(function () {
-          this.setMenu(e.y, e.x)
-          this.$refs.contextMenu.focus()
-        })
-      },
-      setMenu (top, left) {
-        let border = 5
-        let contextMenuEl = this.$refs.contextMenu
-        let containerElRect = this.$refs.container.$el.getBoundingClientRect()
-        let largestWidth = containerElRect.right - contextMenuEl.offsetWidth - border
-        let largestHeight = containerElRect.bottom - contextMenuEl.offsetHeight - border
-
-        console.log(this.$refs.container)
-        console.log(containerElRect)
-
-        if (left > largestWidth) left = largestWidth
-        if (top > largestHeight) top = largestHeight
-
-        this.contextMenu.top = top
-        this.contextMenu.left = left
-      },
-      addBlockContextMenu (name) {
-        let offset = domHelper.getOffsetRect(this.$refs.container.$el)
-        let x = this.contextMenu.mouseX - offset.left
-        let y = this.contextMenu.mouseY - offset.top
-
-        this.$refs.container.addNewBlock(name, x, y)
-        this.closeContextMenu()
-      },
-      closeContextMenu () {
-        this.contextMenu.isShow = false
-      }
     },
     async mounted () {
       console.log("mounted")
@@ -155,29 +107,9 @@ export default {
 </script>
 
 <style lang="less">
-  .block-picker-bar {
-    min-width: 200px;
-    padding:0;
-    background-color:#EEEEEE
-  }
-  #contextMenu {
-    position: absolute;
-    z-index: 1000;
-    background: white;
-    border: 1px solid black;
-    padding: 5px;
-    margin: 0;
-
-    li {
-      &.label {
-        color: gray;
-        font-size: 90%;
-      }
-      list-style: none;
-    }
-
-    &:focus {
-      outline: none;
-    }
-  }
+.block-picker-bar {
+  min-width: 200px;
+  padding:0;
+  background-color:#EEEEEE
+}
 </style>

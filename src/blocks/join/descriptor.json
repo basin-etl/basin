@@ -5,10 +5,10 @@
     "color": "red",
     "icon": "call_merge",
     "inputs": [
-        {"label":"df1", "type": "dataframe"},
-        {"label":"df2", "type": "dataframe"}
+        {"id":"df1","label":"df1", "type": "dataframe"},
+        {"id":"df2","label":"df2", "type": "dataframe"}
     ],
     "outputs": [
-        {"label":"df", "type": "dataframe"}
+        {"id":"df","label":"df", "type": "dataframe"}
     ]
 }

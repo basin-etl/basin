@@ -222,121 +222,121 @@ blocks: [
 links: [
     {
         id: 3,
-        originID: 2,
+        originId: 2,
         originSlot: 0,
-        targetID: 4,
+        targetId: 4,
         targetSlot: 0
     },
     {
         id: 6,
-        originID: 7,
+        originId: 7,
         originSlot: 0,
-        targetID: 8,
+        targetId: 8,
         targetSlot: 0
     },
     {
         id: 7,
-        originID: 7,
+        originId: 7,
         originSlot: 0,
-        targetID: 9,
+        targetId: 9,
         targetSlot: 0
     },
     {
         id: 8,
-        originID: 9,
+        originId: 9,
         originSlot: 0,
-        targetID: 10,
+        targetId: 10,
         targetSlot: 0
     },
     {
         id: 9,
-        originID: 9,
+        originId: 9,
         originSlot: 0,
-        targetID: 8,
+        targetId: 8,
         targetSlot: 1
     },
     {
         id: 10,
-        originID: 2,
+        originId: 2,
         originSlot: 0,
-        targetID: 6,
+        targetId: 6,
         targetSlot: 0
     },
     {
         id: 11,
-        originID: 6,
+        originId: 6,
         originSlot: 0,
-        targetID: 4,
+        targetId: 4,
         targetSlot: 1
     },
     {
         id: 12,
-        originID: 4,
+        originId: 4,
         originSlot: 1,
-        targetID: 5,
+        targetId: 5,
         targetSlot: 0
     },
     {
         id: 13,
-        originID: 11,
+        originId: 11,
         originSlot: 0,
-        targetID: 13,
+        targetId: 13,
         targetSlot: 0
     },
     {
         id: 14,
-        originID: 11,
+        originId: 11,
         originSlot: 0,
-        targetID: 12,
+        targetId: 12,
         targetSlot: 0
     },
     {
         id: 15,
-        originID: 12,
+        originId: 12,
         originSlot: 0,
-        targetID: 13,
+        targetId: 13,
         targetSlot: 1
     },
     {
         id: 16,
-        originID: 13,
+        originId: 13,
         originSlot: 1,
-        targetID: 15,
+        targetId: 15,
         targetSlot: 0
     },
     {
         id: 17,
-        originID: 15,
+        originId: 15,
         originSlot: 0,
-        targetID: 14,
+        targetId: 14,
         targetSlot: 0
     },
     {
         id: 18,
-        originID: 14,
+        originId: 14,
         originSlot: 0,
-        targetID: 16,
+        targetId: 16,
         targetSlot: 0
     },
     {
         id: 19,
-        originID: 14,
+        originId: 14,
         originSlot: 1,
-        targetID: 16,
+        targetId: 16,
         targetSlot: 1
     },
     {
         id: 20,
-        originID: 15,
+        originId: 15,
         originSlot: 0,
-        targetID: 17,
+        targetId: 17,
         targetSlot: 0
     },
     {
         id: 21,
-        originID: 17,
+        originId: 17,
         originSlot: 0,
-        targetID: 14,
+        targetId: 14,
         targetSlot: 1
     }
 ],

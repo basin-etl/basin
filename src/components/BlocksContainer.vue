@@ -124,11 +124,11 @@
 
         for (let link of this.links) {
           let originBlock = this.blocks.find(block => {
-            return block.id === link.originID
+            return block.id === link.originId
           })
 
           let targetBlock = this.blocks.find(block => {
-            return block.id === link.targetID
+            return block.id === link.targetId
           })
 
           if (!originBlock || !targetBlock) {
@@ -142,8 +142,8 @@
             this.removeLink(link.id)
             continue
           }
-          const sourceBlockComponent = this.getBlock(link.originID)
-          const targetBlockComponent = this.getBlock(link.targetID)
+          const sourceBlockComponent = this.getBlock(link.originId)
+          const targetBlockComponent = this.getBlock(link.targetId)
           const originLinkPos = this.scalePosition(sourceBlockComponent.getConnectionPos('output',link.originSlot))
           const targetLinkPos = this.scalePosition(targetBlockComponent.getConnectionPos('input',link.targetSlot))
 
@@ -331,7 +331,7 @@
       linkingStop (targetBlock, slotNumber) {
         if (this.linkStartData && targetBlock && slotNumber > -1) {
           this.links = this.links.filter(value => {
-            return !(value.targetID === targetBlock.id && value.targetSlot === slotNumber)
+            return !(value.targetId === targetBlock.id && value.targetSlot === slotNumber)
           })
 
           let maxID = Math.max(0, ...this.links.map(function (o) {
@@ -342,9 +342,9 @@
           if (this.linkStartData.block.id !== targetBlock.id) {
             this.links.push({
               id: maxID + 1,
-              originID: this.linkStartData.block.id,
+              originId: this.linkStartData.block.id,
               originSlot: this.linkStartData.slotNumber,
-              targetID: targetBlock.id,
+              targetId: targetBlock.id,
               targetSlot: slotNumber
             })
             this.updateScene()
@@ -358,16 +358,16 @@
       linkingBreak (targetBlock, slotNumber) {
         if (targetBlock && slotNumber > -1) {
           let findLink = this.links.find(value => {
-            return value.targetID === targetBlock.id && value.targetSlot === slotNumber
+            return value.targetId === targetBlock.id && value.targetSlot === slotNumber
           })
 
           if (findLink) {
             let findBlock = this.blocks.find(value => {
-              return value.id === findLink.originID
+              return value.id === findLink.originId
             })
 
             this.links = this.links.filter(value => {
-              return !(value.targetID === targetBlock.id && value.targetSlot === slotNumber)
+              return !(value.targetId === targetBlock.id && value.targetSlot === slotNumber)
             })
 
             this.linkingStart(findBlock, findLink.originSlot)
@@ -451,7 +451,7 @@
           this.blockDeselect(block)
         }
         this.links.forEach(l => {
-          if (l.originID === block.id || l.targetID === block.id) {
+          if (l.originId === block.id || l.targetId === block.id) {
             this.removeLink(l.id)
           }
         })
@@ -497,11 +497,11 @@
         //
         blocks.forEach(block => {
           let inputs = links.filter(link => {
-            return link.targetID === block.id
+            return link.targetId === block.id
           })
 
           let outputs = links.filter(link => {
-            return link.originID === block.id
+            return link.originId === block.id
           })
           block.inputs.forEach((s, index) => {
             // is linked
@@ -525,8 +525,8 @@
         this.blocks = blocks
         await this.$nextTick()
         scene.links.forEach( (link) => {
-          vm.$set(this.getBlock(link.originID).outputLinks,link.originSlot,link)
-          vm.$set(this.getBlock(link.targetID).inputLinks,link.targetSlot,link)
+          vm.$set(this.getBlock(link.originId).outputLinks,link.originSlot,link)
+          vm.$set(this.getBlock(link.targetId).inputLinks,link.targetSlot,link)
         })
         blocks = this.prepareBlocksLinking(blocks, scene.links)
         
