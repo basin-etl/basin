@@ -17,7 +17,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- blocks editor
     //-
     v-col.pa-0.d-flex
-      BlocksContainer.flex-grow-1(@contextmenu.native='showContextMenu' @click.native='closeContextMenu' ref='container' :scene.sync='scene' 
+      BlocksContainer.flex-grow-1(ref='container' :scene.sync='scene' 
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'

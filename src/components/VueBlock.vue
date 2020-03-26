@@ -32,7 +32,7 @@
 
 </template>
 
-<script lang="ts">
+<script>
 const circleSize = 10
 
 export default {

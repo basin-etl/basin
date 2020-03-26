@@ -12,12 +12,16 @@
     "@jupyterlab/services": "^5.0.2",
     "ag-grid-community": "^23.0.1",
     "ag-grid-vue": "^23.0.0",
+    "apache-arrow": "^0.16.0",
+    "axios": "^0.19.2",
     "core-js": "^3.6.4",
+    "datasaur-base": "^3.0.0",
     "fin-hypergrid": "^3.3.2",
     "mustache": "^4.0.1",
     "require-context": "^1.1.0",
     "topological-sort": "^0.3.0",
     "vue": "^2.6.11",
+    "vue-class-component": "^7.2.2",
     "vue-property-decorator": "^8.4.1",
     "vue-router": "^3.1.5",
     "vuetify": "^2.2.11"
@@ -25,10 +29,14 @@
   "devDependencies": {
     "@types/mustache": "^4.0.1",
     "@types/webpack-env": "^1.15.1",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
     "@vue/cli-plugin-babel": "~4.2.0",
     "@vue/cli-plugin-eslint": "~4.2.0",
     "@vue/cli-plugin-router": "^4.2.3",
+    "@vue/cli-plugin-typescript": "^4.2.3",
     "@vue/cli-service": "~4.2.0",
+    "@vue/eslint-config-typescript": "^5.0.1",
     "babel-eslint": "^10.0.3",
     "babel-plugin-wildcard": "^6.0.0",
     "eslint": "^6.7.2",
@@ -37,6 +45,7 @@
     "less-loader": "^5.0.0",
     "sass": "^1.19.0",
     "sass-loader": "^8.0.0",
+    "typescript": "~3.7.5",
     "vue-cli-plugin-pug": "~1.0.7",
     "vue-cli-plugin-vuetify": "~2.0.5",
     "vue-template-compiler": "^2.6.11",
@@ -49,10 +58,11 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/typescript"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@typescript-eslint/parser"
     },
     "rules": {}
   },

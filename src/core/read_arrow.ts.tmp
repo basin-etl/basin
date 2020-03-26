@@ -1,0 +1,24 @@
+import { readFileSync } from 'fs';
+import { Table } from 'apache-arrow';
+
+const arrow = readFileSync('/home/oren/Documents/output.arrow');
+const table = Table.from([arrow]);
+
+console.log(table.data);
+
+let dataModel = {
+    getSchema: function() {
+        if (!this.schema) {
+            this.schema = table.schema;
+            this.dispatchEvent('data-schema-changed');
+        }
+        return this.schema;
+    },
+    getValue: function(x, y) {
+        return table.getColumnAt(y).get(x)
+    },
+    getRowCount: function() {
+       return table.count()
+    }
+};
+console.log(dataModel.getValue(0,1))

@@ -9,7 +9,7 @@ const requireComponent = require.context(
   // The regular expression used to match base component filenames
   /.*\.json/
 )
-let blockTypes = {}
+let blockTypes:{[component:string]:object} = {}
 requireComponent.keys().forEach(fileName => {
     // Get component config
     const componentConfig = requireComponent(fileName)

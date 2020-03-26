@@ -28,8 +28,8 @@ const requireComponent = requireContext(
   // The regular expression used to match base component filenames
   /.*\.template/
 )
-let templates = {}
-requireComponent.keys().forEach(fileName => {
+let templates:{[type:string]:any} = {}
+requireComponent.keys().forEach( (fileName:string) => {
   // Get component config
   const blockType = fileName.split("/")[0]
   templates[blockType] = requireComponent(fileName)
@@ -38,17 +38,22 @@ requireComponent.keys().forEach(fileName => {
 //
 // render the job
 //
-let jobCommands = []
+let jobCommands:Array<string> = []
+interface Block {
+  type:string
+  properties:object
+  id:number
+}
 sortedBlocks.forEach( block => {
   // find the inputs to this block
-  const incomingLinks = jobContent.links.filter( (link) => link.targetId==block.node["id"])
-  let inputs = {}
+  const incomingLinks = jobContent.links.filter( (link) => link.targetId==(<Block>block.node)["id"])
+  let inputs:{[slot:number]:string} = {}
   incomingLinks.forEach( link => {
     inputs[link.targetSlot] = `output_id${link.originId}_socket${link.originSlot}`
   })
   jobCommands.push(
-    templates[block.node["type"]].render({
-      props: block.node["properties"],
+    templates[(<Block>block.node)["type"]].render({
+      props: (<Block>block.node)["properties"],
       inputs: inputs
     })
   )
