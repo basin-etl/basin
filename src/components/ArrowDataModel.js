@@ -25,10 +25,12 @@ var ArrowDataModel = DatasaurBase.extend('ArrowDataModel',  {
     initialize: function(datasaur, options, data) {
         // this.reset();
         this.data = data
-        let schemaFields = this.data.schema.fields.map( (field) => field.name )
-        this.schema = schemaFields
-        // this.schema = []
-        // this.schema = this.getSchema()
+        if (this.data) {
+            let schemaFields = this.data.schema.fields.map( (field) => field.name )
+            this.schema = schemaFields
+        }
+        else
+            this.schema = []
     },
 
     reset: function() {

@@ -1,12 +1,6 @@
 import { Template } from './template'
 import jobContent from '../pages/demoJob'
 import TopologicalSort from 'topological-sort';
-import { linkSync } from 'fs';
-
-require.extensions['.template'] = function (module, filename) {
-    module.exports = new Template(filename)
-};
-
 
 const sortedGraph = new TopologicalSort<Number, Object>(new Map());
 jobContent.blocks.forEach( block => {
@@ -29,10 +23,10 @@ const requireComponent = requireContext(
   /.*\.template/
 )
 let templates:{[type:string]:any} = {}
-requireComponent.keys().forEach( (fileName:string) => {
+requireComponent.keys().forEach( (filename:string) => {
   // Get component config
-  const blockType = fileName.split("/")[0]
-  templates[blockType] = requireComponent(fileName)
+  const blockType = filename.split("/")[0]
+  templates[blockType] = new Template(filename)
 })
 
 //

@@ -43,7 +43,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
   </template>
 
 <script>
-import jupyterUtils from './jupyterUtils.ts'
+import jupyterUtils from '@/core/jupyterUtils.ts'
 import blockTypes from '@/blocks/blockTypes.ts'
 import jobContent from './demoJob.ts'
 import BlocksContainer from '@/components/BlocksContainer'

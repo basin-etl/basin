@@ -4,6 +4,9 @@
     :class='{selected: selected, "elevation-2":!selected }',
   )
     v-col.pt-0
+      //-
+      //- header
+      //-
       v-row.titlebar.pl-2(align="center",
         :style="{'background-color':color}"
       )
@@ -16,6 +19,9 @@
         v-btn(icon, small)
           v-icon(small) more_vert
       v-row
+        //-
+        //- input and output circles
+        //-
         v-col.pa-0
           .inputs
             v-row.ma-0(align='center',justify="start",v-for='(slot, index) in inputs', :key='index')

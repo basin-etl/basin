@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/mustache": "^4.0.1",
+    "@types/node": "^12.12.31",
     "@types/webpack-env": "^1.15.1",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
