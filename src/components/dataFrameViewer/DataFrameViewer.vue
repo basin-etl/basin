@@ -1,13 +1,13 @@
 <template lang="pug">
 v-row.ma-0.fill-height.flex-column.flex-nowrap
-    v-row.flex-grow-0
-        v-col.flex-grow-0
-            | Filter expression:
-        v-col
-            v-text-field(
-                v-model="expression",
-                @keydown.enter="loadData"
-            )
+    v-row(no-gutters).flex-grow-0.px-3
+        v-text-field(
+            :style="{'max-width':'500px'}",
+            label="Filter expression",
+            :hint="`use ${this.dataframe} to refer to current dataframe`",
+            v-model="expression",
+            @keydown.enter="loadData"
+        )
     v-row(no-gutters).flex-column
         div.flex-grow-1.grid(v-show="kernel && data",ref="dataGrid")
         v-row.overlay(no-gutters,justify="center",align="center",v-if="!kernel || !data || loading")
@@ -15,30 +15,20 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //-
     //- row detail popup
     //-
-    v-dialog(v-model="showDetails" width="80%")
-        v-card
-            v-card-title
-                | title
-            v-card-text
-                v-row(v-for="(value,key) in details" :key="key")
-                    v-col.flex-grow-0 {{key}}:
-                    v-col {{value}}
-            v-card-actions
-                v-spacer
-                v-btn(color="green darken-1" text @click="showDetails = false") Close
-
+    v-dialog(v-model="showDetails",width="80%",content-class="row-detail-dialog")
+        RowDetails(:row="details",v-on:close="showDetails=false")
         
 </template>
 
 <script>
+// TODO: history of commands 
 import HyperGrid from "fin-hypergrid";
 import jupyterUtils from '@/core/jupyterUtils'
 import axios from 'axios'
 import { Table, Data } from 'apache-arrow';
-
+import RowDetails from './RowDetails.vue'
 var DatasaurBase = require('datasaur-base');
 const ArrowDataModel = require('./ArrowDataModel.js')
-let dataModel = null
 export default {
     name: 'DataFrameViewer',
     props: {
@@ -51,14 +41,14 @@ export default {
             //
             // init arrow data model and grid
             //
-            dataModel = new ArrowDataModel(new DatasaurBase,{},null)
+            this.dataModel = new ArrowDataModel(new DatasaurBase,{},null)
             this.grid = new HyperGrid(this.$refs["dataGrid"],
                 {
-                    dataModel : dataModel,
+                    dataModel : this.dataModel,
                 }
             );
             this.grid.properties.rowHeaderCheckboxes = false
-            this.grid.addEventListener('fin-click', (event) => {
+            this.grid.addEventListener('fin-double-click', (event) => {
                 console.log(event)
                 this.openRow(event.detail.row.toJSON())
             });
@@ -80,7 +70,7 @@ export default {
             //
             // register comm target for callback of object inspection
             //
-            const $vm = this
+            const vm = this
             this.kernel.registerCommTarget('inspect_df', (comm, commMsg) => {
                 if (commMsg.content.target_name !== 'inspect_df') {
                     return;
@@ -89,9 +79,9 @@ export default {
                     console.log("got msg")
                     console.log(msg)
                     let t = Table.from(msg.buffers[0].buffer)
-                    this.data = t
-                    dataModel.setData(t)
-                    this.loading = false
+                    vm.data = t
+                    vm.dataModel.setData(t)
+                    vm.loading = false
                 };
                 comm.onClose = msg => {
                     console.log(msg.content.data);
@@ -108,7 +98,8 @@ export default {
             data: null,
             showDetails: false,
             loading: false,
-            details: {} // details of the selected row
+            details: {}, // details of the selected row
+            dataModel: null
         }
     },
     methods: {
@@ -118,15 +109,15 @@ export default {
             // console.log(ArrowDataModel.)
         },
         async loadData() {
+            let vm = this
             this.loading=true
             console.log(`loading ${this.expression}`)
-            jupyterUtils.inspectDataframe(this.kernel,this.expression)
+            jupyterUtils.inspectDataframe(this.kernel,vm.expression)
         }
     },
     components: {
+        RowDetails
     },
-    async mounted() {
-    }
 
 }
 </script>
@@ -140,5 +131,10 @@ export default {
     height:100%;
     background-color:gray;
     opacity:0.5;
+}
+</style>
+<style>
+.row-detail-dialog {
+    height: 90%
 }
 </style>

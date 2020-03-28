@@ -4,7 +4,7 @@ DataFrameViewer(:kernel="kernel",dataframe="df")
 </template>
 
 <script>
-import DataFrameViewer from '@/components/DataFrameViewer'
+import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer'
 import jupyterUtils from '@/core/jupyterUtils'
 export default {
     name: "DataFrameViewerDriver",
