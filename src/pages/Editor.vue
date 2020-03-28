@@ -1,11 +1,15 @@
 <template lang="pug">
 v-row.ma-0.fill-height.flex-column.flex-nowrap
-  v-row.flex-grow-0.flex-column
+  v-row(no-gutters).flex-grow-0.flex-column
+    //-
+    //- toolbar
+    //-
     v-toolbar(dense,flat)
       v-toolbar-title New job
       v-spacer
-      v-btn(icon,small,@click.stop='addBlock')
-        v-icon(small) save
+      v-btn(icon,small)
+        v-icon(color="green",v-if="!running",@click="run") play_circle_outline
+        v-icon(color="red",v-if="running",@click="stop") stop
     v-divider
   v-row.ma-0
     //-
@@ -17,7 +21,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- blocks editor
     //-
     v-col.pa-0.d-flex
-      BlocksContainer.flex-grow-1(ref='container' :scene.sync='scene' 
+      BlocksContainer.flex-grow-1(ref='container' :scene.sync='job' 
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'
@@ -59,18 +63,15 @@ export default {
     },
     data: function () {
       return {
+        kernel: null,
         dragAdding: false,
         selectedBlockType: "BlockProperties",
         selectedBlockId: 20,
         blockTypes: blockTypes,
         showPropertiesPanel: false,
-        scene: jobContent,
+        job: jobContent,  // holds the job content
         selectedBlock: null,
-      }
-    },
-    computed: {
-      selectBlocksType () {
-        return Object.entries(blockTypes).map(b => b.type)
+        running: false,
       }
     },
     methods: {
@@ -85,24 +86,31 @@ export default {
         console.log('deselect', block)
         this.selectedBlock = null
       },
-      addBlock () {
-        this.$refs.container.addNewBlock("extract")
-      },
       saveProperties() {
         this.showPropertiesPanel = false
       },
-    },
-    async mounted () {
-      console.log("mounted")
-      console.log(jupyterUtils)
-      await jupyterUtils.getKernel()
+      run() {
+        this.running = true
+        console.log("running")
+      },
+      stop() {
+        this.running = false
+      }
     },
     watch: {
-      scene (newValue) {
-        // console.log('scene', JSON.stringify(newValue))
-        console.log('scene changed')
+      job(newJob) {
+        localStorage.job = JSON.stringify(newJob)
       }
-    }
+    },
+    async mounted () {
+      try {
+        if (localStorage.job) this.job = JSON.parse(localStorage.job)
+      }
+      catch (e) {
+        console.log(e)
+      }
+      this.kernel = await jupyterUtils.getKernel()
+    },
   }
 </script>
 

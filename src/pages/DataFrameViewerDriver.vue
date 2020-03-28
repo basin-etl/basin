@@ -19,7 +19,7 @@ export default {
     async created() {
         // cleanup active kernel
         window.addEventListener('beforeunload', () => {
-            console.log("are you sure you want to go away??")
+            console.log("shutting down kernel")
             this.kernel.shutdown()
         }, false)
         this.kernel = await jupyterUtils.getKernel()
