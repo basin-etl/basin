@@ -1,8 +1,7 @@
-var fs = require('fs');
 export class Template {
   template:string
-  constructor(filename:string) {
-    this.template = fs.readFileSync(filename, 'utf8')
+  constructor(template:string) {
+    this.template = template
   }
   render(values = {}) {
     const handler = new Function('values', [

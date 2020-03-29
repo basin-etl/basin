@@ -206,8 +206,6 @@
         return this.$refs[`block${id}`][0]
       },
       blockDblClick(block) {
-        console.log('block doubleclicked')
-        console.log(block)
         this.$emit('blockproperties', block)
       },
       // Events
@@ -482,7 +480,7 @@
             title: block.title,
             inputs: blockType? blockType.inputs : [],
             outputs: blockType? blockType.outputs : [],
-            properties: {"myprop":"yes!"}
+            properties: block.properties
           }
         })
       },

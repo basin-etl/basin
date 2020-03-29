@@ -1,4 +1,13 @@
 module.exports = {
+  chainWebpack: config => {
+    // template loader
+    config.module
+      .rule('python_template')
+      .test(/\.template$/)   
+      .use('file-loader')
+      .loader('raw-loader')
+      // .loader('./template-loader.ts')
+  },
   devServer: { 
     watchOptions: {
     },

@@ -54,6 +54,7 @@ import BlocksContainer from '@/components/BlocksContainer'
 import BlockProperties from '@/components/BlockProperties'
 import domHelper from '@/helpers/dom'
 import EditorBlocksBar from './EditorBlocksBar'
+import jobRenderer from '@/core/jobRenderer'
 export default {
     name: 'App',
     components: {
@@ -91,6 +92,7 @@ export default {
       },
       run() {
         this.running = true
+        console.log(jobRenderer.render(this.job))
         console.log("running")
       },
       stop() {
