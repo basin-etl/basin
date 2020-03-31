@@ -1,1 +1,3 @@
-extract ${props.source}
+from time import sleep
+sleep(1)
+print("extracting ${props.source}")

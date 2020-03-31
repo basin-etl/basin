@@ -3,10 +3,11 @@
   v-on:drop="blockDropped($event)"
   v-on:dragover="dragOver($event)"
 )
-  VueLink(:lines="lines")
-  VueBlock(v-for="block in blocks"
+  VueLink(:lines="lines",:readOnly="readOnly")
+  VueBlock(v-for="block in scene.blocks"
               :key="block.id"
               :ref="`block${block.id}`"
+              :readOnly="readOnly"
               v-bind.sync="block"
               :options="optionsForChild"
               @update="updateScene"
@@ -15,7 +16,8 @@
               @linkingBreak="linkingBreak(block, $event)"
               @select="blockSelect(block)"
               @delete="blockDelete(block)"
-              v-on:dblclick.native ="blockDblClick(block)"
+              @click.stop="deselectAll"
+              @blockproperties="showProperties($event)"
   )
 </template>
 
@@ -23,7 +25,7 @@
   import merge from 'deepmerge'
   import mouseHelper from '../helpers/mouse'
 
-  import VueBlock from './VueBlock'
+  import VueBlock from './blocksEditor/VueBlock.vue'
   import VueLink from './VueLink'
   import blockTypes from '@/blocks/blockTypes.ts'
 
@@ -37,6 +39,10 @@
       scene: {
         type: Object,
         default: {blocks: [], links: [], container: {}}
+      },
+      readOnly: {
+        type: Boolean,
+        default: false
       },
       options: {
         type: Object
@@ -199,14 +205,20 @@
           event.offsetY
         )
       },
+      setProperties(blockId,properties) {
+        let blockIndex = this.blocks.findIndex(x => x.id == blockId);
+        this.blocks[blockIndex].properties = properties
+        this.updateScene()
+      },
       dragOver(event) {
         event.preventDefault() 
       },
       getBlock(id) {
         return this.$refs[`block${id}`][0]
       },
-      blockDblClick(block) {
-        this.$emit('blockproperties', block)
+      showProperties(e) {
+        // propagate the event
+        this.$emit('blockproperties', e)
       },
       // Events
       /** @param e {MouseEvent} */
@@ -257,7 +269,6 @@
       },
       handleUp (e) {
         const target = e.target || e.srcElement
-
         if (this.dragging) {
           this.dragging = false
 
@@ -410,7 +421,6 @@
           id: id,
           x: 0,
           y: 0,
-          selected: false,
           type: node.type,
           title: node.title || node.type,
           inputs: inputs,
@@ -418,11 +428,10 @@
           properties: {}
         }
       },
-      deselectAll (withoutID = null) {
-        this.blocks.forEach((value) => {
-          if (value.id !== withoutID && value.selected) {
-            this.blockDeselect(value)
-          }
+      deselectAll () {
+        console.log("deselecting")
+        this.blocks.forEach((block) => {
+          this.blockDeselect(block)
         })
       },
       // Events
@@ -433,15 +442,7 @@
         this.$emit('blockselect', block)
       },
       blockDeselect (block) {
-        block.selected = false
-
-        if (block &&
-          this.selectedBlock &&
-          this.selectedBlock.id === block.id
-        ) {
-          this.selectedBlock = null
-        }
-
+        this.getBlock(block.id).deselect()
         this.$emit('blockdeselect', block)
       },
       blockDelete (block) {
@@ -458,85 +459,18 @@
         })
         this.updateScene()
       },
-      //
-      prepareBlocks (blocks) {
-        return blocks.map(block => {
-          let color = 'white'
-          let icon = 'add'
-          let blockType = blockTypes[block.type]
-          if (blockType) {
-            // pick up properties from the block type definition
-            color = blockType.color
-            icon = blockType.icon            
-          }
-          return {
-            id: block.id,
-            x: block.x,
-            y: block.y,
-            selected: false,
-            color: color,
-            icon: icon,
-            type: block.type,
-            title: block.title,
-            inputs: blockType? blockType.inputs : [],
-            outputs: blockType? blockType.outputs : [],
-            properties: block.properties
-          }
-        })
-      },
-      prepareBlocksLinking (blocks, links) {
-        if (!blocks) {
-          return []
-        }
-
-        let newBlocks = []
-        //
-        // update each block with its links
-        //
-        blocks.forEach(block => {
-          let inputs = links.filter(link => {
-            return link.targetId === block.id
-          })
-
-          let outputs = links.filter(link => {
-            return link.originId === block.id
-          })
-          block.inputs.forEach((s, index) => {
-            // is linked
-            block.inputs[index].active = inputs.some(i => i.targetSlot === index)
-          })
-
-          block.outputs.forEach((s, index) => {
-            // is linked
-            block.outputs[index].active = outputs.some(i => i.originSlot === index)
-          })
-
-          newBlocks.push(block)
-        })
-
-        return newBlocks
-      },
       importScene: async function () {
         const vm = this
         let scene = merge(this.defaultScene, this.scene)
-        let blocks = this.prepareBlocks(scene.blocks)
-        this.blocks = blocks
+        this.blocks = scene.blocks
         await this.$nextTick()
+        // set the link indications for each block object
         scene.links.forEach( (link) => {
           vm.$set(this.getBlock(link.originId).outputLinks,link.originSlot,link)
           vm.$set(this.getBlock(link.targetId).inputLinks,link.targetSlot,link)
         })
-        blocks = this.prepareBlocksLinking(blocks, scene.links)
         
-        // set last selected after update blocks from props
-        if (this.selectedBlock) {
-          let block = blocks.find(b => this.selectedBlock.id === b.id)
-          if (block) {
-            block.selected = true
-          }
-        }
-
-        this.links = merge([], scene.links)
+        this.links = scene.links
 
         let container = scene.container
         if (container.centerX) {

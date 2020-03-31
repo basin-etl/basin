@@ -25,11 +25,12 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'
+        :readOnly="readOnly"
         )
   //-
   //- properties panel
   //-
-  v-navigation-drawer(
+  v-navigation-drawer.pa-3(
       v-model="showPropertiesPanel"
       absolute
       v-if="selectedBlock",
@@ -38,11 +39,17 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       right
       width="400"
   )
-      component(
-        v-bind:is="selectedBlockType",:blockId="selectedBlock.id")
-      template(v-slot:append)
-        v-row.py-3(justify="center")
-          v-btn(@click.stop="saveProperties()") Save
+    v-row(no-gutters)
+      div {{selectedBlock.type}} Properties
+      v-spacer
+      v-btn(icon,@click="showPropertiesPanel=false")
+          v-icon close
+    component(
+      ref="propertiesPanel",
+      v-bind:is="`${selectedBlock.type}Properties`",v-bind="selectedBlockProperties",:blockId="selectedBlock.id")
+    template(v-slot:append)
+      v-row.py-3(justify="center")
+        v-btn(@click.stop="saveProperties()") Save
 
   </template>
 
@@ -55,6 +62,7 @@ import BlockProperties from '@/components/BlockProperties'
 import domHelper from '@/helpers/dom'
 import EditorBlocksBar from './EditorBlocksBar'
 import jobRenderer from '@/core/jobRenderer'
+import Vue from 'vue'
 export default {
     name: 'App',
     components: {
@@ -66,37 +74,65 @@ export default {
       return {
         kernel: null,
         dragAdding: false,
-        selectedBlockType: "BlockProperties",
-        selectedBlockId: 20,
+        props: {},
         blockTypes: blockTypes,
         showPropertiesPanel: false,
         job: jobContent,  // holds the job content
         selectedBlock: null,
+        selectedBlockProperties: {}, // we store this separately because of reactivity issues with vue and the v-bind to the properties panel
         running: false,
+        readOnly: false
       }
     },
     methods: {
-      showProperties(block) {
-        this.showPropertiesPanel = true
+      async showProperties(block) {
+        this.selectedBlock=block
+        this.selectedBlockProperties=block.properties
+        this.showPropertiesPanel = true        
+        await this.$nextTick()
+        this.$refs["propertiesPanel"].reset()
       },
       selectBlock (block) {
         console.log('select', block)
         this.selectedBlock = block
+        this.selectedBlockProperties = block.properties
       },
       deselectBlock (block) {
         console.log('deselect', block)
         this.selectedBlock = null
       },
       saveProperties() {
+        // find index of selected block in job contents
+        this.$refs["container"].setProperties(this.selectedBlock.id,this.$refs["propertiesPanel"].getProperties())
         this.showPropertiesPanel = false
       },
-      run() {
+      getContainer() {
+        // returns the handle to the blocks container
+        return this.$refs["container"]
+      },
+      async run() {
+        //
+        // run this job in jupyter notebook
+        //
         this.running = true
-        console.log(jobRenderer.render(this.job))
+        this.readOnly = true
+        let commands = jobRenderer.render(this.job)
         console.log("running")
+        console.log(commands)
+        for (let command of commands) {
+          console.log(command)
+          this.$refs["container"].getBlock(command.blockId).setState('running')
+          await jupyterUtils.sendToPython(this.kernel,commands[0].code)
+          this.$refs["container"].getBlock(command.blockId).setState('completed')
+        }
       },
       stop() {
+        // stop running the job. exit 'debug' mode
         this.running = false
+        this.readOnly = false
+        for (block of this.jobContent.blocks) {
+          this.getContainer().getBlock(block.id).setState('')
+        }
       }
     },
     watch: {
@@ -105,6 +141,11 @@ export default {
       }
     },
     async mounted () {
+      // cleanup active kernel
+      window.addEventListener('beforeunload', () => {
+          console.log("shutting down kernel")
+          this.kernel.shutdown()
+      }, false)
       try {
         if (localStorage.job) this.job = JSON.parse(localStorage.job)
       }
@@ -113,6 +154,10 @@ export default {
       }
       this.kernel = await jupyterUtils.getKernel()
     },
+    beforeDestroy() {
+      console.log("shutting down kernel")
+      this.kernel.shutdown()
+    }
   }
 </script>
 

@@ -25,6 +25,10 @@
       outline: {
         type: Boolean,
         default: false
+      },
+      readOnly: {
+        type: Boolean,
+        default: false
       }
     },
     methods: {
@@ -59,7 +63,11 @@
           let dist = this.distance(l.x1, l.y1, l.x2, l.y2) * 0.25
           paths.push({
             data: `M ${l.x1}, ${l.y1} C ${(l.x1 + dist)}, ${l.y1}, ${(l.x2 - dist)}, ${l.y2}, ${l.x2}, ${l.y2}`,
-            style: l.style,
+            style: {
+              stroke: this.readOnly? 'lightgray' : l.style.stroke,
+              strokeWidth: l.style.strokeWidth,
+              fill:'none'
+            },
             outlineStyle: l.outlineStyle
           })
         })
@@ -83,7 +91,7 @@
           arrows.push({
             transform: `translate(${pos.x}, ${pos.y}) rotate(${degrees})`,
             style: {
-              stroke: l.style.stroke,
+              stroke: this.readOnly? 'lightgray' : l.style.stroke,
               strokeWidth: l.style.strokeWidth * 2,
               fill: l.style.stroke
             }

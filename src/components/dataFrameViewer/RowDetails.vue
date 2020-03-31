@@ -21,44 +21,36 @@ v-card.flex-column.d-flex.height-100
 </template>
 
 <script>
-export default {
+import Vue from 'vue'
+import Component from 'vue-class-component'
+@Component({
     name: 'RowDetails',
     props: {
         row: Object,
     },
-    data() {
-        return {
-            headers: [
-                {
-                    text:'column',
-                    value:'key'
-                },
-                {
-                    text: 'value',
-                    value:'value'
-                }
-            ],
+})
+export default class RowDetails extends Vue {
+    headers= [
+        {
+            text:'column',
+            value:'key'
+        },
+        {
+            text: 'value',
+            value:'value'
         }
-    },
-    computed: {
-        items () {
-            // convert object to array for datatable
-            return Object.keys(this.row).map( (key) => {
-                return {
-                    "key": key,
-                    "value": this.row[key]
-                }
-            });
-        }
-    },
-    methods: {
-        closeDialog() {
-            this.$emit("close")
-        }
+    ]
+    get items() {
+        // convert object to array for datatable
+        return Object.keys(this.row).map( (key) => {
+            return {
+                "key": key,
+                "value": this.row[key]
+            }
+        });
+    }
+    closeDialog() {
+        this.$emit("close")
     }
 }
 </script>
-
-<style>
-
-</style>

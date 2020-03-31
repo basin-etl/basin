@@ -16,8 +16,7 @@ interface Job {
   links: Array<Link>
 }
 import blockTypes from '../blocks/blockTypes'
-console.log(blockTypes)
-function render(jobContent:Job):Array<string> {
+function render(jobContent:Job):Array<Object> {
 
     const sortedGraph = new TopologicalSort<Number, Object>(new Map());
     jobContent.blocks.forEach( block => {
@@ -31,7 +30,7 @@ function render(jobContent:Job):Array<string> {
     //
     // render the job
     //
-    let jobCommands:Array<string> = []
+    let jobCommands:Array<Object> = []
     sortedBlocks.forEach( block => {
       // find the inputs to this block
       const incomingLinks = jobContent.links.filter( (link) => link.targetId==(<Block>block.node)["id"])
@@ -39,12 +38,13 @@ function render(jobContent:Job):Array<string> {
       incomingLinks.forEach( link => {
         inputs[link.targetSlot] = `output_id${link.originId}_socket${link.originSlot}`
       })
-      jobCommands.push(
-        blockTypes[(<Block>block.node)["type"]].template.render({
+      jobCommands.push({
+        blockId: (<Block>block.node)["id"],
+        code: blockTypes[(<Block>block.node)["type"]].template.render({
           props: (<Block>block.node)["properties"],
           inputs: inputs
         })
-      )
+      })
     })
     return jobCommands
 }
