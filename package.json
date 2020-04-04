@@ -25,7 +25,7 @@
     "vue-property-decorator": "^8.4.1",
     "vue-router": "^3.1.5",
     "vue-worker": "^1.2.1",
-    "vuetify": "^2.2.11"
+    "vuetify": "^2.2.20"
   },
   "devDependencies": {
     "@types/mustache": "^4.0.1",

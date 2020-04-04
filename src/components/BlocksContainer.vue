@@ -4,7 +4,7 @@
   v-on:dragover="dragOver($event)"
 )
   VueLink(:lines="lines",:readOnly="readOnly")
-  VueBlock(v-for="block in scene.blocks"
+  VueBlock(v-for="block in blocks"
               :key="block.id"
               :ref="`block${block.id}`"
               :readOnly="readOnly"
@@ -18,6 +18,7 @@
               @delete="blockDelete(block)"
               @click.stop="deselectAll"
               @blockproperties="showProperties($event)"
+              @inspectsocket="inspectSocket($event)"
   )
 </template>
 
@@ -216,12 +217,15 @@
       getBlock(id) {
         return this.$refs[`block${id}`][0]
       },
+      // Events
+      /** @param e {MouseEvent} */
       showProperties(e) {
         // propagate the event
         this.$emit('blockproperties', e)
       },
-      // Events
-      /** @param e {MouseEvent} */
+      inspectSocket(socket) {
+        this.$emit('inspectsocket',socket)
+      },
       handleMove (e) {
         let mouse = mouseHelper.getMousePosition(this.$el, e)
         this.mouseX = mouse.x
@@ -461,18 +465,16 @@
       },
       importScene: async function () {
         const vm = this
-        let scene = merge(this.defaultScene, this.scene)
-        this.blocks = scene.blocks
+        this.blocks = JSON.parse(JSON.stringify(this.scene.blocks))
         await this.$nextTick()
         // set the link indications for each block object
-        scene.links.forEach( (link) => {
-          vm.$set(this.getBlock(link.originId).outputLinks,link.originSlot,link)
-          vm.$set(this.getBlock(link.targetId).inputLinks,link.targetSlot,link)
+        this.links = this.scene.links
+        this.links.forEach( (link) => {
+          vm.$set(vm.getBlock(link.originId).outputLinks,link.originSlot,link)
+          vm.$set(vm.getBlock(link.targetId).inputLinks,link.targetSlot,link)
         })
         
-        this.links = scene.links
-
-        let container = scene.container
+        let container = this.scene.container
         if (container.centerX) {
           this.centerX = container.centerX
         }
@@ -505,7 +507,7 @@
     },
     watch: {
       scene () {
-        this.importScene()
+        // this.importScene()
       }
     }
   }

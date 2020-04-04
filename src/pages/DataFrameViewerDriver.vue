@@ -1,18 +1,26 @@
 <template lang="pug">
-DataFrameViewer(:kernel="kernel",dataframe="df")
-  
+div
+    v-bottom-sheet(v-model="show",height="300")
+        v-sheet(height="500px")
+            DataFrameViewer(:kernel="kernel",dataframeType="pandas",dataframe="df",v-if="kernel")
+    v-btn(@click.stop="show=!show") Show
 </template>
 
 <script>
-import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer'
+import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
 import jupyterUtils from '@/core/jupyterUtils'
 export default {
     name: "DataFrameViewerDriver",
     components: {
         DataFrameViewer
     },
+    beforeDestroy() {
+      console.log("shutting down kernel")
+      this.kernel.shutdown()
+    },
     data() {
         return {
+            show:true,
             kernel: null
         }
     },
@@ -22,16 +30,13 @@ export default {
             console.log("shutting down kernel")
             this.kernel.shutdown()
         }, false)
-        this.kernel = await jupyterUtils.getKernel()
+        let kernel = await jupyterUtils.getKernel()
         let code = `
-from ipykernel.comm import Comm
-
-import pyarrow as pa
 import pandas as pd
 df = pd.read_csv("./public/calendar.csv")
 `;
-      await this.kernel.requestExecute({ code: code }).done;
-
+        await kernel.requestExecute({ code: code }).done;
+        this.kernel = kernel
     }
 
 }

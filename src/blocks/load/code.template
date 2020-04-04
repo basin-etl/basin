@@ -1,1 +1,1 @@
-loading ${inputs[0]} to ${props.target}
+print("loading ${inputs[0]} to ${props.target}")

@@ -76,7 +76,8 @@
     display:flex
   }
   .block-contents{
-    font-size: 12px
+    font-size: 12px;
+    z-index: 5
   }
   .titlebar {
     border-radius: 4px 4px 0 0 
@@ -98,7 +99,7 @@
     .circle {
       box-sizing: border-box;
 
-      z-index:10;
+      z-index:20;
 
       width: @circleSize;
       height: @circleSize;
@@ -143,7 +144,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 1;
+    z-index: 10;
     background: rgba(#ffffff,0.5);
     background-size: 200px 100%;
     content: '';
@@ -156,6 +157,7 @@
     right: 0;
     bottom: 0;
     left: 0;
+    z-index: 1;
     background: linear-gradient(to right, 
       rgba(#ffffff,0), 
       rgba(#ffffff,0) 10%,

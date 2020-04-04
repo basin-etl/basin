@@ -54,17 +54,29 @@ async function sendToPython(kernel:Kernel.IKernelConnection,cmd:string) {
 		}
 	}
 }
-function inspectDataframe(kernel:Kernel.IKernelConnection,expression:string) {
-
-	let code = `
-	batch = pa.RecordBatch.from_pandas(${expression})
-	sink = pa.BufferOutputStream()
-	writer = pa.RecordBatchStreamWriter(sink, batch.schema)
+function inspectDataframe(kernel:Kernel.IKernelConnection,expression:string,type:string) {
+	let code = ""
+	if (type=='pandas') {
+		code += `
+batch = pa.RecordBatch.from_pandas(${expression})
+batches = [batch]
+`
+	}
+	else {
+		code += `
+batches = (${expression})._collectAsArrow()
+		`
+	}
+	code += `
+sink = pa.BufferOutputStream()
+writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
+for batch in batches:
 	writer.write_batch(batch)
-	comm = Comm(target_name="inspect_df")
-	comm.send(data="test",buffers=[sink.getvalue()])
-	comm.close(data="closing comm")
-	`;
+comm = Comm(target_name="inspect_df")
+comm.send(data="test",buffers=[sink.getvalue()])
+comm.close(data="closing comm")
+		`;
+	
     kernel.requestExecute({code: code})
 }
 

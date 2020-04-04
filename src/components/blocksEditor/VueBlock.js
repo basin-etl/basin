@@ -57,6 +57,7 @@ export default {
   mounted () {
     // we handle mouse move at the document level to have smooth dragging when dragging outside of container
     this.$parent.$el.addEventListener('mousemove', this.handleMove, true)
+    console.log(this.id)
   },
   beforeDestroy () {
     // we handle mouse move at the document level to have smooth dragging when dragging outside of container
@@ -166,7 +167,7 @@ export default {
       if (e.preventDefault) e.preventDefault()
     },
     inspectSlot(type,index) {
-      this.$emit('inspectSocket',{type:type,index:index})
+      this.$emit('inspectsocket',{type:type,id:this.id,index:index})
     },
     slotBreak (e, index) {
       if (this.readOnly) return

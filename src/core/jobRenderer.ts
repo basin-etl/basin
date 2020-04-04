@@ -16,6 +16,7 @@ interface Job {
   links: Array<Link>
 }
 import blockTypes from '../blocks/blockTypes'
+import { isClearOutputMsg } from '@jupyterlab/services/lib/kernel/messages';
 function render(jobContent:Job):Array<Object> {
 
     const sortedGraph = new TopologicalSort<Number, Object>(new Map());
@@ -38,11 +39,16 @@ function render(jobContent:Job):Array<Object> {
       incomingLinks.forEach( link => {
         inputs[link.targetSlot] = `output_id${link.originId}_socket${link.originSlot}`
       })
+      let output = `output_id${(<Block>block.node)["id"]}_socket0`
+
       jobCommands.push({
         blockId: (<Block>block.node)["id"],
+        inputs: inputs,
+        output: output,
         code: blockTypes[(<Block>block.node)["type"]].template.render({
           props: (<Block>block.node)["properties"],
-          inputs: inputs
+          inputs: inputs,
+          output: output
         })
       })
     })
