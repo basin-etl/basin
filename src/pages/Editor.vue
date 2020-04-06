@@ -5,7 +5,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- toolbar
     //-
     v-toolbar(dense,flat)
-      v-toolbar-title New job
+      v-toolbar-title New job {{status}}
       v-spacer
       v-btn(icon,small)
         v-icon(color="green",v-if="!running",@click="run") play_circle_outline
@@ -21,7 +21,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- blocks editor
     //-
     v-col.pa-0.d-flex
-      BlocksContainer.flex-grow-1(v-if="job && job!=={}" ref='container' :scene.sync='job' 
+      BlocksContainer.flex-grow-1(v-if="job" ref='container' :scene.sync='job' 
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'
@@ -63,7 +63,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
 
   </template>
 
-<script src="./Editor.js">
+<script src="./Editor.ts" lang="ts">
 </script>
 
 <style lang="less">

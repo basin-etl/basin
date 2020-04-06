@@ -1,22 +1,9 @@
-// import { Template } from './template'
 import TopologicalSort from 'topological-sort';
-interface Block {
-  id: number
-  type:string
-  properties:object
-}
-interface Link {
-  originId: number,
-  targetId: number,
-  originSlot: number,
-  targetSlot: number
-}
-interface Job {
-  blocks: Array<Block>,
-  links: Array<Link>
-}
+import Block from '@/models/Block'
+import Link from '@/models/Link';
+import Job from '@/models/Job';
 import blockTypes from '../blocks/blockTypes'
-import { isClearOutputMsg } from '@jupyterlab/services/lib/kernel/messages';
+
 function render(jobContent:Job):Array<Object> {
 
     const sortedGraph = new TopologicalSort<Number, Object>(new Map());

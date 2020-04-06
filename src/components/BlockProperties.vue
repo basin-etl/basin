@@ -5,12 +5,21 @@ div
 </template>
 
 <script>
+import blockPropertiesMixin from '@/blocks/blockPropertiesMixin.js'
+
 export default {
-    props: {
-      blockId: {
-        type: Number,
-      }
+  mixins: [blockPropertiesMixin],
+  props: {
+    blockId: {
+      type: Number,
     }
+  },
+  methods: {
+    test() {
+      return 1
+    }
+
+  }
 }
 </script>
 

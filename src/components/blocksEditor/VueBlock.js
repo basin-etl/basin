@@ -191,6 +191,9 @@ export default {
     }
   },
   computed: {
+    storeBlock() {
+      return this.$store.getters["job/getBlockById"](this.id)
+    },
     style () {
       return {
         top: this.options.center.y + this.y * this.options.scale + 'px',
