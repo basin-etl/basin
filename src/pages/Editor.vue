@@ -22,6 +22,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //-
     v-col.pa-0.d-flex
       BlocksContainer.flex-grow-1(v-if="links && blocks" ref='container'
+        v-on:update:scene="updateJob"
         :jobStatus="jobStatus"
         :readOnly="readOnly"
         :blocks="blocks"

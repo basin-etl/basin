@@ -30,7 +30,7 @@ export default class JobModule extends VuexModule {
     @Mutation
     changeBlockStatus( payload:{id:number,status:string} ) {
         let index = this.blocks.findIndex( (block) => block.id == payload.id)
-        this.blocks[index].status = payload.status
+        // this.blocks[index].status = payload.status
     }
 
     @Action

@@ -6,15 +6,13 @@ import VueBlock from './blocksEditor/VueBlock.vue'
 import VueLink from './VueLink.vue'
 import blockTypes from '@/blocks/blockTypes.ts'
 import Vue from 'vue'
-import Block from '@/models/Block';
+import Block, { BlockStatus } from '@/models/Block';
 import Link from '@/models/Link';
 
-interface vBlock extends Block {
-    selected: boolean
-    x:number
-    y:number
-    inputLinks:Object
-    outputLinks:Object
+class vBlock extends Block {
+    selected: boolean = false
+    inputLinks:Object = {}
+    outputLinks:Object = {}
 }
 
 @Component({
@@ -181,11 +179,6 @@ export default class BlocksContainer extends Vue {
             event.offsetX,
             event.offsetY
         )
-    }
-    setProperties(blockId:number,properties:any) {
-        let blockIndex = this.s_blocks.findIndex(x => x.id == blockId);
-        this.s_blocks[blockIndex].properties = properties
-        this.updateScene()
     }
     dragOver(event:DragEvent) {
         event.preventDefault() 
@@ -374,11 +367,10 @@ export default class BlocksContainer extends Vue {
 
     // Blocks
     addNewBlock (blockType:string, x:number, y:number) {
-        let maxID = Math.max(0, ...this.s_blocks.map(function (o) {
+        let maxId = Math.max(0, ...this.s_blocks.map(function (o) {
           return o.id
         }))
-        let blockTypeObj = this.blockTypes[blockType]
-        let block = this.createBlock(blockTypeObj, maxID + 1)
+        let block = new vBlock({id:maxId+1,type:blockType})
 
         // if x or y not set, place block to center
         if (x === undefined || y === undefined) {
@@ -394,23 +386,6 @@ export default class BlocksContainer extends Vue {
         this.s_blocks.push(block)
 
         this.updateScene()
-    }
-    createBlock (node:any, id:number): vBlock {
-        let inputs = []
-        let outputs = []
-
-        return {
-          id: id,
-          status: "stopped",
-          selected: false,
-          code:"",
-          x: 0,
-          y: 0,
-          inputLinks: {},
-          outputLinks: {},
-          type: node.type,
-          properties: {}
-        }
     }
     deselectAll () {
         console.log("deselecting")
@@ -467,15 +442,6 @@ export default class BlocksContainer extends Vue {
         }
     }
     exportScene () {
-        let clonedBlocks:Array<vBlock> = JSON.parse(JSON.stringify(this.s_blocks))
-        let blocks = clonedBlocks.map(value => {
-        //   delete value['inputs']
-        //   delete value['outputs']
-        //   delete value['selected']
-
-          return value
-        })
-
         return {
           blocks: this.s_blocks,
           links: this.s_links,

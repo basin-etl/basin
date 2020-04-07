@@ -1,8 +1,8 @@
-<script src="./VueBlock.js">
+<script src="./VueBlock.ts">
 </script>
 <template lang="pug">
 .vue-block(
-  :class='{selected: selected,running: status=="running",completed:completed && readOnly}',
+  :class='{selected: selected,running: running,completed:completed && readOnly}',
   :style='style',
   @mousedown.stop="handleDown",
   @mouseup.stop="handleUp"
