@@ -2,6 +2,7 @@ import jupyterUtils from '@/core/jupyterUtils.ts'
 import blockTypes from '@/blocks/blockTypes.ts'
 import BlocksContainer from '@/components/BlocksContainer.vue'
 import BlockProperties from '@/components/BlockProperties.vue'
+import BlockPropertiesRef from '@/components/BlockProperties'
 import EditorBlocksBar from './EditorBlocksBar.vue'
 import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
 import jobRenderer from '@/core/jobRenderer'
@@ -11,6 +12,7 @@ import { Prop, Watch } from 'vue-property-decorator'
 import { Kernel } from "@jupyterlab/services"
 import Block from '@/models/Block';
 import Job from '@/models/Job';
+import Link from '@/models/Link';
 @Component({
   name: 'Editor',
   components: {
@@ -21,18 +23,15 @@ import Job from '@/models/Job';
   },
 })
 export default class Editor extends Vue {
-  // explicitly define refs so we can type them in typescript
-  // $refs!: Vue['$refs'] & {
-  //   propertiesPanel: BlockProperties
-  // };
+  //
   // data
+  //
   kernel:Kernel.IKernelConnection = null
   dragAdding = false
   props = {}
   interrupt = false // special flag to allow to interrupt a running job mid way
   blockTypes = blockTypes
   showPropertiesPanel = false
-  job:Job = null // holds the job content
   jobCommands:Array<Block> = null // holds the runtime commands of the job while debugging
   selectedBlock:object = null
   selectedBlockProperties = {} // we store this separately because of reactivity issues with vue and the v-bind to the properties panel
@@ -42,13 +41,16 @@ export default class Editor extends Vue {
   showDataframePanel = false
   error:string = null
   showError = false
-
+  jobStatus = 'stopped' // or 'completed' or 'running'
+  blocks:Array<Block>
+  links:Array<Link>
+  
   async showProperties(block:Block) {
     this.selectedBlock=block
     this.selectedBlockProperties=block.properties
     this.showPropertiesPanel = true        
     await this.$nextTick();
-    // this.$refs.propertiesPanel.reset()
+    (this.$refs.propertiesPanel as BlockPropertiesRef).reset()
   }
   selectBlock (block:Block) {
     this.selectedBlock = block
@@ -59,12 +61,9 @@ export default class Editor extends Vue {
   }
   saveProperties() {
     // find index of selected block in job contents
-    // (<BlocksContainer>this.$refs["container"]).setProperties(this.selectedBlock.id,this.$refs["propertiesPanel"].getProperties())
-    // this.showPropertiesPanel = false
-  }
-  getContainer() {
-    // returns the handle to the blocks container
-    return this.$refs["container"]
+    // this.selectedBlock.id,)
+    this.$set(this.blocks,0,Object.assign({},this.blocks[0],{"properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()}))
+    this.showPropertiesPanel = false
   }
     async run() {
       //
@@ -92,7 +91,7 @@ export default class Editor extends Vue {
 //       await jupyterUtils.sendToPython(this.kernel,initCode)
 
 //       for (let command of commands) {
-//         // check if we have a flag to inerrupt current execution
+//         // check if we have a flag to inerrupt currenct execution
 //         if (this.interrupt) {
 //           this.interrupt = false
 //           console.log("interrupting execution")
@@ -137,22 +136,17 @@ export default class Editor extends Vue {
     //   this.showDataframePanel = true
     //   this.inspectDataframeVariable = dataframe
     // }
-    get status () {
-      return this.$store.state.job.status
-    }
-    get storeBlocks() {
-      return this.$store.state.job.blocks
-    }
     @Watch('job', { immediate: true})
     onJobChanged(newVal:string, oldVal:string) {
-      if (newVal) localStorage.job = JSON.stringify(newVal)
+      if (newVal)localStorage.job = JSON.stringify(newVal)
     }
     async created() {
       this.interrupt = true
-      await this.$store.dispatch("job/initialize")
         try {
             if (localStorage.job) {
-              this.job = JSON.parse(localStorage.job)
+              let job = JSON.parse(localStorage.job)
+              this.blocks = job.blocks
+              this.links = job.links
             }
           }
 

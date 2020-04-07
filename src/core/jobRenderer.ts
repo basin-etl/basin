@@ -4,7 +4,7 @@ import Link from '@/models/Link';
 import Job from '@/models/Job';
 import blockTypes from '../blocks/blockTypes'
 
-function render(jobContent:Job):Array<Object> {
+function render(jobContent:Job):Array<any> {
 
     const sortedGraph = new TopologicalSort<Number, Object>(new Map());
     jobContent.blocks.forEach( block => {
@@ -18,7 +18,7 @@ function render(jobContent:Job):Array<Object> {
     //
     // render the job
     //
-    let jobCommands:Array<Object> = []
+    let jobCommands:Array<any> = []
     sortedBlocks.forEach( block => {
       // find the inputs to this block
       const incomingLinks = jobContent.links.filter( (link) => link.targetId==(<Block>block.node)["id"])

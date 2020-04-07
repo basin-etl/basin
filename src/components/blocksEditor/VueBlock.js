@@ -42,7 +42,14 @@ export default {
     },
     options: {
       type: Object
+    },
+    jobStatus: {
+      type: String
+    },
+    status: {
+      type: String
     }
+
   },
   created () {
     this.mouseX = 0
@@ -75,9 +82,6 @@ export default {
     }
   },
   methods: {
-    setState(state) {
-      this.state = state
-    },
     select() {
       this.selected = true
     },
@@ -191,9 +195,6 @@ export default {
     }
   },
   computed: {
-    storeBlock() {
-      return this.$store.getters["job/getBlockById"](this.id)
-    },
     style () {
       return {
         top: this.options.center.y + this.y * this.options.scale + 'px',

@@ -30,6 +30,7 @@ export default class DataFrameViewer extends Vue {
     loading = false
     details = {} // details of the selected row
     dataModel:any = null
+
     @Watch('dataframe', { immediate: true})
     onDataframeChanged(newVal:string, oldVal:string) {
         this.expression = this.dataframe

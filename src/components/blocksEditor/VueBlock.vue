@@ -2,7 +2,7 @@
 </script>
 <template lang="pug">
 .vue-block(
-  :class='{selected: selected,running: storeBlock.status=="running",completed:completed && readOnly}',
+  :class='{selected: selected,running: status=="running",completed:completed && readOnly}',
   :style='style',
   @mousedown.stop="handleDown",
   @mouseup.stop="handleUp"
@@ -19,7 +19,7 @@
       )
         .typeicon
           v-icon(color="white",small,dense) {{blockType.icon}}
-        .pl-2 {{blockType.title}}{{storeBlock.status}}
+        .pl-2 {{blockType.title}}{{status}}
         v-spacer
         v-btn(icon,small,
           @mousedown.stop='$event.preventDefault()'

@@ -1,6 +1,6 @@
 export default interface Link {
-  originId: number,
-  targetId: number,
-  originSlot: number,
-  targetSlot: number
+    originId: number
+    targetId: number
+    originSlot: number
+    targetSlot: number
 }

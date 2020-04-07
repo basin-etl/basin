@@ -5,7 +5,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- toolbar
     //-
     v-toolbar(dense,flat)
-      v-toolbar-title New job {{status}}
+      v-toolbar-title New job
       v-spacer
       v-btn(icon,small)
         v-icon(color="green",v-if="!running",@click="run") play_circle_outline
@@ -21,12 +21,15 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- blocks editor
     //-
     v-col.pa-0.d-flex
-      BlocksContainer.flex-grow-1(v-if="job" ref='container' :scene.sync='job' 
+      BlocksContainer.flex-grow-1(v-if="links && blocks" ref='container'
+        :jobStatus="jobStatus"
+        :readOnly="readOnly"
+        :blocks="blocks"
+        :links="links"
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'
         @inspectsocket='inspectSocket($event)'
-        :readOnly="readOnly"
         )
   //-
   //- properties panel
