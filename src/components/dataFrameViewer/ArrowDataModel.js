@@ -26,8 +26,10 @@ var ArrowDataModel = DatasaurBase.extend('ArrowDataModel',  {
         // this.reset();
         this.data = data
         if (this.data) {
-            let schemaFields = this.data.schema.fields.map( (field) => field.name )
-            this.schema = schemaFields
+            this.setData(data)
+            // let schemaFields = this.data.schema.fields.map( (field) => field.name )
+
+            // this.schema = schemaFields
         }
         else
             this.schema = []
@@ -67,7 +69,21 @@ var ArrowDataModel = DatasaurBase.extend('ArrowDataModel',  {
          * @memberOf DatasaurLocal#
          */
         this.data = data || [];
-        let schemaFields = this.data.schema.fields.map( (field) => field.name )
+        let schemaFields = []
+        // handle duplicate columns. Spark can return duplicates if they have a table alias
+        let uniqueFields = {} // holds count of each unique field
+        for (let field of this.data.schema.fields) {
+            if (field.name in uniqueFields) {
+                // already exists, rename
+                uniqueFields[field.name]++
+                schemaFields.push(`${field.name}_${uniqueFields[field.name]}`)
+            }
+            else {
+                // unique
+                schemaFields.push(field.name)
+                uniqueFields[field.name] = 0
+            }
+        }
         this.setSchema(schemaFields)
 
         // if (schema) {
@@ -233,7 +249,8 @@ var ArrowDataModel = DatasaurBase.extend('ArrowDataModel',  {
      */
     getColumnCount: function() {
         return this.schema.length;
-    }
+    },
+
 });
 
 module.exports = ArrowDataModel;

@@ -10,27 +10,54 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
         )
     v-row(no-gutters).flex-column
         div.flex-grow-1.grid(v-show="kernel && data && !loading",ref="dataGrid")
-        v-row.overlay(no-gutters,justify="center",align="center",v-if="!kernel || !data || loading")
-            v-progress-circular(indeterminate)
+        v-row.overlay(no-gutters,justify="center",align="center",v-show="!kernel || !data || loading")
+            v-progress-circular(v-if="!errorMessage",indeterminate)
+            v-icon(v-if="errorMessage") error_outline
+    div.status-bar.px-3
+        div(v-if="!loading")
+            | loaded {{recordCount | numFormat}} records, {{columnCount | numFormat}} columns
+        div(v-if="loading && !errorMessage")
+            | loading...
+        div(v-if="errorMessage")
+            | {{errorMessage}}
     //-
     //- row detail popup
     //-
     v-dialog(v-model="showDetails",width="80%",transition="",content-class="row-detail-dialog")
         RowDetails(:row="details",v-on:close="showDetails=false")
-        
+    //-
+    //- error snackbar
+    //-
+    v-snackbar(
+        v-model="showErrorSnackbar",
+        color="error"
+    )
+        | {{errorMessage}}
+        v-btn(
+            dark
+            text
+            @click="showErrorSnackbar = false"
+        ) Close
+
 </template>
 
 <script lang="ts" src="./DataFrameViewer.ts">
 </script>
 <style scoped>
+.status-bar {
+    background-color: gray;
+    height: 20px;
+    color:white;
+    font-size: 11px;
+    display:flex;
+    flex-direction:column;
+    justify-content: center;
+}
 .grid {
     background-color: lightgray;
     height: 100%
 }
 .overlay {
-    position:absolute;
-    width:100%;
-    height:100%;
     background-color:gray;
     opacity:0.5;
 }

@@ -30,11 +30,16 @@ export default class DataFrameViewer extends Vue {
     loading = false
     details = {} // details of the selected row
     dataModel:any = null
-
+    errorMessage:string = null
+    showErrorSnackbar = false
+    initialized = false
+    recordCount:number = 0
+    columnCount:number = 0
+    
     @Watch('dataframe', { immediate: true})
     onDataframeChanged(newVal:string, oldVal:string) {
         this.expression = this.dataframe
-        if (this.kernel) this.loadData()
+        if (this.initialized) this.loadData()
     }
     async mounted() {
         this.expression = this.dataframe
@@ -80,11 +85,12 @@ export default class DataFrameViewer extends Vue {
                 return;
             }
             comm.onMsg = msg => {
-                console.log("got msg")
-                console.log(msg)
+                console.log("got msg callback")
                 let t = Table.from((<DataView>msg.buffers[0]).buffer)
                 vm.data = t
                 vm.dataModel.setData(t)
+                vm.recordCount = vm.dataModel.getRowCount()
+                vm.columnCount = vm.dataModel.getColumnCount()
                 vm.loading = false
             };
             comm.onClose = msg => {
@@ -100,6 +106,7 @@ import pandas as pd
         await this.kernel.requestExecute({ code: code }).done;
         console.log("kernel callbacks initialized")
         // load the dataframe unfiltered
+        this.initialized = true
         this.loadData()
     }
     openRow(row:object) {
@@ -110,7 +117,14 @@ import pandas as pd
     async loadData() {
         let vm = this
         this.loading=true
+        this.errorMessage = null
         console.log(`loading ${this.expression}`)
-        jupyterUtils.inspectDataframe(this.kernel,vm.expression,this.dataframeType)
+        try {
+            await jupyterUtils.inspectDataframe(this.kernel,vm.expression,this.dataframeType)
+        }
+        catch (e) {
+            this.errorMessage = `${e.ename}: ${e.evalue}`
+            this.showErrorSnackbar = true
+        }
     }
 }

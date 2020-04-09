@@ -3,6 +3,7 @@ import blockTypes from '@/blocks/blockTypes.ts'
 import { Prop, Component } from 'vue-property-decorator';
 import Vue from 'vue';
 import { BlockStatus } from '@/models/Block';
+import { JobStatus } from '@/models/Job';
 
 @Component({
   name: 'VueBlock',
@@ -39,7 +40,7 @@ export default class Editor extends Vue {
       type: Object,
       default: () => { return {} }
     })   outputLinks: Object
-  @Prop() jobStatus: String
+  @Prop() jobStatus: Number
   @Prop() status: Number
   
   // data
@@ -59,27 +60,26 @@ export default class Editor extends Vue {
   mounted () {
     // we handle mouse move at the document level to have smooth dragging when dragging outside of container
     this.$parent.$el.addEventListener('mousemove', this.handleMove, true)
-    console.log(this.id)
   }
   beforeDestroy () {
     // we handle mouse move at the document level to have smooth dragging when dragging outside of container
     this.$parent.$el.removeEventListener('mousemove', this.handleMove, true)
   }
-    select() {
-      this.selected = true
+  select() {
+    this.selected = true
+  }
+  deselect() {
+    this.selected = false
+  }
+  toggleSelected() {
+    this.selected = !this.selected      
+  }
+  getConnectionPos (socketType:string, socketNumber:number) {
+    return {
+      'x': this.x + (<Array<HTMLElement>>this.$refs[`${socketType}${socketNumber}`])[0].offsetLeft + circleSize/2,
+      'y': this.y + (<Array<HTMLElement>>this.$refs[`${socketType}${socketNumber}`])[0].offsetTop + circleSize/2
     }
-    deselect() {
-      this.selected = false
-    }
-    toggleSelected() {
-      this.selected = !this.selected      
-    }
-    getConnectionPos (socketType:string, socketNumber:number) {
-      return {
-        'x': this.x + (<Array<HTMLElement>>this.$refs[`${socketType}${socketNumber}`])[0].offsetLeft + circleSize/2,
-        'y': this.y + (<Array<HTMLElement>>this.$refs[`${socketType}${socketNumber}`])[0].offsetTop + circleSize/2
-      }
-    }
+  }
     showProperties(e:Event) {
       this.$emit('blockproperties', 
         {
@@ -190,5 +190,8 @@ export default class Editor extends Vue {
     }
     get completed() {
       return this.status==BlockStatus.Completed
+    }
+    get pending_run() {
+      return this.jobStatus==JobStatus.Running && this.status!=BlockStatus.Completed
     }
   }

@@ -54,7 +54,7 @@ async function sendToPython(kernel:Kernel.IKernelConnection,cmd:string) {
 		}
 	}
 }
-function inspectDataframe(kernel:Kernel.IKernelConnection,expression:string,type:string) {
+function inspectDataframe(kernel:Kernel.IKernelConnection,expression:string,type:string,limit=50000) {
 	let code = ""
 	if (type=='pandas') {
 		code += `
@@ -64,7 +64,7 @@ batches = [batch]
 	}
 	else {
 		code += `
-batches = (${expression})._collectAsArrow()
+batches = (${expression}).limit(${limit})._collectAsArrow()
 		`
 	}
 	code += `
@@ -77,7 +77,7 @@ comm.send(data="test",buffers=[sink.getvalue()])
 comm.close(data="closing comm")
 		`;
 	
-    kernel.requestExecute({code: code})
+    return sendToPython(kernel,code)
 }
 
 export default {

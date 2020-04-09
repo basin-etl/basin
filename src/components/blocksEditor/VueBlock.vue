@@ -40,6 +40,7 @@
               .circle.mt-1.inputSlot(
                 :ref="`input${index}`",
                 :class='{active: inputLinks[index],"read-only":readOnly}',
+                :style="{visibility: pending_run ? 'hidden': 'visible'}"
                 @mouseup='slotMouseUp($event, index)',
                 @mousedown="readOnly? inspectSlot('input',index) : slotBreak($event, index)"
               )
@@ -53,6 +54,7 @@
               .circle.mt-1(
                 :ref="`output${index}`",
                 :class='{active: outputLinks[index],"read-only":readOnly}',
+                :style="{visibility: pending_run ? 'hidden': 'visible'}"
                 @mousedown="readOnly? inspectSlot('output',index) : slotMouseDown($event, index)"
               )
 

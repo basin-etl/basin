@@ -11,7 +11,7 @@ import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import { Kernel } from "@jupyterlab/services"
 import Block, { BlockStatus } from '@/models/Block';
-import Job from '@/models/Job';
+import Job, { JobStatus } from '@/models/Job';
 import Link from '@/models/Link';
 @Component({
   name: 'Editor',
@@ -41,7 +41,7 @@ export default class Editor extends Vue {
   showDataframePanel = false
   error:string = null
   showError = false
-  jobStatus = 'stopped' // or 'completed' or 'running'
+  jobStatus = JobStatus.Stopped
   blocks:Array<Block> = []
   links:Array<Link> = []
   
@@ -84,6 +84,7 @@ export default class Editor extends Vue {
       //
       // run this job in jupyter notebook
       //
+      this.jobStatus = JobStatus.Running
       this.running = true
       this.interrupt = false
       this.readOnly = true
@@ -130,6 +131,9 @@ spark = SparkSession \
 
         this.setBlockStatus(command.blockId,BlockStatus.Completed)
       }
+      // job complete
+      this.jobStatus = JobStatus.Completed
+
     }
     stop() {
       // stop running the job. exit 'debug' mode

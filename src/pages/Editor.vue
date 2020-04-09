@@ -60,7 +60,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
   //-
   v-bottom-sheet(v-model="showDataframePanel",height="500px",transition="")
     v-sheet(height="500px")
-      DataFrameViewer(:kernel="kernel",:dataframe="inspectDataframeVariable",v-if="kernel && inspectDataframeVariable")
+      DataFrameViewer(:kernel="kernel",:dataframe="inspectDataframeVariable",v-if="showDataframePanel && kernel && inspectDataframeVariable")
 
   v-snackbar(v-model="showError",bottom,right)
     | {{error}}
