@@ -24,3 +24,5 @@ yarn-error.log*
 venv/
 .ipynb*/
 *.ipynb
+
+*.csv
