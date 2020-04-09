@@ -12,6 +12,7 @@ export default class Block {
     code:string
     x:number
     y:number
+    comment: string
 
     constructor( jsonData: any) {
         this.id = jsonData.id
@@ -20,6 +21,7 @@ export default class Block {
         this.status = BlockStatus.Stopped
         this.x = jsonData.x ? jsonData.x : 0
         this.y = jsonData.y ? jsonData.y : 0
+        this.comment = jsonData.comment ? jsonData.comment : ''
     }
     static toJson(block:Block) {
         return {
@@ -27,7 +29,8 @@ export default class Block {
             type: block.type,
             properties: block.properties,
             x: block.x,
-            y: block.y
+            y: block.y,
+            comment: block.comment
         }
     }
 }

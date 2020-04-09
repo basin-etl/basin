@@ -68,7 +68,8 @@ export default class Editor extends Vue {
       this.blocks,
       blockIndex,
       Object.assign({},this.blocks[blockIndex],{
-        "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()
+        "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties(),
+        "comment":this.selectedBlock.comment
       })
     )
     this.showPropertiesPanel = false

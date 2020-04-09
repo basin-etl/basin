@@ -10,16 +10,16 @@
   v-sheet(
     :class='{selected: selected, "elevation-2":!selected&&!readOnly,"read-only":readOnly }',
   )
-    v-col.pt-0
+    div.d-flex.flex-column.py-0(:style="{'min-height':'65px'}")
       //-
       //- header
       //-
-      v-row.titlebar.pl-2(align="center",
+      v-row.flex-grow-0.titlebar.pl-2(no-gutters,align="center",
        :style="{'background-color':blockType.color}"
       )
         .typeicon
           v-icon(color="white",small,dense) {{blockType.icon}}
-        .pl-2 {{blockType.title}}{{status}}
+        .pl-2 {{blockType.title}}
         v-spacer
         v-btn(icon,small,
           @mousedown.stop='$event.preventDefault()'
@@ -30,7 +30,7 @@
           v-icon(small) delete
         v-btn(icon, small)
           v-icon(small) more_vert
-      v-row
+      v-row(no-gutters)
         //-
         //- input and output circles
         //-
@@ -44,9 +44,11 @@
                 @mouseup='slotMouseUp($event, index)',
                 @mousedown="readOnly? inspectSlot('input',index) : slotBreak($event, index)"
               )
-              //- .pl-1 {{slot.label}}
-        v-col.flex-grow-1.block-contents.pa-1
-          | lorem ipsum the brown dog jumpted
+        //-
+        //- block comment
+        //-
+        v-col.flex-grow-1.block-contents.py-1.px-2
+          | {{comment}}
         v-col.pa-0.flex-grow-0
           .outputs
             v-row.ma-0(align='center',justify="end",v-for='(slot, index) in outputs', :key='index')
@@ -79,7 +81,8 @@
   }
   .block-contents{
     font-size: 12px;
-    z-index: 5
+    z-index: 5;
+    color: #666
   }
   .titlebar {
     border-radius: 4px 4px 0 0 

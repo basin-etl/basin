@@ -31,6 +31,7 @@ export default class Editor extends Vue {
   @Prop() type: string
   @Prop() id: Number
   @Prop() properties: Object
+  @Prop() comment: String
   @Prop() options: any
   @Prop({
       type: Object,

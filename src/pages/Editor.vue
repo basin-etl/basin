@@ -49,6 +49,8 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       v-spacer
       v-btn(icon,@click="showPropertiesPanel=false")
           v-icon close
+    v-row(no-gutters)
+      v-textarea(v-model="selectedBlock.comment",filled,label="comment")
     component(
       ref="propertiesPanel",
       v-bind:is="`${selectedBlock.type}Properties`",v-bind="selectedBlockProperties",:blockId="selectedBlock.id")
@@ -59,7 +61,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
   //- bottom sheet
   //-
   v-bottom-sheet(v-model="showDataframePanel",height="500px",transition="")
-    v-sheet(height="500px")
+    v-sheet(height="500px",:style="{'border-radius':'0'}")
       DataFrameViewer(:kernel="kernel",:dataframe="inspectDataframeVariable",v-if="showDataframePanel && kernel && inspectDataframeVariable")
 
   v-snackbar(v-model="showError",bottom,right)
