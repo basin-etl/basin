@@ -13,6 +13,8 @@ export default class Block {
     x:number
     y:number
     comment: string
+    outputLinks: any
+    inputLinks: any
 
     constructor( jsonData: any) {
         this.id = jsonData.id
@@ -22,6 +24,8 @@ export default class Block {
         this.x = jsonData.x ? jsonData.x : 0
         this.y = jsonData.y ? jsonData.y : 0
         this.comment = jsonData.comment ? jsonData.comment : ''
+        this.inputLinks = {}
+        this.outputLinks = {}
     }
     static toJson(block:Block) {
         return {

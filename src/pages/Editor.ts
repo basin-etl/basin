@@ -13,6 +13,7 @@ import { Kernel } from "@jupyterlab/services"
 import Block, { BlockStatus } from '@/models/Block';
 import Job, { JobStatus } from '@/models/Job';
 import Link from '@/models/Link';
+import JobCommand from '@/models/JobCommand';
 @Component({
   name: 'Editor',
   components: {
@@ -32,7 +33,7 @@ export default class Editor extends Vue {
   interrupt = false // special flag to allow to interrupt a running job mid way
   blockTypes = blockTypes
   showPropertiesPanel = false
-  jobCommands:Array<Block> = null // holds the runtime commands of the job while debugging
+  jobCommands:Array<JobCommand> = null // holds the runtime commands of the job while debugging
   selectedBlock:Block = null
   selectedBlockProperties = {} // we store this separately because of reactivity issues with vue and the v-bind to the properties panel
   readOnly = false
@@ -44,7 +45,8 @@ export default class Editor extends Vue {
   completedBlocks = -1
   blocks:Array<Block> = []
   links:Array<Link> = []
-  
+  container:any = {}
+
   async showProperties(block:Block) {
     this.selectedBlock=block
     this.selectedBlockProperties=block.properties
@@ -101,6 +103,8 @@ export default class Editor extends Vue {
       console.log("running")
       console.log(commands)
       let initCode = `
+import pyspark.sql.functions as F
+import pyspark.sql.types as T
 from pyspark.sql import SparkSession
 spark = SparkSession \
   .builder \
@@ -118,93 +122,126 @@ spark = SparkSession \
           console.log("interrupting execution")
           break
         }
+        //
+        // run command
+        //
         console.log("running command")
         console.log(command.code)
-        // this.setBlockStatus(command.blockId,BlockStatus.Running)
+        this.setBlockStatus(command.blockId,BlockStatus.Running)
         try {
-              let response = await jupyterUtils.sendToPython(this.kernel,command.code)
-              console.log(response)
+          let response = await jupyterUtils.sendToPython(this.kernel,command.code)
+          console.log(response)
         }
         catch (e) {
-            console.log(e)
-            if (e.ename) {
-                this.error = `${e.ename}: ${e.evalue}`
-                this.showError = true
-            }
-            return
+          console.log(e)
+          if (e.ename) {
+              this.error = `${e.ename}: ${e.evalue}`
+              this.showError = true
+          }
+          return
         }
+        // set the result count
+        let blockIndex = this.blocks.findIndex( (block) => block.id===command.blockId)
+        let block = this.blocks[blockIndex]
+        console.log(block)
+        if (command.output) {
+          block.outputLinks[0].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.output)
+        }
+        // set it so it forces an update
+        this.$set(this.blocks,blockIndex,block)
 
+        // block completed
         this.setBlockStatus(command.blockId,BlockStatus.Completed)
         this.completedBlocks++
       }
       // job complete
       this.jobStatus = JobStatus.Completed
 
-    }
-    stop() {
-      // stop running the job. exit 'debug' mode
-      this.interrupt = true
-      this.jobStatus = JobStatus.Stopped
-      this.readOnly = false
-      for (let block of this.blocks) {
-        this.setBlockStatus(block.id,BlockStatus.Stopped)
-      }
-    }
-    updateJob(job:any) {
-      this.blocks = job.blocks
-      this.links = job.links
-      this.persist()
-    }
-    persist() {
-      let jsonBlocks = this.blocks.map( (block) => Block.toJson(block))
-      localStorage.job = JSON.stringify({
-        blocks: jsonBlocks,
-        links: this.links,
-      })
-
-    }
-    async inspectSocket(socket:any) {
-      console.log("inspecting socket")
-      console.log(socket)
-
-      // decypher the python variable name from the runtime commands
-      let command:any = this.jobCommands.find( (command:any) => command.blockId==socket.id)
-      console.log(`inspect ${command.inputs[socket.index]}`)
-      let dataframe = command.inputs[socket.index]
-
-      this.showDataframePanel = true
-      this.inspectDataframeVariable = dataframe
-    }
-    get isJobRunning() {
-      return this.jobStatus==JobStatus.Running
-    }
-    //
-    // lifecycle events
-    //
-    async created() {
-      try {
-        // load from local storage
-        if (localStorage.job) {
-          let job = JSON.parse(localStorage.job)
-          this.blocks = job.blocks.map( (block:any) => new Block(block) )
-          this.links = job.links
-        }
-      }
-      catch (e) {
-        console.log(e)
-      }
-      // start a new kernel
-      this.kernel = await jupyterUtils.getKernel()    
-    }
-    async mounted () {
-      // cleanup active kernel
-      window.addEventListener('beforeunload', () => {
-          console.log("shutting down kernel")
-          this.kernel.shutdown()
-      }, false)
-    }
-    beforeDestroy() {
-      console.log("shutting down kernel")
-      this.kernel.shutdown()
+  }
+  stop() {
+    // stop running the job. exit 'debug' mode
+    this.interrupt = true
+    this.jobStatus = JobStatus.Stopped
+    this.readOnly = false
+    for (let block of this.blocks) {
+      this.setBlockStatus(block.id,BlockStatus.Stopped)
     }
   }
+  updateJob(job:any) {
+    this.blocks = job.blocks
+    this.links = job.links
+    this.container = job.container
+    this.persist()
+  }
+  persist() {
+    let jsonBlocks = this.blocks.map( (block) => Block.toJson(block))
+    localStorage.job = JSON.stringify({
+      blocks: jsonBlocks,
+      links: this.links,
+    })
+
+  }
+  async inspectSocket(socket:any) {
+    console.log("inspecting socket")
+    console.log(socket)
+
+    // decypher the python variable name from the runtime commands
+    let command:any = this.jobCommands.find( (command:any) => command.blockId==socket.id)
+    let dataframe
+    if (socket.type=='input') {
+      dataframe = command.inputs[socket.index]
+    }
+    else {
+      dataframe = command.output
+    }
+    console.log(`inspect ${dataframe}`)
+
+    this.showDataframePanel = true
+    this.inspectDataframeVariable = dataframe
+  }
+  get isJobRunning() {
+    return this.jobStatus==JobStatus.Running
+  }
+  get isJobStopped() {
+    return this.jobStatus==JobStatus.Stopped
+  }
+  get isJobComplete() {
+    return this.jobStatus==JobStatus.Completed
+  }
+  //
+  // lifecycle events
+  //
+  async created() {
+    try {
+      // load from local storage
+      if (localStorage.job) {
+        let vm = this
+        let job = JSON.parse(localStorage.job)
+        this.blocks = job.blocks.map( (block:any) => new Block(block) )
+        this.links = job.links.map( (link:any) => new Link(link) )
+        this.links.forEach( (link) => {
+          let originIndex = this.blocks.findIndex( (block) => block.id===link.originId)
+          let targetIndex = this.blocks.findIndex( (block) => block.id===link.targetId)
+          vm.blocks[originIndex].outputLinks[link.originSlot] = link
+          vm.blocks[targetIndex].inputLinks[link.targetSlot] = link
+        })
+      }
+    }
+    catch (e) {
+      console.log(e)
+    }
+    // start a new kernel
+    this.kernel = await jupyterUtils.getKernel()    
+  }
+  async mounted () {
+    // cleanup active kernel
+    window.addEventListener('beforeunload', () => {
+        console.log("shutting down kernel")
+        this.kernel.shutdown()
+    }, false)
+  }
+  beforeDestroy() {
+    console.log("shutting down kernel")
+    this.kernel.shutdown()
+  }
+}

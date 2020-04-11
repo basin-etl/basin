@@ -57,6 +57,7 @@ export default class Editor extends Vue {
   inputs = blockTypes[this.type].inputs
   outputs = blockTypes[this.type].outputs
   selected = false
+  showCounts = true
 
   mounted () {
     // we handle mouse move at the document level to have smooth dragging when dragging outside of container
@@ -192,7 +193,10 @@ export default class Editor extends Vue {
     get completed() {
       return this.status==BlockStatus.Completed
     }
-    get pending_run() {
+    get stopped() {
+      return this.jobStatus==JobStatus.Stopped
+    }
+    get pendingRun() {
       return this.jobStatus==JobStatus.Running && this.status!=BlockStatus.Completed
     }
   }

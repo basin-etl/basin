@@ -54,6 +54,21 @@ async function sendToPython(kernel:Kernel.IKernelConnection,cmd:string) {
 		}
 	}
 }
+async function getDataframeCount(kernel:Kernel.IKernelConnection,expression:string,type='pyspark'): Promise<number> {
+	let code = ""
+	if (type=='pandas') {
+		code += `
+print(len(${expression}))
+`
+	}
+	else {
+		code += `
+print(${expression}.count())
+		`
+	}
+	let count = await sendToPython(kernel,code)
+	return parseInt(count)
+}
 function inspectDataframe(kernel:Kernel.IKernelConnection,expression:string,type:string,limit=50000) {
 	let code = ""
 	if (type=='pandas') {
@@ -84,5 +99,6 @@ export default {
     getKernel: getKernel,
     sendToPython: sendToPython,
 	dataframeInfo: dataframeInfo,
+	getDataframeCount: getDataframeCount,
 	inspectDataframe: inspectDataframe
 }

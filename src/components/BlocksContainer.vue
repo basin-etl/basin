@@ -2,6 +2,7 @@
 .vue-container(
   v-on:drop="blockDropped($event)"
   v-on:dragover="dragOver($event)"
+  id="blockscontainer"
 )
   VueLink(:lines="lines",:readOnly="readOnly")
   VueBlock(v-for="block in s_blocks"

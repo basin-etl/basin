@@ -7,11 +7,11 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     v-toolbar(dense,flat)
       v-toolbar-title New job
       v-spacer
-      v-btn(small,dark,color="success",v-if="!isJobRunning")
-        v-icon(@click="run") play_arrow
-      v-btn(small,color="danger",v-if="isJobRunning")
-          v-icon(color="red",click="stop") stop
-          //- v-progress-circular(small,indeterminate,color="white")
+      v-btn(@click="run",small,color="success",v-if="isJobStopped",:disabled="!kernel")
+        v-icon(color="white") play_arrow
+      v-btn(small,@click="stop",color="red",v-if="!isJobStopped")
+          v-progress-circular(v-show="!isJobComplete",small,indeterminate,color="white",size="14",width="2")
+          v-icon(color="white") stop
     v-divider
   v-row.ma-0
     //-
@@ -23,18 +23,23 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- blocks editor
     //-
     v-col.pa-0.d-flex.flex-column
-      //- v-progress-linear(
-      //-   :style="{'position':'absolute'}"
-      //-   :indeterminate="isJobRunning && completedBlocks==-1"
-      //-   :value="completedBlocks/blocks.length"
-      //-   color="cyan"
-      //- )
+      //-
+      //- progress bar
+      //-
+      v-progress-linear(
+        :style="{'position':'absolute'}"
+        :indeterminate="!isJobStopped && completedBlocks==-1"
+        :value="completedBlocks==0? 5 : (completedBlocks/blocks.length)*100"
+        :color="isJobComplete?'cyan':'cyan'"
+        v-show="!isJobStopped"
+      )
       BlocksContainer.flex-grow-1(v-if="links && blocks" ref='container'
         v-on:update:scene="updateJob"
         :jobStatus="jobStatus"
         :readOnly="readOnly"
         :blocks="blocks"
         :links="links"
+        :container="container"
         @blockselect='selectBlock' 
         @blockdeselect='deselectBlock'
         @blockproperties='showProperties'

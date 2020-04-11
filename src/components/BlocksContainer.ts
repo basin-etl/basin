@@ -12,7 +12,7 @@ import Link from '@/models/Link';
 class vBlock extends Block {
     selected: boolean = false
     inputLinks:Object = {}
-    outputLinks:Object = {}
+    outputLinks:any = {}
 }
 
 @Component({
@@ -29,6 +29,7 @@ export default class BlocksContainer extends Vue {
     //
     @Prop(Array)    readonly blocks: Array<any>
     @Prop(Array)    readonly links: Array<any>
+    @Prop(Object)   readonly container: any
     @Prop({
         type: Boolean,
         default: false
@@ -89,13 +90,6 @@ export default class BlocksContainer extends Vue {
                 x: this.centerX,
                 y: this.centerY
             }
-        }
-    }
-    get container () {
-        return {
-            centerX: this.centerX,
-            centerY: this.centerY,
-            scale: this.scale
         }
     }
     // Links calculate
@@ -198,7 +192,6 @@ export default class BlocksContainer extends Vue {
         let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
         this.mouseX = mouse.x
         this.mouseY = mouse.y
-
         if (this.dragging) {
           let diffX = this.mouseX - this.lastMouseX
           let diffY = this.mouseY - this.lastMouseY
@@ -225,8 +218,7 @@ export default class BlocksContainer extends Vue {
     }
     handleDown (e:MouseEvent) {
         const target = e.target || e.srcElement
-        //? if ((target === this.$el || target.matches('svg, svg *')) && e.which === 1) {
-        if (target === this.$el && e.which === 1) {
+        if ((target === this.$el || (<Element>target).matches('svg, svg *')) && e.which === 1) {
           this.dragging = true
 
           let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
@@ -242,6 +234,7 @@ export default class BlocksContainer extends Vue {
     }
     handleUp (e:MouseEvent) {
         const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
+        console.log(this.dragging)
         if (this.dragging) {
           this.dragging = false
 
@@ -319,12 +312,12 @@ export default class BlocksContainer extends Vue {
 
           // skip if looping
           if (this.linkStartData.block.id !== targetBlock.id) {
-            this.s_links.push({
+            this.s_links.push(new Link({
               originId: this.linkStartData.block.id,
               originSlot: this.linkStartData.slotNumber,
               targetId: targetBlock.id,
               targetSlot: slotNumber
-            })
+            }))
             this.updateScene()
           }
         }
@@ -420,15 +413,10 @@ export default class BlocksContainer extends Vue {
     }
     async importScene() {
         const vm = this
-        console.log(this.blocks)
         this.s_blocks = JSON.parse(JSON.stringify(this.blocks))
         await this.$nextTick()
         // set the link indications for each block object
         this.s_links = JSON.parse(JSON.stringify(this.links))
-        this.s_links.forEach( (link) => {
-          vm.$set(vm.getBlock(link.originId).outputLinks,link.originSlot,link)
-          vm.$set(vm.getBlock(link.targetId).inputLinks,link.targetSlot,link)
-        })
         
         let container = this.container
         if (container.centerX) {
@@ -443,9 +431,13 @@ export default class BlocksContainer extends Vue {
     }
     exportScene () {
         return {
-          blocks: this.s_blocks,
-          links: this.s_links,
-          container: this.container
+            blocks: this.s_blocks,
+            links: this.s_links,
+            container: {
+                centerX: this.centerX,
+                centerY: this.centerY,
+                scale: this.scale
+            }
         }
     }
     updateScene () {

@@ -1,0 +1,13 @@
+{
+    "title": "aggregate",
+    "type": "aggregate",
+    "description": "groupby",
+    "color": "red",
+    "icon": "call_merge",
+    "inputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ],
+    "outputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ]
+}

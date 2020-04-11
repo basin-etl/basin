@@ -15,41 +15,48 @@
       //- header
       //-
       v-row.flex-grow-0.titlebar.pl-2(no-gutters,align="center",
-       :style="{'background-color':blockType.color}"
+       :style="{'background-color':blockType.color,'min-height':'28px'}"
       )
         .typeicon
           v-icon(color="white",small,dense) {{blockType.icon}}
         .pl-2 {{blockType.title}}
         v-spacer
-        //- settings button
-        v-btn(icon,small,
-          @mousedown.stop='$event.preventDefault()'
-          @click.stop="showProperties()"
-        )
-          v-icon(small) settings
-        //- delete button
-        v-btn(icon, small, 
-          @click='deleteBlock'
-          @mousedown.stop='$event.preventDefault()'
-        )
-          v-icon(small) delete
-        //- more options menu
-        v-btn(icon, small)
-          v-icon(small) more_vert
+        div(v-show="!readOnly")
+          //- settings button
+          v-btn(icon,small,
+            @mousedown.stop='$event.preventDefault()'
+            @click.stop="showProperties()"
+          )
+            v-icon(small) settings
+          //- delete button
+          v-btn(icon, small, 
+            @click='deleteBlock'
+            @mousedown.stop='$event.preventDefault()'
+          )
+            v-icon(small) delete
+          //- more options menu
+          v-btn(icon, small)
+            v-icon(small) more_vert
       v-row(no-gutters)
         //-
         //- input circles
         //-
         v-col.pa-0.flex-grow-0.d-flex.flex-column
           .d-flex.flex-column.inputs
-            .d-flex.flex-column.flex-grow-1.ma-0(align='center',justify="start",v-for='(slot, index) in inputs', :key='index')
-              .circle.mt-1.inputSlot(
-                :ref="`input${index}`",
-                :class='{active: inputLinks[index],"read-only":readOnly}',
-                :style="{visibility: pending_run ? 'hidden': 'visible'}"
-                @mouseup='slotMouseUp($event, index)',
-                @mousedown="readOnly? inspectSlot('input',index) : slotBreak($event, index)"
-              )
+            .slot-container(v-for='(slot, index) in inputs')
+              //-
+              //- slot
+              //-
+              .d-flex.flex-column.flex-grow-1.ma-0(align='center',justify="start")
+                .circle.ma-0.inputSlot(
+                  :ref="`input${index}`",
+                  :class='{active: inputLinks[index],"read-only":readOnly}',
+                  :style="{visibility: stopped && !readOnly ? 'visible': 'hidden'}"
+                  @mouseup='slotMouseUp($event, index)',
+                  @mousedown="readOnly? inspectSlot('input',index) : slotBreak($event, index)"
+                )
+              //- tooltip (result counts). irrelevant since we can see if from the outputs of previous block
+              //- div.slot-tooltip.input(v-show="completed") {{inputLinks[index]? inputLinks[index].resultCount : '' | numFormat}}
         //-
         //- block comment
         //-
@@ -60,14 +67,16 @@
         //-
         v-col.pa-0.flex-grow-0
           .outputs
-            v-row.ma-0(align='center',justify="end",v-for='(slot, index) in outputs', :key='index')
-              //- .pr-1 {{slot.label}}
-              .circle.mt-1(
-                :ref="`output${index}`",
-                :class='{active: outputLinks[index],"read-only":readOnly}',
-                :style="{visibility: pending_run ? 'hidden': 'visible'}"
-                @mousedown="readOnly? inspectSlot('output',index) : slotMouseDown($event, index)"
-              )
+            .slot-container(v-for='(slot, index) in outputs')
+              .d-flex.flex-column.flex-grow-1.ma-0(align='center',justify="start")
+                .circle.ma-0(
+                  :ref="`output${index}`",
+                  :class='{active: outputLinks[index],"read-only":readOnly}',
+                  :style="{visibility: pendingRun ? 'hidden': 'visible'}"
+                  @mousedown="readOnly? inspectSlot('output',index) : slotMouseDown($event, index)"
+                )
+              //- tooltip (result counts)
+              div.slot-tooltip.output(v-show="completed") {{outputLinks[index]? outputLinks[index].resultCount : '' | numFormat}}
 </template>
 
 <style lang="less" scoped>
@@ -81,6 +90,29 @@
   @circleNewColor: #00FF00;
   @circleRemoveColor: #FF0000;
   @circleConnectedColor: #FFFF00;
+  .slot-container {
+    margin-top: 3px;
+    margin-bottom: 3px
+  }
+  .slot-tooltip {
+    position:absolute;
+    color:white;
+    background-color: black;
+    opacity: 0.5;
+    font-size: 9px;
+    border-radius: 3px;
+    min-width:35px;
+    margin-top: -12px;
+    padding: 0 2px 0 2px;
+    text-align:right;
+    &.input {
+      margin-left: -40px;
+    }
+    &.output {
+      margin-left: 15px;
+    }
+
+  }
   .typeicon {
     height: 16px;
     width: 16px;
@@ -102,6 +134,9 @@
     cursor: move;
     &.selected {
       z-index: 2;
+    }
+    &.completed {
+      cursor: default
     }
 
     .selected {
