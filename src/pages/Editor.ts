@@ -168,8 +168,16 @@ spark = SparkSession \
     }
   }
   updateJob(job:any) {
+    let vm = this
     this.blocks = job.blocks
     this.links = job.links
+    // update the block links
+    this.links.forEach( (link) => {
+      let originIndex = this.blocks.findIndex( (block) => block.id===link.originId)
+      let targetIndex = this.blocks.findIndex( (block) => block.id===link.targetId)
+      vm.blocks[originIndex].outputLinks[link.originSlot] = link
+      vm.blocks[targetIndex].inputLinks[link.targetSlot] = link
+    })
     this.container = job.container
     this.persist()
   }
@@ -217,13 +225,10 @@ spark = SparkSession \
       if (localStorage.job) {
         let vm = this
         let job = JSON.parse(localStorage.job)
-        this.blocks = job.blocks.map( (block:any) => new Block(block) )
-        this.links = job.links.map( (link:any) => new Link(link) )
-        this.links.forEach( (link) => {
-          let originIndex = this.blocks.findIndex( (block) => block.id===link.originId)
-          let targetIndex = this.blocks.findIndex( (block) => block.id===link.targetId)
-          vm.blocks[originIndex].outputLinks[link.originSlot] = link
-          vm.blocks[targetIndex].inputLinks[link.targetSlot] = link
+        this.updateJob({
+          blocks: job.blocks.map( (block:any) => new Block(block) ),
+          links: job.links.map( (link:any) => new Link(link) ),
+          container: job.container
         })
       }
     }
