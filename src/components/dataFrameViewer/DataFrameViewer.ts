@@ -1,5 +1,4 @@
 // TODO: history of commands 
-import HyperGrid from "fin-hypergrid";
 import jupyterUtils from '@/core/jupyterUtils'
 import axios from 'axios'
 import { Table, Data } from 'apache-arrow';
@@ -48,14 +47,24 @@ export default class DataFrameViewer extends Vue {
         // init arrow data model and grid
         //
         this.dataModel = new ArrowDataModel(new DatasaurBase,{},null)
+        console.log("dataframe viewer mounted")
+        let HyperGrid = (await import("fin-hypergrid")).default;
+        console.log(HyperGrid)
         this.grid = new HyperGrid(this.$refs["dataGrid"],
             {
                 boundingRect: {
                     height: "100%"
                 },
-                dataModel : this.dataModel,
             }
         );
+        this.grid.canvas.stopPaintLoop()
+        this.grid.canvas.stopResizeLoop()
+        this.grid.canvas.restartPaintLoop()
+        this.grid.canvas.restartResizeLoop()
+        // we must set the datamodel after restarting the paint loop to get around an internal hypergrid bug if we unload the stoppaint when unmounting the component
+        this.grid.setBehavior({
+                dataModel : this.dataModel,
+        })
         this.grid.properties.rowHeaderCheckboxes = false
         this.grid.addEventListener('fin-double-click', (event:CustomEvent) => {
             console.log(event)
@@ -108,6 +117,13 @@ import pandas as pd
         // load the dataframe unfiltered
         this.initialized = true
         this.loadData()
+    }
+    beforeDestroy() {
+        console.log("dataframe viewer cleanup")
+        // we need to stop these loops since they are not cleaned up and take up cpu
+        this.grid.canvas.stopPaintLoop()
+        this.grid.canvas.stopResizeLoop()
+        this.grid.terminate()
     }
     openRow(row:object) {
         this.details = row

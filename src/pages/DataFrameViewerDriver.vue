@@ -2,7 +2,7 @@
 div
     v-bottom-sheet(v-model="show",height="300")
         v-sheet(height="500px")
-            DataFrameViewer(:kernel="kernel",dataframeType="pandas",dataframe="df",v-if="kernel")
+            DataFrameViewer(:kernel="kernel",dataframeType="pandas",dataframe="df",v-if="kernel && show")
     v-btn(@click.stop="show=!show") Show
 </template>
 

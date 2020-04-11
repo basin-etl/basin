@@ -7,9 +7,11 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     v-toolbar(dense,flat)
       v-toolbar-title New job
       v-spacer
-      v-btn(icon,small)
-        v-icon(color="green",v-if="!running",@click="run") play_circle_outline
-        v-icon(color="red",v-if="running",@click="stop") stop
+      v-btn(small,dark,color="success",v-if="!isJobRunning")
+        v-icon(@click="run") play_arrow
+      v-btn(small,color="danger",v-if="isJobRunning")
+          v-icon(color="red",click="stop") stop
+          //- v-progress-circular(small,indeterminate,color="white")
     v-divider
   v-row.ma-0
     //-
@@ -20,7 +22,13 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //-
     //- blocks editor
     //-
-    v-col.pa-0.d-flex
+    v-col.pa-0.d-flex.flex-column
+      //- v-progress-linear(
+      //-   :style="{'position':'absolute'}"
+      //-   :indeterminate="isJobRunning && completedBlocks==-1"
+      //-   :value="completedBlocks/blocks.length"
+      //-   color="cyan"
+      //- )
       BlocksContainer.flex-grow-1(v-if="links && blocks" ref='container'
         v-on:update:scene="updateJob"
         :jobStatus="jobStatus"

@@ -35,13 +35,13 @@ export default class Editor extends Vue {
   jobCommands:Array<Block> = null // holds the runtime commands of the job while debugging
   selectedBlock:Block = null
   selectedBlockProperties = {} // we store this separately because of reactivity issues with vue and the v-bind to the properties panel
-  running = false
   readOnly = false
   inspectDataframeVariable = ''
   showDataframePanel = false
   error:string = null
   showError = false
   jobStatus = JobStatus.Stopped
+  completedBlocks = -1
   blocks:Array<Block> = []
   links:Array<Link> = []
   
@@ -85,16 +85,19 @@ export default class Editor extends Vue {
       //
       // run this job in jupyter notebook
       //
+      this.completedBlocks = -1 // will display a loading progress indicator
       this.jobStatus = JobStatus.Running
-      this.running = true
       this.interrupt = false
       this.readOnly = true
-      let commands = jobRenderer.render({blocks:this.blocks,links:this.links, container: {}})
-      this.jobCommands = commands
       // clear running or completed state of all blocks
       for (let block of this.blocks) {
         block.status = BlockStatus.Stopped
       }
+
+      let commands = jobRenderer.render({blocks:this.blocks,links:this.links, container: {}})
+      this.jobCommands = commands
+
+      // start running
       console.log("running")
       console.log(commands)
       let initCode = `
@@ -106,6 +109,7 @@ spark = SparkSession \
   .getOrCreate()
 `
       await jupyterUtils.sendToPython(this.kernel,initCode)
+      this.completedBlocks = 0
 
       for (let command of commands) {
         // check if we have a flag to inerrupt currenct execution
@@ -116,7 +120,7 @@ spark = SparkSession \
         }
         console.log("running command")
         console.log(command.code)
-        this.setBlockStatus(command.blockId,BlockStatus.Running)
+        // this.setBlockStatus(command.blockId,BlockStatus.Running)
         try {
               let response = await jupyterUtils.sendToPython(this.kernel,command.code)
               console.log(response)
@@ -131,6 +135,7 @@ spark = SparkSession \
         }
 
         this.setBlockStatus(command.blockId,BlockStatus.Completed)
+        this.completedBlocks++
       }
       // job complete
       this.jobStatus = JobStatus.Completed
@@ -139,7 +144,7 @@ spark = SparkSession \
     stop() {
       // stop running the job. exit 'debug' mode
       this.interrupt = true
-      this.running = false
+      this.jobStatus = JobStatus.Stopped
       this.readOnly = false
       for (let block of this.blocks) {
         this.setBlockStatus(block.id,BlockStatus.Stopped)
@@ -170,6 +175,12 @@ spark = SparkSession \
       this.showDataframePanel = true
       this.inspectDataframeVariable = dataframe
     }
+    get isJobRunning() {
+      return this.jobStatus==JobStatus.Running
+    }
+    //
+    // lifecycle events
+    //
     async created() {
       try {
         // load from local storage

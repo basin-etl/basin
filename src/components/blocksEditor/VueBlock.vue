@@ -21,18 +21,24 @@
           v-icon(color="white",small,dense) {{blockType.icon}}
         .pl-2 {{blockType.title}}
         v-spacer
+        //- settings button
         v-btn(icon,small,
           @mousedown.stop='$event.preventDefault()'
           @click.stop="showProperties()"
         )
           v-icon(small) settings
-        v-btn(icon, small, @click='deleteBlock')
+        //- delete button
+        v-btn(icon, small, 
+          @click='deleteBlock'
+          @mousedown.stop='$event.preventDefault()'
+        )
           v-icon(small) delete
+        //- more options menu
         v-btn(icon, small)
           v-icon(small) more_vert
       v-row(no-gutters)
         //-
-        //- input and output circles
+        //- input circles
         //-
         v-col.pa-0.flex-grow-0.d-flex.flex-column
           .d-flex.flex-column.inputs
@@ -49,6 +55,9 @@
         //-
         v-col.flex-grow-1.block-contents.py-1.px-2
           | {{comment}}
+        //-
+        //- output circles
+        //-
         v-col.pa-0.flex-grow-0
           .outputs
             v-row.ma-0(align='center',justify="end",v-for='(slot, index) in outputs', :key='index')
@@ -59,9 +68,7 @@
                 :style="{visibility: pending_run ? 'hidden': 'visible'}"
                 @mousedown="readOnly? inspectSlot('output',index) : slotMouseDown($event, index)"
               )
-
 </template>
-
 
 <style lang="less" scoped>
 
