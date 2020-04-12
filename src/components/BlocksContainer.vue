@@ -2,6 +2,7 @@
 .vue-container(
   v-on:drop="blockDropped($event)"
   v-on:dragover="dragOver($event)"
+  @wheel.stop="handleWheel($event)"
   id="blockscontainer"
 )
   VueLink(:lines="lines",:readOnly="readOnly")
@@ -12,6 +13,7 @@
               v-bind.sync="block"
               :options="optionsForChild"
               :jobStatus="jobStatus"
+              :linking="linking"
               @update="updateScene"
               @linkingStart="linkingStart(block, $event)"
               @linkingStop="linkingStop(block, $event)"

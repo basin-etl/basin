@@ -79,8 +79,13 @@ export default class Editor extends Vue {
   }
   setBlockStatus(id:number,status:BlockStatus) {
     let blockIndex = this.blocks.findIndex( (block) => block.id===id)
+    let update:any = {"status": status}
+    if (status==BlockStatus.Stopped) {
+      // clear the error
+      update["error"] = null
+    }
     this.$set(this.blocks,blockIndex,
-      Object.assign(this.blocks[blockIndex],{"status": status})
+      Object.assign(this.blocks[blockIndex],update)
     )
   }
   async run() {
@@ -127,6 +132,10 @@ spark = SparkSession \
         //
         console.log("running command")
         console.log(command.code)
+        // find block
+        let blockIndex = this.blocks.findIndex( (block) => block.id===command.blockId)
+        let block = this.blocks[blockIndex]
+
         this.setBlockStatus(command.blockId,BlockStatus.Running)
         try {
           let response = await jupyterUtils.sendToPython(this.kernel,command.code)
@@ -136,13 +145,15 @@ spark = SparkSession \
           console.log(e)
           if (e.ename) {
               this.error = `${e.ename}: ${e.evalue}`
+              block.error = this.error
               this.showError = true
+              // set it so it forces an update
+              this.$set(this.blocks,blockIndex,block)
+              this.jobStatus = JobStatus.Completed
           }
           return
         }
         // set the result count
-        let blockIndex = this.blocks.findIndex( (block) => block.id===command.blockId)
-        let block = this.blocks[blockIndex]
         console.log(block)
         if (command.output) {
           block.outputLinks[0].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.output)
@@ -183,9 +194,11 @@ spark = SparkSession \
   }
   persist() {
     let jsonBlocks = this.blocks.map( (block) => Block.toJson(block))
+    let jsonLinks = this.links.map( (link) => Link.toJson(link))
     localStorage.job = JSON.stringify({
       blocks: jsonBlocks,
-      links: this.links,
+      links: jsonLinks,
+      container: this.container
     })
 
   }

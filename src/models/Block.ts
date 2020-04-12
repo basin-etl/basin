@@ -15,6 +15,7 @@ export default class Block {
     comment: string
     outputLinks: any
     inputLinks: any
+    error:string
 
     constructor( jsonData: any) {
         this.id = jsonData.id

@@ -65,7 +65,6 @@ export default class BlocksContainer extends Vue {
         document.documentElement.addEventListener('mousemove', this.handleMove, true)
         document.documentElement.addEventListener('mousedown', this.handleDown, true)
         document.documentElement.addEventListener('mouseup', this.handleUp, true)
-        document.documentElement.addEventListener('wheel', this.handleWheel, true)
 
         this.centerX = this.$el.clientWidth / 2
         this.centerY = this.$el.clientHeight / 2
@@ -76,7 +75,6 @@ export default class BlocksContainer extends Vue {
       document.documentElement.removeEventListener('mousemove', this.handleMove, true)
       document.documentElement.removeEventListener('mousedown', this.handleDown, true)
       document.documentElement.removeEventListener('mouseup', this.handleUp, true)
-      document.documentElement.removeEventListener('wheel', this.handleWheel, true)
     }
     created () {
     }
@@ -206,7 +204,6 @@ export default class BlocksContainer extends Vue {
         }
 
         if (this.linking && this.linkStartData) {
-          // let linkStartPos = this.getConnectionPos(this.linkStartData.block, this.linkStartData.slotNumber, false)
           let linkStartPos = this.scalePosition(this.getBlock(this.linkStartData.block.id).getConnectionPos('output',this.linkStartData.slotNumber))
           this.tempLink = {
             x1: linkStartPos.x,
@@ -220,7 +217,6 @@ export default class BlocksContainer extends Vue {
         const target = e.target || e.srcElement
         if ((target === this.$el || (<Element>target).matches('svg, svg *')) && e.which === 1) {
           this.dragging = true
-
           let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
           this.mouseX = mouse.x
           this.mouseY = mouse.y
@@ -234,8 +230,7 @@ export default class BlocksContainer extends Vue {
     }
     handleUp (e:MouseEvent) {
         const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
-        console.log(this.dragging)
-        if (this.dragging) {
+        if (this.dragging && !this.linking) {
           this.dragging = false
 
           if (this.hasDragged) {
@@ -245,7 +240,9 @@ export default class BlocksContainer extends Vue {
         }
 
         if (this.$el.contains(target) && (typeof target.className !== 'string' || target.className.indexOf(this.inputSlotClassName) === -1)) {
+          // dud link. did not connect to any point. discard.
           this.linking = false
+          this.dragging = false
           this.tempLink = null
           this.linkStartData = null
         }
@@ -321,7 +318,6 @@ export default class BlocksContainer extends Vue {
             this.updateScene()
           }
         }
-
         this.linking = false
         this.tempLink = null
         this.linkStartData = null
@@ -381,7 +377,6 @@ export default class BlocksContainer extends Vue {
         this.updateScene()
     }
     deselectAll () {
-        console.log("deselecting")
         this.s_blocks.forEach((block) => {
           this.blockDeselect(block)
         })
@@ -445,7 +440,6 @@ export default class BlocksContainer extends Vue {
     }
     @Watch('blocks', { immediate: true})
     onBlocksChanged() {
-        console.log("importing scene")
         this.importScene()
     }
 }

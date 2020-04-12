@@ -32,6 +32,7 @@ export default class Editor extends Vue {
   @Prop() id: Number
   @Prop() properties: Object
   @Prop() comment: String
+  @Prop() error: String
   @Prop() options: any
   @Prop({
       type: Object,
@@ -43,13 +44,13 @@ export default class Editor extends Vue {
     })   outputLinks: Object
   @Prop() jobStatus: Number
   @Prop() status: Number
-  
+  @Prop() linking: Boolean
+
   // data
   mouseX = 0
   mouseY = 0
   lastMouseX = 0
   lastMouseY = 0
-  linking = false
   dragging = false
 
   blockType = blockTypes[this.type]
@@ -118,6 +119,7 @@ export default class Editor extends Vue {
 
       const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
       if (this.$el.contains(target) && e.which === 1) {
+        console.log("block drag")
         this.dragging = true
         if (e.preventDefault) e.preventDefault()
       }
@@ -136,19 +138,12 @@ export default class Editor extends Vue {
           this.toggleSelected()
         }
       }
-
-      if (this.linking) {
-        this.linking = false
-      }
       e.preventDefault()
     }
     // Slots
     slotMouseDown (e:MouseEvent, index:number) {
       if (this.readOnly) return
-      this.linking = true
-
       this.$emit('linkingStart', index)
-      if (e.preventDefault) e.preventDefault()
     }
     slotMouseUp (e:MouseEvent, index:number) {
       if (this.readOnly) return
@@ -160,7 +155,6 @@ export default class Editor extends Vue {
     }
     slotBreak (e:MouseEvent, index:number) {
       if (this.readOnly) return
-      this.linking = true
       this.$delete(this.inputLinks,index)
       this.$emit('linkingBreak', index)
       if (e.preventDefault) e.preventDefault()
@@ -188,7 +182,7 @@ export default class Editor extends Vue {
       }
     }
     get running() {
-      return this.status==BlockStatus.Running
+      return this.status==BlockStatus.Running && !this.error
     }
     get completed() {
       return this.status==BlockStatus.Completed

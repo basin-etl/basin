@@ -8,13 +8,13 @@
   @mouseup.stop="handleUp"
 )
   v-sheet(
-    :class='{selected: selected, "elevation-2":!selected&&!readOnly,"read-only":readOnly }',
+    :class='{selected: selected, "elevation-2":!selected&&!readOnly,"read-only":readOnly,"block-error":error }',
   )
     div.d-flex.flex-column.py-0(:style="{'min-height':'65px'}")
       //-
       //- header
       //-
-      v-row.flex-grow-0.titlebar.pl-2(no-gutters,align="center",
+      v-row.flex-grow-0.titlebar.px-2(no-gutters,align="center",
        :style="{'background-color':blockType.color,'min-height':'28px'}"
       )
         .typeicon
@@ -37,6 +37,7 @@
           //- more options menu
           v-btn(icon, small)
             v-icon(small) more_vert
+        v-icon(small,color="white",:title="this.error",v-if="this.error") warning
       v-row(no-gutters)
         //-
         //- input circles
@@ -53,7 +54,7 @@
                   :class='{active: inputLinks[index],"read-only":readOnly}',
                   :style="{visibility: stopped && !readOnly ? 'visible': 'hidden'}"
                   @mouseup='slotMouseUp($event, index)',
-                  @mousedown="readOnly? inspectSlot('input',index) : slotBreak($event, index)"
+                  @mousedown.stop="readOnly? inspectSlot('input',index) : slotBreak($event, index)"
                 )
               //- tooltip (result counts). irrelevant since we can see if from the outputs of previous block
               //- div.slot-tooltip.input(v-show="completed") {{inputLinks[index]? inputLinks[index].resultCount : '' | numFormat}}
@@ -73,7 +74,7 @@
                   :ref="`output${index}`",
                   :class='{active: outputLinks[index],"read-only":readOnly}',
                   :style="{visibility: pendingRun ? 'hidden': 'visible'}"
-                  @mousedown="readOnly? inspectSlot('output',index) : slotMouseDown($event, index)"
+                  @mousedown.stop="readOnly? inspectSlot('output',index) : slotMouseDown($event, index)"
                 )
               //- tooltip (result counts)
               div.slot-tooltip.output(v-show="completed") {{outputLinks[index]? outputLinks[index].resultCount : '' | numFormat}}
@@ -139,8 +140,12 @@
       cursor: default
     }
 
-    .selected {
+    .block-error {
       box-shadow: 0 0 0 @blockBorder red;
+      background-color: #ff5252
+    }
+    .selected {
+      box-shadow: 0 0 0 @blockBorder orange;
     }
 
     .circle {
