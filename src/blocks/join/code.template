@@ -1,2 +1,2 @@
-print("joining ${inputs[0]} to ${inputs[1]}")
+# joining ${inputs[0]} to ${inputs[1]}
 ${output} = ${inputs[0]}.join(${inputs[1]},${props.condition},how="${props.how}")

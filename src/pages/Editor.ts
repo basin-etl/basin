@@ -1,9 +1,11 @@
 import jupyterUtils from '@/core/jupyterUtils.ts'
 import blockTypes from '@/blocks/blockTypes.ts'
+// components
 import BlocksContainer from '@/components/BlocksContainer.vue'
 import BlockProperties from '@/components/BlockProperties.vue'
 import BlockPropertiesRef from '@/components/BlockProperties'
 import EditorBlocksBar from './EditorBlocksBar.vue'
+import EditableLabel from '@/components/EditableLabel.vue'
 import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
 import jobRenderer from '@/core/jobRenderer'
 import Vue from 'vue'
@@ -20,14 +22,14 @@ import JobCommand from '@/models/JobCommand';
     BlocksContainer,
     BlockProperties,
     EditorBlocksBar,
-    DataFrameViewer
+    DataFrameViewer,
+    EditableLabel,
   },
 })
 export default class Editor extends Vue {
   //
   // data
   //
-  kernel:Kernel.IKernelConnection = null
   dragAdding = false
   props = {}
   interrupt = false // special flag to allow to interrupt a running job mid way
@@ -46,10 +48,11 @@ export default class Editor extends Vue {
   blocks:Array<Block> = []
   links:Array<Link> = []
   container:any = {}
+  jobName:string = "New Job"
 
   async showProperties(block:Block) {
-    this.selectedBlock=block
-    this.selectedBlockProperties=block.properties
+    this.selectedBlock=this.getBlockById(block.id)
+    this.selectedBlockProperties=this.selectedBlock.properties
     this.showPropertiesPanel = true        
     await this.$nextTick();
     (this.$refs.propertiesPanel as BlockPropertiesRef).reset()
@@ -78,7 +81,7 @@ export default class Editor extends Vue {
     this.persist()
   }
   setBlockStatus(id:number,status:BlockStatus) {
-    let blockIndex = this.blocks.findIndex( (block) => block.id===id)
+    let blockIndex = this.getBlockIndexById(id)
     let update:any = {"status": status}
     if (status==BlockStatus.Stopped) {
       // clear the error
@@ -88,18 +91,46 @@ export default class Editor extends Vue {
       Object.assign(this.blocks[blockIndex],update)
     )
   }
-  async run() {
+  getBlockById(id:number) {
+    return this.blocks.find( (block) => block.id===id)
+  }
+  getBlockIndexById(id:number) {
+    return this.blocks.findIndex( (block) => block.id===id)
+  }
+  async testSelectedBlock() {
+    // we run only this block before saving. used for testing / preview
+    // await this.run(true,this.selectedBlock.id)
+    let draftBlock = Object.assign({},this.selectedBlock,{
+        "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()
+    })
+    let jobCommand = this.jobCommands.find( (command) => command.blockId==this.selectedBlock.id)
+    let code = blockTypes[this.selectedBlock.type].codeTemplate.render({
+      comment: draftBlock.comment,
+      props: draftBlock.properties,
+      inputs: jobCommand.inputs,
+      output: 'df'
+    })
+    console.log(code)
+    await jupyterUtils.sendToPython(this.kernel,code)
+    this.showDataframePanel = true
+    this.inspectDataframeVariable = 'df'
+  }
+  // silent - no updates of status
+  // stopBeforeBlock - used to run only up to a certain block (not including)
+  async run(silent:boolean=false,stopBeforeBlock:number=null) {
       //
       // run this job in jupyter notebook
       //
-      this.completedBlocks = -1 // will display a loading progress indicator
-      this.jobStatus = JobStatus.Running
-      this.interrupt = false
-      this.readOnly = true
-      // clear running or completed state of all blocks
-      for (let block of this.blocks) {
-        block.status = BlockStatus.Stopped
+      if (!silent) {
+        this.completedBlocks = -1 // will display a loading progress indicator
+        this.jobStatus = JobStatus.Running
+        this.readOnly = true
+        // clear running or completed state of all blocks
+        for (let block of this.blocks) {
+          block.status = BlockStatus.Stopped
+        }
       }
+      this.interrupt = false
 
       let commands = jobRenderer.render({blocks:this.blocks,links:this.links, container: {}})
       this.jobCommands = commands
@@ -127,6 +158,7 @@ spark = SparkSession \
           console.log("interrupting execution")
           break
         }
+        if (command.blockId==stopBeforeBlock) break
         //
         // run command
         //
@@ -136,7 +168,7 @@ spark = SparkSession \
         let blockIndex = this.blocks.findIndex( (block) => block.id===command.blockId)
         let block = this.blocks[blockIndex]
 
-        this.setBlockStatus(command.blockId,BlockStatus.Running)
+        if (!silent) this.setBlockStatus(command.blockId,BlockStatus.Running)
         try {
           let response = await jupyterUtils.sendToPython(this.kernel,command.code)
           console.log(response)
@@ -162,12 +194,13 @@ spark = SparkSession \
         this.$set(this.blocks,blockIndex,block)
 
         // block completed
-        this.setBlockStatus(command.blockId,BlockStatus.Completed)
-        this.completedBlocks++
+        if (!silent) {
+          this.setBlockStatus(command.blockId,BlockStatus.Completed)
+          this.completedBlocks++
+        }
       }
       // job complete
-      this.jobStatus = JobStatus.Completed
-
+      if (!silent) this.jobStatus = JobStatus.Completed
   }
   stop() {
     // stop running the job. exit 'debug' mode
@@ -202,6 +235,14 @@ spark = SparkSession \
     })
 
   }
+  exportCode() {
+    let text = this.jobCommands.map( (command) => command.code).join("\n\n")
+    let encodedUri = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(text)
+    let link = document.createElement('a');
+    link.download = "job.py";
+    link.href = encodedUri
+    link.click();
+  }
   async inspectSocket(socket:any) {
     console.log("inspecting socket")
     console.log(socket)
@@ -233,6 +274,7 @@ spark = SparkSession \
   // lifecycle events
   //
   async created() {
+    this.$store.dispatch('job/initialize')
     try {
       // load from local storage
       if (localStorage.job) {
@@ -248,18 +290,27 @@ spark = SparkSession \
     catch (e) {
       console.log(e)
     }
-    // start a new kernel
-    this.kernel = await jupyterUtils.getKernel()    
   }
   async mounted () {
     // cleanup active kernel
     window.addEventListener('beforeunload', () => {
-        console.log("shutting down kernel")
-        this.kernel.shutdown()
+      this.$store.dispatch('job/destroy')
     }, false)
   }
   beforeDestroy() {
-    console.log("shutting down kernel")
-    this.kernel.shutdown()
+    // cleanup active kernel
+    this.$store.dispatch('job/destroy')
+  }
+  //
+  // computed
+  //
+  get connectionStatus() {
+    return this.$store.state.job.connectionStatus
+  }
+  get kernelStatus() {
+    return this.$store.state.job.kernelStatus
+  }
+  get kernel() {
+    return this.$store.state.job.kernel
   }
 }

@@ -5,13 +5,28 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //- toolbar
     //-
     v-toolbar(dense,flat)
-      v-toolbar-title New job
+      v-toolbar-title
+        EditableLabel(v-model="jobName")
+          | {{jobName}}
       v-spacer
-      v-btn(@click="run",small,color="success",v-if="isJobStopped",:disabled="!kernel")
+      //- toolbar buttons
+      div.pr-3
+        v-btn(@click="exportCode",icon,small)
+          v-icon(small) cloud_download
+      v-divider.mx-2(vertical)
+      //- status indicators
+      .mx-2(:style="{'min-width':'120px'}") kernel: {{kernelStatus}}
+      v-icon(small,v-if="connectionStatus=='connected'",color="green") link
+      v-icon(small,v-if="connectionStatus=='connecting'",color="green") more_horiz
+      v-icon(small,v-if="connectionStatus=='disconnected'",color="red") link_off
+      v-divider.mx-3(vertical)
+      //- run buttons
+      v-btn(@click="run()",small,color="success",v-if="isJobStopped",:disabled="!kernel")
         v-icon(color="white") play_arrow
       v-btn(small,@click="stop",color="red",v-if="!isJobStopped")
           v-progress-circular(v-show="!isJobComplete",small,indeterminate,color="white",size="14",width="2")
           v-icon(color="white") stop
+
     v-divider
   v-row.ma-0
     //-
@@ -70,6 +85,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     template(v-slot:append)
       v-row.py-3(justify="center")
         v-btn(@click.stop="saveProperties()") Save
+        v-btn.ml-2(@click.stop="testSelectedBlock()") Preview
   //-
   //- bottom sheet
   //-

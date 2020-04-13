@@ -1,4 +1,4 @@
-export class Template {
+export class CodeTemplate {
   template:string
   constructor(template:string) {
     this.template = template

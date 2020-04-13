@@ -1,3 +1,2 @@
-print("extracting ${props.source}")
+# ${comment? comment: 'extract '+props.source}
 ${output} = spark.read.option("header",True).csv("./public/${props.source}.csv")
-print(f"total records: {${output}.count()}")

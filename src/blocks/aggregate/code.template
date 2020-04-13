@@ -1,2 +1,2 @@
-print("aggregating ${inputs[0]}")
+# aggregating ${inputs[0]}
 ${output} = ${inputs[0]}.groupby(${props.groupBy}).agg(${props.aggregate})

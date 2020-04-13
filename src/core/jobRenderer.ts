@@ -24,22 +24,35 @@ function render(jobContent:Job):Array<JobCommand> {
       // find the block type
       let blockType = blockTypes[(<Block>block.node)["type"]]      
       // find the inputs to this block
-      const incomingLinks = jobContent.links.filter( (link) => link.targetId==(<Block>block.node)["id"])
+      let blockNode = (<Block>block.node)
+      const incomingLinks = jobContent.links.filter( (link) => link.targetId==blockNode.id)
+      
+      // name the inputs
       let inputs:{[slot:number]:string} = {}
       incomingLinks.forEach( link => {
-        inputs[link.targetSlot] = `output_id${link.originId}_socket${link.originSlot}`
+        let sourceBlock = jobCommands.find( (command) => command.blockId==link.originId)
+        inputs[link.targetSlot] = sourceBlock.output
       })
       let output =null
+
+      // name the output
       if (blockType.outputs.length>0) {
-        output = `output_id${(<Block>block.node)["id"]}_socket0`
+        // give the output a pretty name
+        output = blockType.outputNameTemplate.render({
+          id: blockNode.id,
+          props: blockNode.properties,
+          inputs: inputs,
+        })
+        // handle duplicates
       }
 
       jobCommands.push({
-        blockId: (<Block>block.node)["id"],
+        blockId: blockNode.id,
         inputs: inputs,
         output: output,
-        code: blockType.template.render({
-          props: (<Block>block.node)["properties"],
+        code: blockType.codeTemplate.render({
+          comment: blockNode.comment,
+          props: blockNode.properties,
           inputs: inputs,
           output: output
         })
