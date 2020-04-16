@@ -4,7 +4,11 @@ import Link from '@/models/Link';
 import Job from '@/models/Job';
 import blockTypes from '../blocks/blockTypes'
 import JobCommand from '@/models/JobCommand';
-
+import { CodeTemplate } from './template';
+let initCode = require("./init.pyspark.template")
+function renderInitCode():string {
+  return new CodeTemplate(initCode).render({})
+}
 function render(jobContent:Job):Array<JobCommand> {
 
     const sortedGraph = new TopologicalSort<Number, Object>(new Map());
@@ -61,5 +65,6 @@ function render(jobContent:Job):Array<JobCommand> {
     return jobCommands
 }
 export default {
-  render: render
+  render: render,
+  renderInitCode: renderInitCode
 }

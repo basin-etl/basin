@@ -11,7 +11,6 @@ import jobRenderer from '@/core/jobRenderer'
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
-import { Kernel } from "@jupyterlab/services"
 import Block, { BlockStatus } from '@/models/Block';
 import Job, { JobStatus } from '@/models/Job';
 import Link from '@/models/Link';
@@ -111,13 +110,21 @@ export default class Editor extends Vue {
       output: 'df'
     })
     console.log(code)
-    await jupyterUtils.sendToPython(this.kernel,code)
-    this.showDataframePanel = true
-    this.inspectDataframeVariable = 'df'
+    try {
+      await jupyterUtils.sendToPython(this.kernel,code)
+      this.showDataframePanel = true
+      this.inspectDataframeVariable = 'df'
+    }
+    catch (e) {
+      if (e.ename) {
+          this.error = `${e.ename}: ${e.evalue}`
+          this.showError = true
+      }
+    }
   }
   // silent - no updates of status
   // stopBeforeBlock - used to run only up to a certain block (not including)
-  async run(silent:boolean=false,stopBeforeBlock:number=null) {
+  async run(silent:boolean=false,stopBeforeBlock:number=null,getCount:boolean=true,getSchema:boolean=false) {
       //
       // run this job in jupyter notebook
       //
@@ -136,18 +143,7 @@ export default class Editor extends Vue {
       this.jobCommands = commands
 
       // start running
-      console.log("running")
-      console.log(commands)
-      let initCode = `
-import pyspark.sql.functions as F
-import pyspark.sql.types as T
-from pyspark.sql import SparkSession
-spark = SparkSession \
-  .builder \
-  .appName("superglue studio") \
-  .config("spark.sql.decimalOperations.allowPrecisionLoss",False) \
-  .getOrCreate()
-`
+      let initCode = jobRenderer.renderInitCode()
       await jupyterUtils.sendToPython(this.kernel,initCode)
       this.completedBlocks = 0
 
@@ -187,7 +183,7 @@ spark = SparkSession \
         }
         // set the result count
         console.log(block)
-        if (command.output) {
+        if (command.output && getCount) {
           block.outputLinks[0].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.output)
         }
         // set it so it forces an update
