@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import blockTypes from '@/blocks/blockTypes.ts'
+import blockTypes from '@/core/blockTypes.ts'
 export default {
     name: 'EditorBlocksBar',
     data: function () {

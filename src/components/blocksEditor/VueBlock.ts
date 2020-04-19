@@ -1,6 +1,6 @@
 const circleSize = 10
-import blockTypes from '@/blocks/blockTypes.ts'
-import { Prop, Component } from 'vue-property-decorator';
+import blockTypes from '@/core/blockTypes'
+import { Prop, Component, Watch } from 'vue-property-decorator';
 import Vue from 'vue';
 import { BlockStatus } from '@/models/Block';
 import { JobStatus } from '@/models/Job';

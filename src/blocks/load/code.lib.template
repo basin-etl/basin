@@ -1,0 +1,3 @@
+import decimal
+def load():
+    return df

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify';
 import router from './router/index'
-import '@/blocks/blockTypes'
+import '@/core/blockTypes'
 import VueWorker from 'vue-worker'
 import store from './store'
 import numeral from 'numeral';

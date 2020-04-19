@@ -13,6 +13,8 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       div.pr-3
         v-btn(@click="exportCode",icon,small)
           v-icon(small) cloud_download
+        v-btn(@click="autoArrange",icon,small)
+          v-icon(small) account_tree
       v-divider.mx-2(vertical)
       //- status indicators
       .mx-2(:style="{'min-width':'120px'}") kernel: {{kernelStatus}}
@@ -50,6 +52,9 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       )
       BlocksContainer.flex-grow-1(v-if="links && blocks" ref='container'
         v-on:update:scene="updateJob"
+        v-on:update:links="updateLinks"
+        v-on:update:container="updateContainer"
+        v-on:update:blocks="updateBlocks"
         :jobStatus="jobStatus"
         :readOnly="readOnly"
         :blocks="blocks"

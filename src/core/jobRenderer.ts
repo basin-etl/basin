@@ -2,7 +2,7 @@ import TopologicalSort from 'topological-sort';
 import Block from '@/models/Block'
 import Link from '@/models/Link';
 import Job from '@/models/Job';
-import blockTypes from '../blocks/blockTypes'
+import blockTypes from '@/core/blockTypes'
 import JobCommand from '@/models/JobCommand';
 import { CodeTemplate } from './template';
 let initCode = require("./init.pyspark.template")

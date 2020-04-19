@@ -1,7 +1,10 @@
+import { tween } from 'femtotween'
+import { easeOutCubic } from 'femtotween/ease'
 import jupyterUtils from '@/core/jupyterUtils.ts'
-import blockTypes from '@/blocks/blockTypes.ts'
+import blockTypes from '@/core/blockTypes'
 // components
 import BlocksContainer from '@/components/BlocksContainer.vue'
+import BlocksContainerRef from '@/components/BlocksContainer'
 import BlockProperties from '@/components/BlockProperties.vue'
 import BlockPropertiesRef from '@/components/BlockProperties'
 import EditorBlocksBar from './EditorBlocksBar.vue'
@@ -10,7 +13,7 @@ import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
 import jobRenderer from '@/core/jobRenderer'
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { Prop, Watch } from 'vue-property-decorator'
+import { Prop, Watch, Ref } from 'vue-property-decorator'
 import Block, { BlockStatus } from '@/models/Block';
 import Job, { JobStatus } from '@/models/Job';
 import Link from '@/models/Link';
@@ -43,11 +46,14 @@ export default class Editor extends Vue {
   error:string = null
   showError = false
   jobStatus = JobStatus.Stopped
+  isRunStateDirty = true // this indicates if there have been changes since we last ran the job. used to avoid re-running the job for things live preview
   completedBlocks = -1
   blocks:Array<Block> = []
   links:Array<Link> = []
   container:any = {}
   jobName:string = "New Job"
+
+  @Ref('container') readonly blocksContainer!: BlocksContainerRef
 
   async showProperties(block:Block) {
     this.selectedBlock=this.getBlockById(block.id)
@@ -65,7 +71,6 @@ export default class Editor extends Vue {
   }
   saveProperties() {
     // find index of selected block in job contents
-    // this.selectedBlock.id,)
     let blockIndex = this.blocks.findIndex(x => x.id == this.selectedBlock.id);
 
     this.$set(
@@ -77,6 +82,7 @@ export default class Editor extends Vue {
       })
     )
     this.showPropertiesPanel = false
+    this.isRunStateDirty = true
     this.persist()
   }
   setBlockStatus(id:number,status:BlockStatus) {
@@ -96,9 +102,12 @@ export default class Editor extends Vue {
   getBlockIndexById(id:number) {
     return this.blocks.findIndex( (block) => block.id===id)
   }
+  autoArrange() {
+    (this.$refs.container as BlocksContainerRef).autoArrange()
+  }
   async testSelectedBlock() {
     // we run only this block before saving. used for testing / preview
-    // await this.run(true,this.selectedBlock.id)
+    if (this.isRunStateDirty) await this.run(true,this.selectedBlock.id,false,true)
     let draftBlock = Object.assign({},this.selectedBlock,{
         "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()
     })
@@ -197,7 +206,8 @@ export default class Editor extends Vue {
       }
       // job complete
       if (!silent) this.jobStatus = JobStatus.Completed
-  }
+      this.isRunStateDirty = false
+    }
   stop() {
     // stop running the job. exit 'debug' mode
     this.interrupt = true
@@ -207,18 +217,39 @@ export default class Editor extends Vue {
       this.setBlockStatus(block.id,BlockStatus.Stopped)
     }
   }
-  updateJob(job:any) {
+  updateContainer(container:any) {
+    this.container = container
+    this.persist()
+  }
+  updateBlocks(blocks:Array<Block>) {
+    this.blocks = blocks
+    this.persist()
+  }
+  setObjectProperties(arr:Array<any>,index:number,assignProperty:any) {
+    this.$set(arr,index,Object.assign({},arr[index],assignProperty))
+  }
+  updateLinks(links:Array<Link>) {
     let vm = this
-    this.blocks = job.blocks
-    this.links = job.links
+    this.links = links
+    for (let i=0; i<this.blocks.length; i++) {
+      this.setObjectProperties(this.blocks,i,{outputLinks:{}})
+      this.setObjectProperties(this.blocks,i,{inputLinks:{}})
+    }
     // update the block links
     this.links.forEach( (link) => {
       let originIndex = this.blocks.findIndex( (block) => block.id===link.originId)
       let targetIndex = this.blocks.findIndex( (block) => block.id===link.targetId)
-      vm.blocks[originIndex].outputLinks[link.originSlot] = link
+      vm.$set(vm.blocks[originIndex].outputLinks,link.originSlot,link)
       vm.blocks[targetIndex].inputLinks[link.targetSlot] = link
     })
-    this.container = job.container
+    this.persist()
+  }
+  updateJob(job:any) {
+    let vm = this
+    this.isRunStateDirty = true
+    this.updateBlocks(job.blocks)
+    this.updateLinks(job.links)
+    this.updateContainer(job.container)
     this.persist()
   }
   persist() {
