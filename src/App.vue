@@ -48,7 +48,7 @@ v-app
       div(v-show="$root.$data.$loading || !$auth.ready()")
         v-progress-circular(indeterminate,color="primary")
   v-content
-    v-container.ma-0.pa-0(fluid,fill-height)
+    v-container.ma-0.pa-0(fluid,fill-height,:style="{'align-items':'start'}")
       router-view
   v-footer
     v-spacer

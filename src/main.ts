@@ -7,10 +7,16 @@ import VueWorker from 'vue-worker'
 import store from './store'
 import numeral from 'numeral';
 import numFormat from 'vue-filter-number-format';
+import Dexie from 'dexie';
+
+const db = new Dexie('superglue');
+db.version(1).stores({
+    catalog: `name`
+});
 
 Vue.filter('numFormat', numFormat(numeral));
 Vue.use(VueWorker)
-
+Vue.prototype.$idb = db
 Vue.config.productionTip = false
 new Vue({
   vuetify,
