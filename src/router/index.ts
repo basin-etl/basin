@@ -4,6 +4,7 @@ import Editor from '@/pages/Editor.vue'
 import DataFrameViewerDriver from '@/pages/DataFrameViewerDriver.vue'
 import CatalogIndex from '@/pages/catalog/Index.vue'
 import CatalogCreate from '@/pages/catalog/Create.vue'
+import FlowIndex from '@/pages/flow/Index.vue'
 Vue.use(Router)
 
 export default new Router({
@@ -13,7 +14,7 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Editor
+      component: FlowIndex
     },
     {
       path: '/catalog',
@@ -24,6 +25,26 @@ export default new Router({
       path: '/catalog/create',
       name: 'catalog_create',
       component: CatalogCreate
+    },
+    {
+      path: '/catalog/:id/edit',
+      name: 'catalog_edit',
+      component: CatalogCreate
+    },
+    {
+      path: '/flow/:id',
+      name: 'flow_edit',
+      component: Editor
+    },
+    {
+      path: '/flow/create',
+      name: 'flow_create',
+      component: Editor
+    },
+    {
+      path: '/flow',
+      name: 'flow_index',
+      component: FlowIndex
     },
     {
       path: '/df',

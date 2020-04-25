@@ -255,10 +255,11 @@ export default class Editor extends Vue {
   persist() {
     let jsonBlocks = this.blocks.map( (block) => Block.toJson(block))
     let jsonLinks = this.links.map( (link) => Link.toJson(link))
-    localStorage.job = JSON.stringify({
+    this.$idb.table("flows").put({
       blocks: jsonBlocks,
       links: jsonLinks,
-      container: this.container
+      container: this.container,
+      name: this.jobName
     })
 
   }
@@ -301,21 +302,26 @@ export default class Editor extends Vue {
   // lifecycle events
   //
   async created() {
+    this.$root.$data.$loading = true
+    // initialize kernel
     this.$store.dispatch('job/initialize')
+    // take job name from route
+    this.jobName = this.$route.params["id"]
+    let job = await this.$idb.table("flows").get(this.jobName)
+
     try {
-      // load from local storage
-      if (localStorage.job) {
-        let vm = this
-        let job = JSON.parse(localStorage.job)
-        this.updateJob({
-          blocks: job.blocks.map( (block:any) => new Block(block) ),
-          links: job.links.map( (link:any) => new Link(link) ),
-          container: job.container
-        })
-      }
+      let vm = this
+      this.updateJob({
+        blocks: job.blocks.map( (block:any) => new Block(block) ),
+        links: job.links.map( (link:any) => new Link(link) ),
+        container: job.container
+      })
     }
     catch (e) {
       console.log(e)
+    }
+    finally {
+      this.$root.$data.$loading = false
     }
   }
   async mounted () {

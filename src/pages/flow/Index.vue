@@ -2,12 +2,12 @@
 v-row.mt-5(justify="center",align-items="start")
   v-col.table
     v-row.flex-column.pt-5(align="center",v-if="items.length==0")
-        div.headline You haven't defined any source yet
-        router-link.headline(to="create",append) Set up your first source!
+        div.headline You haven't created any flow yet
+        router-link.headline(to="create",append) Create your first flow!
     v-row(no-gutters,v-if="items.length>0")
       //- header toolbar
       v-toolbar.px-0(flat,color="white")
-        v-toolbar-title Sources Catalog
+        v-toolbar-title Flows
         v-spacer
         //- search field
         v-text-field.search-field(
@@ -17,7 +17,7 @@ v-row.mt-5(justify="center",align-items="start")
           single-line
           hide-details
         )
-        v-btn.ml-3(color="success",small,to="create",append) New
+        v-btn.ml-3(color="success",small,@click="newItem",append) New
     v-data-table(
       v-if="items.length>0"
       :headers="headers"
@@ -28,13 +28,12 @@ v-row.mt-5(justify="center",align-items="start")
       template(v-slot:item="props"
       )
         router-link(
-          :to="{ name: 'catalog_edit', params: { id: props.item.name } }"
+          :to="{ name: 'flow_edit', params: { id: props.item.name } }"
           tag="tr",
           :style="{ cursor: 'pointer'}"
         )
           td
             h3 {{props.item.name}}
-          td.text-xs-right {{props.item.type}}
           td
             v-menu()
               template(v-slot:activator="{ on }")
@@ -50,14 +49,14 @@ v-row.mt-5(justify="center",align-items="start")
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
+import Job from '@/models/Job'
 
 @Component({
 })
 
-export default class CatalogIndex extends Vue {
+export default class FlowIndex extends Vue {
   headers = [
     { text: 'Source', value: 'name' },
-    { text: 'Type', value: 'type' },
     { 
       text: '',
       value: 'name',
@@ -68,12 +67,29 @@ export default class CatalogIndex extends Vue {
   search = ''
 
   async deleteItem(id:string) {
-    console.log("deleting")
-    await this.$idb.table("catalog").delete(id)
+    await this.$idb.table("flows").delete(id)
     this.items.splice(this.items.findIndex( item => item.name==id), 1);
   }
+  async newItem() {
+    // create a new job. find an available name
+    let newJobPrefix = "new_flow"
+    let jobNames = await this.$idb.table("flows").where("name").startsWith(newJobPrefix).primaryKeys()
+    let i = 1
+    while (true) {
+      if (!jobNames.includes(`${newJobPrefix}_${i}`)) {
+        break
+      }
+      i++
+    }
+    let newJobName = `${newJobPrefix}_${i}`
+    let newJob = new Job()
+    await this.$idb.table("flows").put(Object.assign(newJob,{name:newJobName}))
+    this.$router.push({name:'flow_edit',append:true,params:{id:newJobName}})
+  }
   async created() {
-    this.items = await this.$idb.table("catalog").toArray()
+    this.$root.$data.$loading = true
+    this.items = await this.$idb.table("flows").toArray()
+    this.$root.$data.$loading = false
   }
 }
 </script>

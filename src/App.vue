@@ -27,10 +27,16 @@ v-app
   //-
   v-app-bar(app,dense,color="white",:clipped-left="drawer")
     v-toolbar-title.mr-2.pa-2(style="height:100%")
-      a(href="/")
+      router-link(to="/")
         img(src="@/assets/images/logo.png",style="height:100%")
     span(:style="{'font-weight':'bold'}") SuperGlue Studio
     v-spacer
+    router-link(to="/catalog")
+      | Catalog
+    router-link.ml-3(to="/flow")
+      | Flows
+    v-btn.ml-3(icon)
+      v-icon settings
     //- authentication
     //- template(v-if='$auth.check()')
     //-   v-menu(offset-y='')
@@ -43,13 +49,11 @@ v-app
     //- template(v-else)
     //-   v-btn(flat,:to="{name:'register'}") sign up
     //-   v-btn(flat,:to="{name:'login'}") login
-  //- data loading spinner
-    v-layout(column,align-center,justify-center)
-      div(v-show="$root.$data.$loading || !$auth.ready()")
-        v-progress-circular(indeterminate,color="primary")
   v-content
-    v-container.ma-0.pa-0(fluid,fill-height,:style="{'align-items':'start'}")
-      router-view
+    v-container.ma-0.pa-0(fluid,fill-height,:style="{'align-items':$root.$data.$loading?'center':'start','justify-content':'center'}")
+      //- data loading spinner
+      v-progress-circular(indeterminate,color="primary",v-show="$root.$data.$loading")
+      router-view(v-show="!$root.$data.$loading")
   v-footer
     v-spacer
     div.text-xs-left &copy; 2020

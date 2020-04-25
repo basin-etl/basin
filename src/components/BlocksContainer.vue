@@ -5,7 +5,7 @@
   @wheel.stop="handleWheel($event)"
   id="blockscontainer"
 )
-  VueLink(:lines="lines",:readOnly="readOnly")
+  VueLink(v-if="s_blocks.length>0",:lines="lines",:readOnly="readOnly")
   VueBlock(v-for="block in s_blocks"
               :key="block.id"
               :ref="`block${block.id}`"
@@ -24,6 +24,8 @@
               @blockproperties="showProperties($event)"
               @inspectsocket="inspectSocket($event)"
   )
+  img.onboarding-arrow(v-if="s_blocks.length==0",src="@/assets/images/arrow.png")
+  div.headline(v-if="s_blocks.length==0") Start by dragging you first block here. An Extract block is a good first choice
 </template>
 
 <script lang="ts" src="./BlocksContainer.ts">
@@ -33,5 +35,15 @@
   .vue-container {
     position: relative;
     overflow: auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .onboarding-arrow {
+    height: 300px;
+    width: 300px;
+    position:absolute;
+    top: 20px;
+    left: 20px;
   }
 </style>
