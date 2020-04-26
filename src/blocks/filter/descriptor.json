@@ -1,0 +1,14 @@
+{
+    "title": "Filter",
+    "type": "filter",
+    "description": "filter rows",
+    "category": "dataframe",
+    "color": "red",
+    "icon": "call_merge",
+    "inputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ],
+    "outputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ]
+}

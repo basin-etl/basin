@@ -1,7 +1,11 @@
 <template lang="pug">
 div
-    v-text-field(v-model="local.source",label="Source name")
-    v-text-field(v-model="local.alias",label="Alias")
+  v-select(v-model="local.source",
+          :items="sources"
+          item-text="name"
+          item-value="name"
+          label="Source name")
+  v-text-field(v-model="local.alias",label="Alias")
 </template>
 
 <script lang="ts">
@@ -16,10 +20,18 @@ import BlockProperties from '@/components/BlockProperties'
 export default class ExtractBlockProperties extends BlockProperties {
   @Prop(String) source: string
   @Prop(String) alias: string
+  sources:Array<any> = []
 
-  // for data:
-  // only mutate local.<property>. added via mixin
+  async created() {
+    this.sources = await this.$idb.table("catalog").toArray()
+  }
 
+  @Watch('local.source', { immediate: true})
+  onSourceChanged(newVal:string,oldVal:string) {
+    if (!this.local.alias) {
+      this.local.alias = newVal
+    }
+  }
 }
 </script>
 

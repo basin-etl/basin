@@ -199,11 +199,12 @@ export default class BlocksContainer extends Vue {
     let tweenOptions = {time:1500, easeFunc: linear}
     for (let node of g.nodes()) {
       // reposition the node
+      // use tween for animation
       let blockIndex = this.s_blocks.findIndex( (block) => block.id==parseInt(node.substring(1)))
-        tween(this.s_blocks[blockIndex].x, g.node(node).x, (v:number) => { 
+        tween(this.s_blocks[blockIndex].x, g.node(node).x-this.container.centerX/this.scale, (v:number) => { 
           vm.setObjectProperties(this.s_blocks,blockIndex,{x:v});
         },tweenOptions)
-        tween(this.s_blocks[blockIndex].y, g.node(node).y, (v:number) => { 
+        tween(this.s_blocks[blockIndex].y, g.node(node).y-this.container.centerY/this.scale, (v:number) => { 
           vm.setObjectProperties(this.s_blocks,blockIndex,{y:v});
         },tweenOptions)
     }

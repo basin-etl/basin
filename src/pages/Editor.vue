@@ -11,19 +11,19 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       v-spacer
       //- toolbar buttons
       div.pr-3
-        v-btn(@click="exportCode",icon,small)
+        v-btn(@click="exportCode",icon,small,title="export as python")
           v-icon(small) cloud_download
-        v-btn(@click="autoArrange",icon,small)
+        v-btn(@click="autoArrange",icon,small,title="auto arrange")
           v-icon(small) account_tree
       v-divider.mx-2(vertical)
       //- status indicators
       .mx-2(:style="{'min-width':'120px'}") kernel: {{kernelStatus}}
-      v-icon(small,v-if="connectionStatus=='connected'",color="green") link
-      v-icon(small,v-if="connectionStatus=='connecting'",color="green") more_horiz
-      v-icon(small,v-if="connectionStatus=='disconnected'",color="red") link_off
+      v-icon(small,v-if="connectionStatus=='connected'",color="green",title="connected") link
+      v-icon(small,v-if="connectionStatus=='connecting'",color="green",title="connecting...") more_horiz
+      v-icon(small,v-if="connectionStatus=='disconnected'",color="red",title="disconnected") link_off
       v-divider.mx-3(vertical)
       //- run buttons
-      v-btn(@click="run()",small,color="success",v-if="isJobStopped",:disabled="!kernel")
+      v-btn(@click="run()",small,color="success",v-if="isJobStopped",:disabled="!kernel",title="run")
         v-icon(color="white") play_arrow
       v-btn(small,@click="stop",color="red",v-if="!isJobStopped")
           v-progress-circular(v-show="!isJobComplete",small,indeterminate,color="white",size="14",width="2")

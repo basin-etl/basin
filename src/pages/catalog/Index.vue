@@ -69,11 +69,16 @@ export default class CatalogIndex extends Vue {
 
   async deleteItem(id:string) {
     console.log("deleting")
-    await this.$idb.table("catalog").delete(id)
-    this.items.splice(this.items.findIndex( item => item.name==id), 1);
+    let response = await this.$root.$confirm.open("Delete source definition","Are you sure?")
+    if (response) {
+      await this.$idb.table("catalog").delete(id)
+      this.items.splice(this.items.findIndex( item => item.name==id), 1);
+    }
   }
   async created() {
+    this.$root.$data.$loading = true
     this.items = await this.$idb.table("catalog").toArray()
+    this.$root.$data.$loading = false
   }
 }
 </script>

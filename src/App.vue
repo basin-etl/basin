@@ -3,8 +3,8 @@ v-app
   //-
   //- global components
   //-
-  //- confirm(ref="confirm")
-  //- prompt(ref="prompt")
+  confirm(ref="confirm")
+  prompt(ref="prompt")
   //-
   //- navigation drawer
   //-
@@ -60,12 +60,22 @@ v-app
 </template>
 
 <script>
+import Confirm from '@/components/confirm/Confirm.vue'
+import Prompt from '@/components/prompt.vue'
 export default {
   name: 'App',
   data: () => ({
     //
     drawer: false
   }),
+  components: {
+    Confirm,
+    Prompt,
+  },
+  mounted() {
+    this.$root.$confirm = this.$refs.confirm;
+    this.$root.$prompt = this.$refs.prompt;
+  },
 };
 </script>
 <style>

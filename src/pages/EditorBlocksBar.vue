@@ -10,10 +10,10 @@
           v-for="blockType in blockTypes"
           :key="blockType.type"
         )
-          v-list-item(link)
+          v-list-item(link,:title="blockType.description")
             v-list-item-icon
               v-icon {{blockType.icon}}
-            v-list-item-content {{blockType.type}}
+            v-list-item-content {{blockType.title}}
           v-divider
       v-list-group()
         template(v-slot:activator)

@@ -54,7 +54,7 @@ export default class CatalogCreate extends Vue {
     {value:"VSAM",label:"VSAM (cobol generated) with Copybook template"},
     {value:"custom",label:"Custom"},
   ]
-
+  id:string = ""
   rules = {
     required: (value:string) => {
       return !!value || 'Required'
@@ -75,6 +75,9 @@ export default class CatalogCreate extends Vue {
       return true
     }
   }
+  test() {
+
+  }
   async created() {
     this.breadcrumbs = [
       {
@@ -90,6 +93,7 @@ export default class CatalogCreate extends Vue {
       },
     ]
 
+    this.id = this.$route.params["id"]
     if (this.$route.path.endsWith("edit")) {
       // we are editing. fetch the record
       this.properties = await this.$idb.table("catalog").get(this.$route.params["id"])
@@ -97,7 +101,7 @@ export default class CatalogCreate extends Vue {
   }
   async save() {
     // check if we are changing the name
-    if (this.$route.params["id"]!=this.properties.name) {
+    if (this.id && this.id!=this.properties.name) {
       if (!(await this.validate())) {
         return
       }
@@ -107,6 +111,7 @@ export default class CatalogCreate extends Vue {
       }
     }
     this.$idb.table("catalog").put(this.properties)
+    this.id = this.properties.name
     this.success = true
   }
 }
