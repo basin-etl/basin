@@ -40,6 +40,7 @@ export default class Editor extends Vue {
   jobCommands:Array<JobCommand> = null // holds the runtime commands of the job while debugging
   selectedBlock:Block = null
   selectedBlockProperties = {} // we store this separately because of reactivity issues with vue and the v-bind to the properties panel
+  selectedBlockInputSchema:Array<any> = []
   readOnly = false
   inspectDataframeVariable = ''
   showDataframePanel = false
@@ -62,9 +63,16 @@ export default class Editor extends Vue {
   async showProperties(block:Block) {
     this.selectedBlock=this.getBlockById(block.id)
     this.selectedBlockProperties=this.selectedBlock.properties
-    this.showPropertiesPanel = true        
-    await this.$nextTick();
-    (this.$refs.propertiesPanel as BlockPropertiesRef).reset()
+    this.showPropertiesPanel = true
+    try {
+      this.selectedBlockInputSchema=await this.getInputSchema(this.selectedBlock)
+    }
+    catch (e) {
+      if (e.ename) {
+          this.error = `${e.ename}: ${e.evalue}`
+          this.showError = true
+      }
+    }
   }
   selectBlock (block:Block) {
     this.selectedBlock = block
@@ -116,6 +124,7 @@ export default class Editor extends Vue {
         "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()
     })
     let jobCommand = this.jobCommands.find( (command) => command.blockId==this.selectedBlock.id)
+    console.log(await jupyterUtils.getSchema(this.kernel,jobCommand.inputs[0]))
     let code = blockTypes[this.selectedBlock.type].codeTemplate.render({
       comment: draftBlock.comment,
       props: draftBlock.properties,
@@ -135,6 +144,30 @@ export default class Editor extends Vue {
       }
     }
   }
+  async getInputSchema(block:Block): Promise<Array<JSON>> {
+    // we run only this block before saving. used for testing / preview to get the schema
+    if (this.isRunStateDirty) {
+      try {
+        await this.run(true,block.id,false,true)
+      }
+      catch (e) {
+        if (e.ename) {
+            this.error = `${e.ename}: ${e.evalue}`
+            this.showError = true
+        }
+        return []
+      }
+    } 
+
+    let jobCommand = this.jobCommands.find( (command) => command.blockId==block.id)
+    if (Object.keys(jobCommand.inputs).length>0) {
+      return await jupyterUtils.getSchema(this.kernel,jobCommand.inputs[0])
+    }
+    else {
+      return []
+    }
+  }
+
   // silent - no updates of status
   // stopBeforeBlock - used to run only up to a certain block (not including)
   async run(silent:boolean=false,stopBeforeBlock:number=null,getCount:boolean=true,getSchema:boolean=false) {
@@ -184,7 +217,7 @@ export default class Editor extends Vue {
         }
         catch (e) {
           console.log(e)
-          if (e.ename) {
+          if (e.ename && !silent) {
               this.error = `${e.ename}: ${e.evalue}`
               block.error = this.error
               this.showError = true

@@ -1,7 +1,7 @@
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
-import lib.block_utils
-import lib.common.utils
+import block_utils
+import common.utils
 from pyspark.sql import SparkSession
 spark = SparkSession \
   .builder \

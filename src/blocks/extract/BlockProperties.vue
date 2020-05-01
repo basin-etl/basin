@@ -2,8 +2,6 @@
 div
   v-select(v-model="local.source",
           :items="sources"
-          item-text="name"
-          item-value="name"
           label="Source name")
   v-text-field(v-model="local.alias",label="Alias")
 </template>
@@ -22,7 +20,9 @@ export default class ExtractBlockProperties extends BlockProperties {
   sources:Array<any> = []
 
   async created() {
-    this.sources = await this.$idb.table("catalog").toArray()
+    let catalog = await this.$idb.table("catalog").toArray()
+    this.sources = catalog.map( item => item.name)
+    console.log(this.sources)
   }
 
   @Watch('local.source', { immediate: true})

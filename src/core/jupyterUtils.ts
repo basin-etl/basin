@@ -61,6 +61,9 @@ ${name} = json.loads('${JSON.stringify(value)}')`
 })
 	return true
 }
+async function getSchema(kernel:Kernel.IKernelConnection,dataframe:string): Promise<Array<JSON>> {
+	return JSON.parse(await sendToPython(kernel,`print(${dataframe}.schema.json())`))["fields"]
+}
 async function getDataframeCount(kernel:Kernel.IKernelConnection,expression:string,type='pyspark'): Promise<number> {
 	let code = ""
 	if (type=='pandas') {
@@ -108,5 +111,6 @@ export default {
 	dataframeInfo: dataframeInfo,
 	getDataframeCount: getDataframeCount,
 	inspectDataframe: inspectDataframe,
-	setPythonVariable: setPythonVariable
+	setPythonVariable: setPythonVariable,
+	getSchema: getSchema
 }

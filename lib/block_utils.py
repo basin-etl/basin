@@ -1,9 +1,17 @@
 import os
 import pyspark.sql
+import common.utils
 import decimal
 
+
 def extract(spark,env,source):
-    df = spark.read.option("header",True).csv(os.path.join(env["datafolder"],f"{source}.csv"))
+    catalog = common.utils.get_catalog()
+    print(catalog)
+    properties = catalog[source]
+    options = {}
+    options["delimiter"] = properties["delimiter"]
+    options["header"] = properties["header"]
+    df = spark.read.options(**options).csv(os.path.join(env["datafolder"],properties["location"]))
     return df
 
 def load():

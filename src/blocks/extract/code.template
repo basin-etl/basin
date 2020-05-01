@@ -1,2 +1,2 @@
 # ${comment? comment: 'extract '+props.source}
-${output} = lib.block_utils.extract(spark,env,"${props.source}")
+${output} = block_utils.extract(spark,env,"${props.source}")

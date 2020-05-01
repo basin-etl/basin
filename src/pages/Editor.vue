@@ -85,8 +85,9 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     v-row(no-gutters)
       v-textarea(v-model="selectedBlock.comment",filled,label="comment")
     component(
+      v-if="showPropertiesPanel"
       ref="propertiesPanel",
-      v-bind:is="`${selectedBlock.type}Properties`",v-bind="selectedBlockProperties",:blockId="selectedBlock.id")
+      v-bind:is="`${selectedBlock.type}Properties`",v-bind="selectedBlockProperties",:blockId="selectedBlock.id",:inputSchema="selectedBlockInputSchema")
     template(v-slot:append)
       v-row.py-3(justify="center")
         v-btn(@click.stop="saveProperties()") Save
