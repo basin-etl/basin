@@ -75,7 +75,21 @@ export default {
   mounted() {
     this.$root.$confirm = this.$refs.confirm;
     this.$root.$prompt = this.$refs.prompt;
+
+    // cleanup active kernel
+    window.addEventListener('beforeunload', () => {
+      this.$store.dispatch('job/destroy')
+    }, false)
   },
+  beforeDestroy() {
+    // cleanup active kernel
+    this.$store.dispatch('job/destroy')
+  },
+  async created() {
+    // initialize kernel
+    this.$store.dispatch('job/initialize')
+  }
+
 };
 </script>
 <style>

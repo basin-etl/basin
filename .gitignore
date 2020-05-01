@@ -26,3 +26,4 @@ venv/
 *.ipynb
 
 *.csv
+data/

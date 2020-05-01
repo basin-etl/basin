@@ -1,0 +1,1 @@
+docker run -it -v $PWD/data:/opt/superglue/data -v $PWD/lib:/opt/superglue/lib -p 9007:8888 superglue/server

@@ -55,6 +55,10 @@ export default class Editor extends Vue {
 
   @Ref('container') readonly blocksContainer!: BlocksContainerRef
 
+  async getCatalog() {
+    return await this.$idb.table("catalog").toArray()
+  }
+
   async showProperties(block:Block) {
     this.selectedBlock=this.getBlockById(block.id)
     this.selectedBlockProperties=this.selectedBlock.properties
@@ -304,7 +308,7 @@ export default class Editor extends Vue {
   async created() {
     this.$root.$data.$loading = true
     // initialize kernel
-    this.$store.dispatch('job/initialize')
+    // this.$store.dispatch('job/initialize')
     // take job name from route
     this.jobName = this.$route.params["id"]
     let job = await this.$idb.table("flows").get(this.jobName)
@@ -323,16 +327,6 @@ export default class Editor extends Vue {
     finally {
       this.$root.$data.$loading = false
     }
-  }
-  async mounted () {
-    // cleanup active kernel
-    window.addEventListener('beforeunload', () => {
-      this.$store.dispatch('job/destroy')
-    }, false)
-  }
-  beforeDestroy() {
-    // cleanup active kernel
-    this.$store.dispatch('job/destroy')
   }
   //
   // computed

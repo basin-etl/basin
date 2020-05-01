@@ -6,7 +6,7 @@ v-row.mt-5(justify="center",align="start")
       v-model="valid"
     )
   
-      v-text-field.form-field.flex-grow-0(@keydown.space.prevent,v-model="properties.name",label="source name",:rules="[rules.required]")
+      v-text-field.form-field.flex-grow-0(@keydown.space.prevent,v-model="name",label="source name",:rules="[rules.required]")
       v-select.flex-grow-0(v-model="properties.type",
               :items="fileTypes"
               item-text="label"
@@ -34,15 +34,17 @@ v-row.mt-5(justify="center",align="start")
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
+import jupyterUtils from '@/core/jupyterUtils'
+import blockTypes from '@/core/blockTypes'
+import jobRenderer from '@/core/jobRenderer'
 
 @Component({
 })
 
 export default class CatalogCreate extends Vue {
   properties = {
-    name: ''
   }
-  name = "new source"
+  name = ""
   error:String = null
   success = false
   showError = false
@@ -64,7 +66,7 @@ export default class CatalogCreate extends Vue {
   valid:boolean = false
 
   async validate() {
-    let existing = await this.$idb.table("catalog").get(this.properties.name)
+    let existing = await this.$idb.table("catalog").get(this.name)
     if (existing) {
       this.error = 'Name already exists in catalog'
       this.showError = true
@@ -75,9 +77,42 @@ export default class CatalogCreate extends Vue {
       return true
     }
   }
-  test() {
+  async test() {
+    // try to parse the file
+    let catalog:{[name:string]:any} = {}
+    catalog[this.name] = this.properties
+    await jupyterUtils.setPythonVariable(
+      this.$store.state.job.kernel,
+      "catalog",
+      catalog
+    )
+    let kernel = this.$store.state.job.kernel
+    // init kernel
+    let initCode = jobRenderer.renderInitCode()
+    await jupyterUtils.sendToPython(this.$store.state.job.kernel,initCode)
 
+    // create an extract code block
+    let code = blockTypes["extract"].codeTemplate.render({
+      comment: "",
+      props: {source:this.name},
+      inputs: null,
+      output: 'df'
+    })
+    let setMock = 
+`
+import unittest.mock
+patcher = unittest.mock.patch('lib.common.utils.get_catalog', return_value=catalog,create=True)
+patcher.start()
+`
+    await jupyterUtils.sendToPython(kernel,setMock)
+    console.log(code)
+    // try {
+    //   await jupyterUtils.sendToPython(this.kernel,code)
+    //   this.showDataframePanel = true
+    //   this.inspectDataframeVariable = 'df'
+    // }
   }
+
   async created() {
     this.breadcrumbs = [
       {
@@ -96,12 +131,13 @@ export default class CatalogCreate extends Vue {
     this.id = this.$route.params["id"]
     if (this.$route.path.endsWith("edit")) {
       // we are editing. fetch the record
-      this.properties = await this.$idb.table("catalog").get(this.$route.params["id"])
+      this.name = this.$route.params["id"]
+      this.properties = await this.$idb.table("catalog").get(this.name)
     }
   }
   async save() {
     // check if we are changing the name
-    if (this.id && this.id!=this.properties.name) {
+    if (this.id && this.id!=this.name) {
       if (!(await this.validate())) {
         return
       }
@@ -110,8 +146,8 @@ export default class CatalogCreate extends Vue {
         this.$idb.table("catalog").delete(this.$route.params["id"])
       }
     }
-    this.$idb.table("catalog").put(this.properties)
-    this.id = this.properties.name
+    this.$idb.table("catalog").put(Object.assign({name:this.name},this.properties))
+    this.id = this.name
     this.success = true
   }
 }

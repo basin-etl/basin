@@ -1,2 +1,2 @@
 # ${comment? comment: 'extract '+props.source}
-${output} = spark.read.option("header",True).csv("./public/${props.source}.csv")
+${output} = lib.block_utils.extract(spark,env,"${props.source}")

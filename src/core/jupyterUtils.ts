@@ -3,7 +3,7 @@ import { IExecuteReplyMsg, IIOPubMessage, IReplyErrorContent, IStatusMsg, IStrea
 async function getKernel() {
 	var settings = ServerConnection.makeSettings({ 'baseUrl': '/ijupyter',
 	'wsUrl': 'ws://127.0.0.1:9007/',
-	'token': 'nstjupyter' });
+	'token': 'superglue' });
     let kernelManager = new KernelManager({serverSettings: settings})
 	let kernel = await kernelManager.startNew()
     console.log(kernel)
@@ -54,6 +54,13 @@ async function sendToPython(kernel:Kernel.IKernelConnection,cmd:string) {
 		}
 	}
 }
+async function setPythonVariable(kernel:Kernel.IKernelConnection,name:string,value:any): Promise<boolean> {
+	await kernel.requestExecute({code:
+`import json
+${name} = json.loads('${JSON.stringify(value)}')`
+})
+	return true
+}
 async function getDataframeCount(kernel:Kernel.IKernelConnection,expression:string,type='pyspark'): Promise<number> {
 	let code = ""
 	if (type=='pandas') {
@@ -100,5 +107,6 @@ export default {
     sendToPython: sendToPython,
 	dataframeInfo: dataframeInfo,
 	getDataframeCount: getDataframeCount,
-	inspectDataframe: inspectDataframe
+	inspectDataframe: inspectDataframe,
+	setPythonVariable: setPythonVariable
 }

@@ -1,3 +1,5 @@
+import os
 import pyspark.sql
-def extract():
+def extract(spark,env,source):
+    df = spark.read.option("header",True).csv(os.path.join(env["datafolder"],f"{source}.csv"))
     return df

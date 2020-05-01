@@ -1,9 +1,13 @@
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
 import lib.block_utils
+import lib.common.utils
 from pyspark.sql import SparkSession
 spark = SparkSession \
   .builder \
   .appName("superglue studio") \
   .config("spark.sql.decimalOperations.allowPrecisionLoss",False) \
   .getOrCreate()
+env = {
+  "datafolder": "/opt/superglue/data"
+}

@@ -175,7 +175,10 @@ export default class BlocksContainer extends Vue {
     var g = new dagre.graphlib.Graph();
     
     // Set an object for the graph label
-    g.setGraph({rankdir:"LR"});
+    g.setGraph({
+      rankdir:"LR",
+      ranksep: 100
+    });
     
     // Default to assigning a new object as a label for each new edge.
     g.setDefaultEdgeLabel(function() { return {}; });

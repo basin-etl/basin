@@ -11,7 +11,6 @@ div
 <script lang="ts">
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
-import blockPropertiesMixin from '../blockPropertiesMixin.js'
 import Vue from 'vue'
 import BlockProperties from '@/components/BlockProperties'
 @Component({
