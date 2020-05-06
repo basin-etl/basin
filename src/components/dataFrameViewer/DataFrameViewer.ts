@@ -34,11 +34,20 @@ export default class DataFrameViewer extends Vue {
     initialized = false
     recordCount:number = 0
     columnCount:number = 0
+    expanded = false
     
     @Watch('dataframe', { immediate: true})
     onDataframeChanged(newVal:string, oldVal:string) {
         this.expression = this.dataframe
         if (this.initialized) this.loadData()
+    }
+    expand() {
+        this.expanded = true
+        this.$emit("expand")
+    }
+    contract() {
+        this.expanded = false
+        this.$emit("contract")
     }
     async mounted() {
         this.expression = this.dataframe

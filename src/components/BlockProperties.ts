@@ -10,7 +10,7 @@ import { Prop } from 'vue-property-decorator';
 export default class BlockProperties extends Vue {
   @Prop(Array) inputSchema: Array<any>
 
-  local = {}
+  local:any = {}
   created() {
     console.log("created")
     this.local = {...this.$props}  
