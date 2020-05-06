@@ -1,3 +1,4 @@
+import snakeize from 'snakeize'
 import { tween } from 'femtotween'
 import { easeOutCubic } from 'femtotween/ease'
 import jupyterUtils from '@/core/jupyterUtils.ts'
@@ -18,6 +19,7 @@ import Block, { BlockStatus } from '@/models/Block';
 import Job, { JobStatus } from '@/models/Job';
 import Link from '@/models/Link';
 import JobCommand from '@/models/JobCommand';
+import jobUtils from '@/core/jobUtils';
 @Component({
   name: 'Editor',
   components: {
@@ -40,7 +42,7 @@ export default class Editor extends Vue {
   jobCommands:Array<JobCommand> = null // holds the runtime commands of the job while debugging
   selectedBlock:Block = null
   selectedBlockProperties = {} // we store this separately because of reactivity issues with vue and the v-bind to the properties panel
-  selectedBlockInputSchema:Array<any> = []
+  selectedBlockInputSchema:{[slot:string]:Array<any>} = {}
   readOnly = false
   inspectDataframeVariable = ''
   showDataframePanel = false
@@ -65,7 +67,8 @@ export default class Editor extends Vue {
     this.selectedBlockProperties=this.selectedBlock.properties
     this.showPropertiesPanel = true
     try {
-      this.selectedBlockInputSchema=await this.getInputSchema(this.selectedBlock)
+      let schema = await this.getInputSchema(this.selectedBlock)
+      this.selectedBlockInputSchema = schema
     }
     catch (e) {
       if (e.ename) {
@@ -118,13 +121,15 @@ export default class Editor extends Vue {
     (this.$refs.container as BlocksContainerRef).autoArrange()
   }
   async testSelectedBlock() {
+
     // we run only this block before saving. used for testing / preview
     if (this.isRunStateDirty) await this.run(true,this.selectedBlock.id,false,true)
+
     let draftBlock = Object.assign({},this.selectedBlock,{
         "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()
     })
     let jobCommand = this.jobCommands.find( (command) => command.blockId==this.selectedBlock.id)
-    console.log(await jupyterUtils.getSchema(this.kernel,jobCommand.inputs[0]))
+
     let code = blockTypes[this.selectedBlock.type].codeTemplate.render({
       comment: draftBlock.comment,
       props: draftBlock.properties,
@@ -144,7 +149,7 @@ export default class Editor extends Vue {
       }
     }
   }
-  async getInputSchema(block:Block): Promise<Array<JSON>> {
+  async getInputSchema(block:Block): Promise<{[slot:string]:Array<JSON>}> {
     // we run only this block before saving. used for testing / preview to get the schema
     if (this.isRunStateDirty) {
       try {
@@ -155,17 +160,16 @@ export default class Editor extends Vue {
             this.error = `${e.ename}: ${e.evalue}`
             this.showError = true
         }
-        return []
+        return {}
       }
     } 
 
     let jobCommand = this.jobCommands.find( (command) => command.blockId==block.id)
-    if (Object.keys(jobCommand.inputs).length>0) {
-      return await jupyterUtils.getSchema(this.kernel,jobCommand.inputs[0])
+    let schemas:{[slot:string]:Array<JSON>} = {}
+    for (let input of Object.keys(jobCommand.inputs)) {
+      schemas[input] = await jupyterUtils.getSchema(this.kernel,jobCommand.inputs[input])
     }
-    else {
-      return []
-    }
+    return schemas;
   }
 
   // silent - no updates of status
@@ -187,11 +191,18 @@ export default class Editor extends Vue {
 
       let commands = jobRenderer.render({blocks:this.blocks,links:this.links, container: {}})
       this.jobCommands = commands
-
+      console.log(commands)
       // start running
       let initCode = jobRenderer.renderInitCode()
       await jupyterUtils.sendToPython(this.kernel,initCode)
       this.completedBlocks = 0
+
+      // send catalog to server
+      let catalog = await this.$idb.table("catalog").toArray()
+      await jobUtils.syncCatalog(
+        this.kernel,
+        catalog
+      )
 
       for (let command of commands) {
         // check if we have a flag to inerrupt currenct execution
@@ -229,8 +240,10 @@ export default class Editor extends Vue {
         }
         // set the result count
         console.log(block)
-        if (command.output && getCount) {
-          block.outputLinks[0].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.output)
+        if (getCount) {
+          Object.keys(command.outputs).forEach( async output => {
+            block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
+          })
         }
         // set it so it forces an update
         this.$set(this.blocks,blockIndex,block)

@@ -77,10 +77,10 @@ export default class Editor extends Vue {
   toggleSelected() {
     this.selected = !this.selected      
   }
-  getConnectionPos (socketType:string, socketNumber:number) {
+  getConnectionPos (socketType:string, socket:string) {
     return {
-      'x': this.x + (<Array<HTMLElement>>this.$refs[`${socketType}${socketNumber}`])[0].offsetLeft + circleSize/2,
-      'y': this.y + (<Array<HTMLElement>>this.$refs[`${socketType}${socketNumber}`])[0].offsetTop + circleSize/2
+      'x': this.x + (<Array<HTMLElement>>this.$refs[`${socketType}_${socket}`])[0].offsetLeft + circleSize/2,
+      'y': this.y + (<Array<HTMLElement>>this.$refs[`${socketType}_${socket}`])[0].offsetTop + circleSize/2
     }
   }
     showProperties(e:Event) {
@@ -141,22 +141,22 @@ export default class Editor extends Vue {
       e.preventDefault()
     }
     // Slots
-    slotMouseDown (e:MouseEvent, index:number) {
+    slotMouseDown (e:MouseEvent, slot:string) {
       if (this.readOnly) return
-      this.$emit('linkingStart', index)
+      this.$emit('linkingStart', slot)
     }
-    slotMouseUp (e:MouseEvent, index:number) {
+    slotMouseUp (e:MouseEvent, slot:string) {
       if (this.readOnly) return
-      this.$emit('linkingStop', index)
+      this.$emit('linkingStop', slot)
       if (e.preventDefault) e.preventDefault()
     }
     inspectSlot(type:string,index:number) {
       this.$emit('inspectsocket',{type:type,id:this.id,index:index})
     }
-    slotBreak (e:MouseEvent, index:number) {
+    slotBreak (e:MouseEvent, slot:string) {
       if (this.readOnly) return
-      this.$delete(this.inputLinks,index)
-      this.$emit('linkingBreak', index)
+      this.$delete(this.inputLinks,slot)
+      this.$emit('linkingBreak', slot)
       if (e.preventDefault) e.preventDefault()
     }
     save () {

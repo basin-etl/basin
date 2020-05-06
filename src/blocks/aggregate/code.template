@@ -1,2 +1,2 @@
 # aggregating ${inputs[0]}
-${output} = ${inputs[0]}.groupby(${props.groupBy}).agg(${props.aggregate})
+${output} = ${inputs['df']}.groupby(${props.groupBy}).agg(${props.aggregate})

@@ -8,7 +8,7 @@ import { Prop } from 'vue-property-decorator';
   }
 })
 export default class BlockProperties extends Vue {
-  @Prop(Array) inputSchema: Array<any>
+  @Prop(Object) inputSchema: {[slot:string]:Array<any>}
 
   local:any = {}
   created() {

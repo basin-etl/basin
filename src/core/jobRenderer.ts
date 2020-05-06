@@ -32,33 +32,35 @@ function render(jobContent:Job):Array<JobCommand> {
       const incomingLinks = jobContent.links.filter( (link) => link.targetId==blockNode.id)
       
       // name the inputs
-      let inputs:{[slot:number]:string} = {}
+      let inputs:{[slot:string]:string} = {}
       incomingLinks.forEach( link => {
         let sourceBlock = jobCommands.find( (command) => command.blockId==link.originId)
-        inputs[link.targetSlot] = sourceBlock.output
+        inputs[link.targetSlot] = sourceBlock.outputs[link.originSlot]
       })
-      let output =null
 
-      // name the output
-      if (blockType.outputs.length>0) {
-        // give the output a pretty name
-        output = blockType.outputNameTemplate.render({
+      // name the outputs
+      // XXX todo: handle duplicates
+      let outputs:{[slot:string]:string} = {}
+      blockType.outputs.forEach( (item) => {
+        outputs[item.id] = item.outputNameTemplate.render({
           id: blockNode.id,
           props: blockNode.properties,
           inputs: inputs,
+          outputs: null,
+          output: null
         })
-        // handle duplicates
-      }
-
+      })
+      console.log("output:"+(Object.keys(outputs).length==1)? Object.values(outputs)[0] : null)
       jobCommands.push({
         blockId: blockNode.id,
         inputs: inputs,
-        output: output,
+        outputs: outputs,
         code: blockType.codeTemplate.render({
           comment: blockNode.comment,
           props: blockNode.properties,
           inputs: inputs,
-          output: output
+          outputs: outputs,
+          output: (Object.keys(outputs).length==1)? Object.values(outputs)[0] : null
         })
       })
     })

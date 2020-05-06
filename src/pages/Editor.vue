@@ -75,10 +75,10 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       temporary
       stateless
       right
-      width="400"
+      width="600"
   )
-    v-row(no-gutters)
-      div {{selectedBlock.type}} Properties
+    v-row.mb-1(no-gutters,align="center")
+      div {{blockTypes[selectedBlock.type].title}} Properties
       v-spacer
       v-btn(icon,@click="showPropertiesPanel=false")
           v-icon close

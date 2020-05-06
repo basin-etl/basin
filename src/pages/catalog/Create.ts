@@ -68,14 +68,14 @@ export default class CatalogCreate extends Vue {
   }
   async test() {
     // try to parse the file
+    let kernel = this.$store.state.job.kernel
     let catalog:{[name:string]:any} = {}
     catalog[this.name] = this.properties
     await jupyterUtils.setPythonVariable(
-      this.$store.state.job.kernel,
+      kernel,
       "catalog",
       snakeize(catalog)
     )
-    let kernel = this.$store.state.job.kernel
     // init kernel
     let initCode = jobRenderer.renderInitCode()
     await jupyterUtils.sendToPython(this.$store.state.job.kernel,initCode)

@@ -17,7 +17,9 @@ v-row(no-gutters).flex-column
   v-row(no-gutters)
     | Available fields
   v-row(no-gutters)
-    v-chip.ma-1(v-for="field in inputSchema",
+    v-row(no-gutter,align="center",justify="center",v-if="!inputSchema.df")
+      v-progress-circular(indeterminate,color="primary")
+    v-chip.ma-1(v-for="field in inputSchema.df",
       small,
       draggable
       v-on:dragstart="dragChip($event,field.name)"
@@ -39,7 +41,7 @@ export default class AggregateBlockProperties extends BlockProperties {
   @Prop(String) groupBy: string
   @Prop(String) aggregate: string
   fieldDropped(event:DragEvent) {
-    let newVal = this.local.groupBy
+    let newVal = this.local.groupBy ? this.local.groupBy : ""
     newVal += this.local.groupBy && this.local.groupBy.length>0 && !this.local.groupBy.endsWith(",") ? ", " : ""
     newVal += `F.col("${event.dataTransfer.getData("text")}")`
     this.$set(this.local,"groupBy",newVal)

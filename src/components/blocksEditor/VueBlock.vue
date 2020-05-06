@@ -50,11 +50,11 @@
               //-
               .d-flex.flex-column.flex-grow-1.ma-0(align='center',justify="start")
                 .circle.ma-0.inputSlot(
-                  :ref="`input${index}`",
-                  :class='{active: inputLinks[index],"read-only":readOnly}',
+                  :ref="`input_${slot.id}`",
+                  :class='{active: inputLinks[slot.id],"read-only":readOnly}',
                   :style="{visibility: stopped && !readOnly ? 'visible': 'hidden'}"
-                  @mouseup='slotMouseUp($event, index)',
-                  @mousedown.stop="readOnly? inspectSlot('input',index) : slotBreak($event, index)"
+                  @mouseup='slotMouseUp($event, slot.id)',
+                  @mousedown.stop="readOnly? inspectSlot('input',slot.id) : slotBreak($event, slot.id)"
                 )
               //- tooltip (result counts). irrelevant since we can see if from the outputs of previous block
               //- div.slot-tooltip.input(v-show="completed") {{inputLinks[index]? inputLinks[index].resultCount : '' | numFormat}}
@@ -71,13 +71,13 @@
             .slot-container(v-for='(slot, index) in outputs')
               .d-flex.flex-column.flex-grow-1.ma-0(align='center',justify="start")
                 .circle.ma-0(
-                  :ref="`output${index}`",
-                  :class='{active: outputLinks[index],"read-only":readOnly}',
+                  :ref="`output_${slot.id}`",
+                  :class='{active: outputLinks[slot.id],"read-only":readOnly}',
                   :style="{visibility: pendingRun ? 'hidden': 'visible'}"
-                  @mousedown.stop="readOnly? inspectSlot('output',index) : slotMouseDown($event, index)"
+                  @mousedown.stop="readOnly? inspectSlot('output',slot.id) : slotMouseDown($event, slot.id)"
                 )
               //- tooltip (result counts)
-              div.slot-tooltip.output(v-show="completed") {{outputLinks[index]? outputLinks[index].resultCount : '' | numFormat}}
+              div.slot-tooltip.output(v-show="completed") {{outputLinks[slot.id]? outputLinks[slot.id].resultCount : '' | numFormat('0a')}}
 </template>
 
 <style lang="less" scoped>

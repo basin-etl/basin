@@ -6,6 +6,6 @@
     "icon": "system_update",
     "inputs": [],
     "outputs": [
-        {"id":"df", "type": "dataframe","name":"df_${props.alias}"}
+        {"id":"df", "type": "dataframe","name_template":"df_${props.alias}"}
     ]
 }
