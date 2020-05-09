@@ -16,16 +16,7 @@ v-row(no-gutters).flex-column
   )
   v-row(no-gutters)
     | Available fields
-  v-row(no-gutters)
-    v-row(no-gutter,align="center",justify="center",v-if="!inputSchema.df")
-      v-progress-circular(indeterminate,color="primary")
-    v-chip.ma-1(v-for="field in inputSchema.df",
-      small,
-      draggable
-      v-on:dragstart="dragChip($event,field.name)"
-    )
-      v-icon(small,v-if="field.type=='string'") format_quote
-      | {{field.name}}
+  SchemaChips(:schema="inputSchema.df")
 
 </template>
 
@@ -45,16 +36,9 @@ export default class AggregateBlockProperties extends BlockProperties {
     newVal += this.local.groupBy && this.local.groupBy.length>0 && !this.local.groupBy.endsWith(",") ? ", " : ""
     newVal += `F.col("${event.dataTransfer.getData("text")}")`
     this.$set(this.local,"groupBy",newVal)
-    console.log(event.dataTransfer.getData("text"))
 
   }
-  dragChip(event:DragEvent,text:string) {
-    event.dataTransfer.setData("text/plain",text);
-  }
 
-  allowDrop(event:DragEvent) {
-    event.preventDefault();
-  }
 }
 </script>
 

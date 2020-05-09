@@ -14,10 +14,12 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
         v-btn(icon,v-if="expanded",@click="contract")
             v-icon() expand_more
     v-row(no-gutters).flex-column
-        div.flex-grow-1.grid(v-show="kernel && data && !loading",ref="dataGrid")
+        div.flex-grow-1.grid(v-show="kernel && data && !loading && recordCount>0",ref="dataGrid")
         v-row.overlay(no-gutters,justify="center",align="center",v-show="!kernel || !data || loading")
             v-progress-circular(v-if="!errorMessage",indeterminate)
             v-icon(v-if="errorMessage") error_outline
+        v-row.overlay(no-gutters,justify="center",align="center",v-show="!loading && recordCount==0")
+            | no results
     div.status-bar.px-3
         div(v-if="!loading")
             | loaded {{recordCount | numFormat}} records, {{columnCount | numFormat}} columns

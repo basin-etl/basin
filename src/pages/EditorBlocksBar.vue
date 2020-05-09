@@ -13,7 +13,7 @@
           v-list-item(link,:title="blockType.description")
             v-list-item-icon
               v-icon {{blockType.icon}}
-            v-list-item-content {{blockType.title}}
+            v-list-item-content.block-title {{blockType.title}}
           v-divider
       v-list-group()
         template(v-slot:activator)
@@ -58,7 +58,11 @@ export default {
 
 }
 </script>
-
+<style scoped>
+.block-title {
+    text-transform: capitalize;
+}
+</style>
 <style>
   .block-type-ghost {
     position: absolute;

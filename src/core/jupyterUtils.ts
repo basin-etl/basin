@@ -94,9 +94,11 @@ batches = (${expression}).limit(${limit})._collectAsArrow()
 	}
 	code += `
 sink = pa.BufferOutputStream()
-writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-for batch in batches:
-	writer.write_batch(batch)
+# see if we have any results
+if len(batches)>0:
+	writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
+	for batch in batches:
+		writer.write_batch(batch)
 comm = Comm(target_name="inspect_df")
 comm.send(data="test",buffers=[sink.getvalue()])
 comm.close(data="closing comm")

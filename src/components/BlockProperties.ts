@@ -18,4 +18,9 @@ export default class BlockProperties extends Vue {
   getProperties() {
     return this.local
   }
+  // general utilities
+  allowDrop(event:DragEvent) {
+    event.preventDefault();
+  }
+
 }

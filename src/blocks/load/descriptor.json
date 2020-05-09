@@ -5,7 +5,7 @@
     "color": "lightgreen",
     "icon": "cloud_upload",
     "inputs": [
-        {"label":"df", "type": "dataframe"}
+        {"id":"df","label":"df", "type": "dataframe"}
     ],
     "outputs": [
     ]
