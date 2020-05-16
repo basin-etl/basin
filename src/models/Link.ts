@@ -1,8 +1,8 @@
 export default class Link {
     originId: number
     targetId: number
-    originSlot: number
-    targetSlot: number
+    originSlot: string
+    targetSlot: string
     // used for display
     resultCount:number = 0
 

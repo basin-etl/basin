@@ -1,2 +1,2 @@
 # filter ${inputs[0]}
-${output} = ${inputs[0]}.filter(${props.filter})
+${output} = ${inputs.df}.filter(${props.filter})

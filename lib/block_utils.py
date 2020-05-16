@@ -8,7 +8,9 @@ def extract(spark,env,source):
     catalog = common.utils.get_catalog()
     print(catalog)
     properties = catalog[source]
-    options = {}
+    options = {
+        "inferSchema":  True
+    }
     options["delimiter"] = properties["delimiter"]
     options["header"] = properties["header"]
     df = spark.read.options(**options).csv(os.path.join(env["datafolder"],properties["location"]))

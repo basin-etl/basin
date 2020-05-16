@@ -62,7 +62,8 @@ ${name} = json.loads('${JSON.stringify(value)}')`
 	return true
 }
 async function getSchema(kernel:Kernel.IKernelConnection,dataframe:string): Promise<Array<JSON>> {
-	return JSON.parse(await sendToPython(kernel,`print(${dataframe}.schema.json())`))["fields"]
+	// return JSON.parse(await sendToPython(kernel,`print(${dataframe}.schema.json())`))["fields"]
+	return JSON.parse(await sendToPython(kernel,`print(common.utils.get_schema_with_aliases(${dataframe},format="json"))`))["fields"]
 }
 async function getDataframeCount(kernel:Kernel.IKernelConnection,expression:string,type='pyspark'): Promise<number> {
 	let code = ""
@@ -94,9 +95,11 @@ batches = (${expression}).limit(${limit})._collectAsArrow()
 	}
 	code += `
 sink = pa.BufferOutputStream()
-writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-for batch in batches:
-	writer.write_batch(batch)
+# see if we have any results
+if len(batches)>0:
+	writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
+	for batch in batches:
+		writer.write_batch(batch)
 comm = Comm(target_name="inspect_df")
 comm.send(data="test",buffers=[sink.getvalue()])
 comm.close(data="closing comm")

@@ -54,7 +54,7 @@ export default class BlocksContainer extends Vue {
   minScale = 0.2
   maxScale = 5
   linking = false
-  linkStartData:{block: Block, slotNumber: number} = null
+  linkStartData:{block: Block, slot: string} = null
   inputSlotClassName = 'inputSlot'
   //
   s_blocks:Array<vBlock> = [] // internal copy
@@ -255,7 +255,7 @@ export default class BlocksContainer extends Vue {
       }
 
       if (this.linking && this.linkStartData) {
-        let linkStartPos = this.scalePosition(this.getBlock(this.linkStartData.block.id).getConnectionPos('output',this.linkStartData.slotNumber))
+        let linkStartPos = this.scalePosition(this.getBlock(this.linkStartData.block.id).getConnectionPos('output',this.linkStartData.slot))
         this.tempLink = {
           x1: linkStartPos.x,
           y1: linkStartPos.y,
@@ -340,9 +340,9 @@ export default class BlocksContainer extends Vue {
   }
 
   // Linking
-  linkingStart (block:Block, slotNumber:number) {
-      this.linkStartData = {block: block, slotNumber: slotNumber}
-      let linkStartPos = this.scalePosition(this.getBlock(this.linkStartData.block.id).getConnectionPos('output',this.linkStartData.slotNumber))
+  linkingStart (block:Block, slot:string) {
+      this.linkStartData = {block: block, slot: slot}
+      let linkStartPos = this.scalePosition(this.getBlock(this.linkStartData.block.id).getConnectionPos('output',this.linkStartData.slot))
       this.tempLink = {
         x1: linkStartPos.x,
         y1: linkStartPos.y,
@@ -352,31 +352,32 @@ export default class BlocksContainer extends Vue {
 
       this.linking = true
   }
-  linkingStop (targetBlock:Block, slotNumber:number) {
-      if (this.linkStartData && targetBlock && slotNumber > -1) {
-        this.s_links = this.s_links.filter(value => {
-          return !(value.targetId === targetBlock.id && value.targetSlot === slotNumber)
-        })
+  linkingStop (targetBlock:Block, slot:string) {
+    // check if valid link. If not, remove this link by filtering all but this one
+    if (this.linkStartData && targetBlock && slot) {
+      this.s_links = this.s_links.filter(value => {
+        return !(value.targetId === targetBlock.id && value.targetSlot === slot)
+      })
 
-        // skip if looping
-        if (this.linkStartData.block.id !== targetBlock.id) {
-          this.s_links.push(new Link({
-            originId: this.linkStartData.block.id,
-            originSlot: this.linkStartData.slotNumber,
-            targetId: targetBlock.id,
-            targetSlot: slotNumber
-          }))
-          this.updateLinks()
-        }
+      // skip if looping
+      if (this.linkStartData.block.id !== targetBlock.id) {
+        this.s_links.push(new Link({
+          originId: this.linkStartData.block.id,
+          originSlot: this.linkStartData.slot,
+          targetId: targetBlock.id,
+          targetSlot: slot
+        }))
+        this.updateLinks()
       }
-      this.linking = false
-      this.tempLink = null
-      this.linkStartData = null
+    }
+    this.linking = false
+    this.tempLink = null
+    this.linkStartData = null
   }
-  linkingBreak (targetBlock:Block, slotNumber:number) {
-      if (targetBlock && slotNumber > -1) {
+  linkingBreak (targetBlock:Block, slot:string) {
+      if (targetBlock && slot) {
         let findLink = this.s_links.find(value => {
-          return value.targetId === targetBlock.id && value.targetSlot === slotNumber
+          return value.targetId === targetBlock.id && value.targetSlot === slot
         })
 
         if (findLink) {
@@ -385,7 +386,7 @@ export default class BlocksContainer extends Vue {
           })
 
           this.s_links = this.s_links.filter(value => {
-            return !(value.targetId === targetBlock.id && value.targetSlot === slotNumber)
+            return !(value.targetId === targetBlock.id && value.targetSlot === slot)
           })
 
           this.linkingStart(findBlock, findLink.originSlot)

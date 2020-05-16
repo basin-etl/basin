@@ -1,6 +1,12 @@
 # superglueui
 
+Extract, transform, load using a visual studio that can run Spark jobs on any environment
+
+Create and debug from your browser and export into pure python code!
+
 # Project setup
+
+## Install using docker
 ```
 npm install
 ```
@@ -19,6 +25,10 @@ Then run the server:
 ```
 docker run -it -p 9007:8888 superglue/server
 ```
+
+## Install from source
+
+## Getting started
 
 ## Configuration
 The first this runs it will pull all dependencies and install locally. 

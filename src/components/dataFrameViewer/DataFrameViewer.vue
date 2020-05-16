@@ -1,6 +1,6 @@
 <template lang="pug">
 v-row.ma-0.fill-height.flex-column.flex-nowrap
-    v-row(no-gutters).flex-grow-0.px-3
+    v-row(no-gutters,align="center").flex-grow-0.px-3
         v-text-field(
             :style="{'max-width':'500px'}",
             label="Filter expression",
@@ -8,11 +8,18 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
             v-model="expression",
             @keydown.enter="loadData"
         )
+        v-spacer
+        v-btn(icon,v-if="!expanded",@click="expand")
+            v-icon() expand_less
+        v-btn(icon,v-if="expanded",@click="contract")
+            v-icon() expand_more
     v-row(no-gutters).flex-column
-        div.flex-grow-1.grid(v-show="kernel && data && !loading",ref="dataGrid")
+        div.flex-grow-1.grid(v-show="kernel && data && !loading && recordCount>0",ref="dataGrid")
         v-row.overlay(no-gutters,justify="center",align="center",v-show="!kernel || !data || loading")
             v-progress-circular(v-if="!errorMessage",indeterminate)
             v-icon(v-if="errorMessage") error_outline
+        v-row.overlay(no-gutters,justify="center",align="center",v-show="!loading && recordCount==0")
+            | no results
     div.status-bar.px-3
         div(v-if="!loading")
             | loaded {{recordCount | numFormat}} records, {{columnCount | numFormat}} columns

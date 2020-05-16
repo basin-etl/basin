@@ -1,2 +1,3 @@
 # ${comment? comment: 'extract '+props.source}
 ${output} = block_utils.extract(spark,env,"${props.source}")
+${output} = ${output}.alias("${props.alias}")

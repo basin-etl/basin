@@ -15,7 +15,7 @@ v-card.flex-column.d-flex.height-100
             :disable-pagination="true",
             fixed-header,
             height="100%"
-            class="elevation-1"
+            class="elevation-0"
         )
   
 </template>

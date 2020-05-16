@@ -34,11 +34,20 @@ export default class DataFrameViewer extends Vue {
     initialized = false
     recordCount:number = 0
     columnCount:number = 0
+    expanded = false
     
     @Watch('dataframe', { immediate: true})
     onDataframeChanged(newVal:string, oldVal:string) {
         this.expression = this.dataframe
         if (this.initialized) this.loadData()
+    }
+    expand() {
+        this.expanded = true
+        this.$emit("expand")
+    }
+    contract() {
+        this.expanded = false
+        this.$emit("contract")
     }
     async mounted() {
         this.expression = this.dataframe
@@ -96,10 +105,17 @@ export default class DataFrameViewer extends Vue {
             comm.onMsg = msg => {
                 console.log("got msg callback")
                 let t = Table.from((<DataView>msg.buffers[0]).buffer)
-                vm.data = t
-                vm.dataModel.setData(t)
-                vm.recordCount = vm.dataModel.getRowCount()
-                vm.columnCount = vm.dataModel.getColumnCount()
+                console.log(t.count())
+                if (t.count()==0) {
+                    vm.recordCount = 0
+                    vm.columnCount = 0
+                }
+                else {
+                    vm.data = t
+                    vm.dataModel.setData(t)
+                    vm.recordCount = vm.dataModel.getRowCount()
+                    vm.columnCount = vm.dataModel.getColumnCount()    
+                }
                 vm.loading = false
             };
             comm.onClose = msg => {

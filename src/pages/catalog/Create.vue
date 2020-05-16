@@ -15,12 +15,12 @@ v-row.mt-5(justify="center",align="start")
               label="Type of file")
         
       template(v-if="properties.type=='delimited'")
-        v-text-field.form-field.flex-grow-0(v-model="properties.Delimiter",label="Delimiter")
-        v-text-field.form-field.flex-grow-0(v-model="properties.SkipHeader",label="# of header rows to skip")
-        v-text-field.form-field.flex-grow-0(v-model="properties.SkipFooter",label="# of footer rows to ignore")
         v-switch(v-model="properties.header",label="File has a header")
+        v-text-field.form-field.flex-grow-0(v-model="properties.delimiter",label="Delimiter")
+        v-text-field.form-field.flex-grow-0(v-model="properties.skipHeaderLines",label="# of header rows to skip")
+        v-text-field.form-field.flex-grow-0(v-model="properties.skipFooterLines",label="# of footer rows to ignore")
     div
-      v-btn(:disabled="!valid",@click="test") Test
+      v-btn(:disabled="!valid",@click="test") Preview
       v-btn.ml-3(color="success",:disabled="!valid",@click="save") Save
   v-snackbar(color="success",right,
     v-model="success")
@@ -31,15 +31,29 @@ v-row.mt-5(justify="center",align="start")
   //-
   //- bottom sheet
   //-
-  v-bottom-sheet(v-model="showDataframePanel",height="500px",transition="")
-    v-sheet(height="500px",:style="{'border-radius':'0'}")
-      DataFrameViewer(:kernel="kernel",dataframe="df",v-if="showDataframePanel && kernel")
+  v-bottom-sheet.d-flex.flex-column(
+    v-model="showDataframePanel",:content-class="showDataframePanelExpanded?'expanded-dataviewer':'dataviewer'",transition="")
+    v-sheet(height="100%",:style="{'border-radius':'0'}")
+      DataFrameViewer(
+        :kernel="kernel",
+        dataframe="df",
+        v-if="showDataframePanel && kernel"
+        @expand="expandViewer()",
+        @contract="contractViewer()",
+      )
 
 </template>
 
 <script lang="ts" src="./Create.ts">
 </script>
-
+<style>
+.expanded-dataviewer {
+  height: 80%
+}
+.dataviewer {
+  height: 500px
+}
+</style>
 <style scoped>
 .table {
   max-width: 1150px

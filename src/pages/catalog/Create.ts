@@ -6,6 +6,7 @@ import blockTypes from '@/core/blockTypes'
 import jobRenderer from '@/core/jobRenderer'
 import snakeize from 'snakeize'
 import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
+import { Int } from 'apache-arrow';
 
 @Component({
     components: {
@@ -14,7 +15,14 @@ import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
 })
 
 export default class CatalogCreate extends Vue {
-  properties = {
+  properties:{
+    type:string,
+    delimiter?:string,
+    header?:boolean,
+    skipHeaderLines?:number
+    skipFooterLines?:number,
+  } = {
+    type:"delimited"
   }
   name = ""
   error:String = null
@@ -22,6 +30,7 @@ export default class CatalogCreate extends Vue {
   showError = false
   breadcrumbs:Array<any> = []
   showDataframePanel = false
+  showDataframePanelExpanded = false
 
   fileTypes = [
     {value:"delimited",label:"Delimited (comma or other)"},
@@ -38,6 +47,13 @@ export default class CatalogCreate extends Vue {
 
   valid:boolean = false
 
+  expandViewer() {
+    console.log("expanding")
+    this.showDataframePanelExpanded = true
+  }
+  contractViewer() {
+    this.showDataframePanelExpanded = false
+  }
   async validate() {
     let existing = await this.$idb.table("catalog").get(this.name)
     if (existing) {
@@ -52,14 +68,14 @@ export default class CatalogCreate extends Vue {
   }
   async test() {
     // try to parse the file
+    let kernel = this.$store.state.job.kernel
     let catalog:{[name:string]:any} = {}
     catalog[this.name] = this.properties
     await jupyterUtils.setPythonVariable(
-      this.$store.state.job.kernel,
+      kernel,
       "catalog",
       snakeize(catalog)
     )
-    let kernel = this.$store.state.job.kernel
     // init kernel
     let initCode = jobRenderer.renderInitCode()
     await jupyterUtils.sendToPython(this.$store.state.job.kernel,initCode)
@@ -130,5 +146,14 @@ patcher.start()
   get kernel() {
     return this.$store.state.job.kernel
   }
-
+  @Watch('properties.type', { immediate: true})
+  onPropertiesTypeChanged(newVal:string,oldVal:string) {
+    if (newVal=='delimited') {
+      // set default values
+      this.properties.delimiter = ","
+      this.properties.header = true
+      this.properties.skipHeaderLines = 0
+      this.properties.skipFooterLines = 0
+    }
+  }
 }

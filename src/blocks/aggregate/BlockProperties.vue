@@ -14,16 +14,10 @@ v-row(no-gutters).flex-column
     filled,
     label="aggregate"
   )
+  v-text-field(v-model="local.alias",label="Alias")
   v-row(no-gutters)
     | Available fields
-  v-row(no-gutters)
-    v-chip.ma-1(v-for="field in inputSchema",
-      small,
-      draggable
-      v-on:dragstart="dragChip($event,field.name)"
-    )
-      v-icon(small,v-if="field.type=='string'") format_quote
-      | {{field.name}}
+  SchemaChips(:schema="inputSchema.df")
 
 </template>
 
@@ -32,27 +26,23 @@ import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
 import BlockProperties from '@/components/BlockProperties'
+import SchemaChips from '../../components/SchemaChips.vue'
 @Component({
+  components: {SchemaChips}
 })
 
 export default class AggregateBlockProperties extends BlockProperties {
   @Prop(String) groupBy: string
   @Prop(String) aggregate: string
   fieldDropped(event:DragEvent) {
-    let newVal = this.local.groupBy
+    let field = JSON.parse(event.dataTransfer.getData("text"))
+    let newVal = this.local.groupBy ? this.local.groupBy : ""
     newVal += this.local.groupBy && this.local.groupBy.length>0 && !this.local.groupBy.endsWith(",") ? ", " : ""
-    newVal += `F.col("${event.dataTransfer.getData("text")}")`
+    newVal += `F.col("${field.name}")`
     this.$set(this.local,"groupBy",newVal)
-    console.log(event.dataTransfer.getData("text"))
 
   }
-  dragChip(event:DragEvent,text:string) {
-    event.dataTransfer.setData("text/plain",text);
-  }
 
-  allowDrop(event:DragEvent) {
-    event.preventDefault();
-  }
 }
 </script>
 

@@ -4,7 +4,7 @@
     "description": "filter rows",
     "category": "dataframe",
     "color": "red",
-    "icon": "call_merge",
+    "icon": "filter_list",
     "inputs": [
         {"id":"df","label":"df", "type": "dataframe"}
     ],
