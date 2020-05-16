@@ -7,7 +7,7 @@ def extract(spark,env,source):
     print(catalog)
     properties = catalog[source]
     options = {
-        "inferSchema":  true
+        "inferSchema":  True
     }
     options["delimiter"] = properties["delimiter"]
     options["header"] = properties["header"]

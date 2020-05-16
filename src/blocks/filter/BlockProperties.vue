@@ -1,11 +1,16 @@
 <template lang="pug">
 div
   v-textarea(
+    v-on:drop="fieldDropped($event,'filter')"
+    v-on:dragover="allowDrop"
     v-model="local.filter",
     rows="5",
     filled,
     label="filter expression"
   )
+  v-row(no-gutters)
+    | Available fields
+  SchemaChips(:schema="inputSchema.df")
 </template>
 
 <script lang="ts">
@@ -18,6 +23,8 @@ import BlockProperties from '@/components/BlockProperties'
 
 export default class FilterBlockProperties extends BlockProperties {
   @Prop(String) filter: string
+
+
 }
 </script>
 

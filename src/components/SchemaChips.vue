@@ -5,10 +5,10 @@
     v-chip.ma-1(v-for="field in schema",:key="field.name",
       x-small,
       draggable
-      v-on:dragstart="dragChip($event,field.name)"
+      v-on:dragstart="dragChip($event,field.name,field.tablealias)"
     )
       v-icon(small,v-if="field.type=='string'") format_quote
-      | {{field.name}}
+      | {{field.tablealias}}.{{field.name}}
 
 </template>
 
@@ -25,8 +25,13 @@ export default class SchemaChips extends Vue {
   @Prop(Array) schema: Array<JSON>
   @Prop(String) alias: string
 
-  dragChip(event:DragEvent,text:string) {
-    event.dataTransfer.setData("text/plain",JSON.stringify({"name":text,"alias":this.alias}));
+  dragChip(event:DragEvent,name:string,tablealias:string) {
+    let fullname = ""
+    if (tablealias!="") {
+      fullname += tablealias+"."
+    }
+    fullname += name
+    event.dataTransfer.setData("text/plain",JSON.stringify({"name":fullname,"alias":this.alias}));
   }
 }
 </script>

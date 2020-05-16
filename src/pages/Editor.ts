@@ -239,15 +239,15 @@ export default class Editor extends Vue {
           return
         }
         // set the result count
-        console.log(block)
         if (getCount) {
           Object.keys(command.outputs).forEach( async output => {
+            // block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
             block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
           })
         }
+        console.log(block)
         // set it so it forces an update
         this.$set(this.blocks,blockIndex,block)
-
         // block completed
         if (!silent) {
           this.setBlockStatus(command.blockId,BlockStatus.Completed)
