@@ -150,8 +150,8 @@ export default class Editor extends Vue {
       this.$emit('linkingStop', slot)
       if (e.preventDefault) e.preventDefault()
     }
-    inspectSlot(type:string,index:number) {
-      this.$emit('inspectsocket',{type:type,id:this.id,index:index})
+    inspectSlot(type:string,id:string) {
+      this.$emit('inspectsocket',{type:type,id:this.id,socketId:id})
     }
     slotBreak (e:MouseEvent, slot:string) {
       if (this.readOnly) return

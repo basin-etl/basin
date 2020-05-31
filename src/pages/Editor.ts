@@ -329,10 +329,10 @@ export default class Editor extends Vue {
     let command:any = this.jobCommands.find( (command:any) => command.blockId==socket.id)
     let dataframe
     if (socket.type=='input') {
-      dataframe = command.inputs[socket.index]
+      dataframe = command.inputs[socket.socketId]
     }
     else {
-      dataframe = command.output
+      dataframe = command.outputs[socket.socketId]
     }
     console.log(`inspect ${dataframe}`)
 

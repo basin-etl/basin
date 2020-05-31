@@ -7,6 +7,12 @@ module.exports = {
       .use('file-loader')
       .loader('raw-loader')
       // .loader('./template-loader.ts')
+    config
+      .plugin('html')
+      .tap((args) => {
+        args[0].title = 'SuperGlue Studio';
+        return args;
+      });      
   },
   devServer: { 
     watchOptions: {
