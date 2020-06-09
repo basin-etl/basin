@@ -1,3 +1,4 @@
+
 <template lang="pug">
 v-row.mt-5(justify="center",align="start")
   v-row.flex-column.table(align="start",no-gutters)
@@ -7,7 +8,12 @@ v-row.mt-5(justify="center",align="start")
     )
   
       v-text-field.form-field.flex-grow-0(@keydown.space.prevent,v-model="name",label="source name",:rules="[rules.required]")
-      v-text-field.form-field.flex-grow-0(v-model="properties.location",label="file name regexp",:rules="[rules.required]")
+      //- v-text-field.form-field.flex-grow-0(v-model="properties.location",label="file name regexp",:rules="[rules.required]")
+      v-autocomplete.form-field.flex-grow-0(v-model="properties.location",:items="files",label="file name regexp",:rules="[rules.required]")
+        template(
+          v-slot:item="{ item }"
+        )
+          | {{item.text}} ({{(item.size/1024/1024).toFixed(2)}})
       v-select.flex-grow-0(v-model="properties.type",
               :items="fileTypes"
               item-text="label"
@@ -20,7 +26,11 @@ v-row.mt-5(justify="center",align="start")
         v-text-field.form-field.flex-grow-0(v-model="properties.skipHeaderLines",label="# of header rows to skip")
         v-text-field.form-field.flex-grow-0(v-model="properties.skipFooterLines",label="# of footer rows to ignore")
     div
-      v-btn(:disabled="!valid",@click="test") Preview
+      v-btn(
+        :disabled="!valid || loadingPreview",
+        @click="preview",
+        :loading="loadingPreview"
+      ) Preview
       v-btn.ml-3(color="success",:disabled="!valid",@click="save") Save
   v-snackbar(color="success",right,
     v-model="success")

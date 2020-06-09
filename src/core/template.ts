@@ -5,6 +5,7 @@ export class CodeTemplate {
   }
   render(values = {}) {
     const handler = new Function('values', [
+      'columnNames = function(val) { return [...val.matchAll(/F.col\\([\'"](.*?)[\'"]\\)/g)].map( x => x[1]).join(", ") }',
       'const tagged = ( ' + Object.keys(values).join(', ') + ' ) =>',
         '`' + this.template + '`',
       'return tagged(...values)'

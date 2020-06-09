@@ -10,5 +10,6 @@
     ],
     "outputs": [
         {"id":"df","label":"df", "type": "dataframe"}
-    ]
+    ],
+    "comment_template": "filter by ${columnNames(props.filter)}"
 }

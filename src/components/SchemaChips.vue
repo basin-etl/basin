@@ -8,7 +8,7 @@
       v-on:dragstart="dragChip($event,field.name,field.tablealias)"
     )
       v-icon(small,v-if="field.type=='string'") format_quote
-      | {{field.tablealias}}.{{field.name}}
+      | {{field.tablealias? field.tablealias+'.':''}}{{field.name}}
 
 </template>
 

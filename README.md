@@ -1,12 +1,14 @@
-# superglueui
+# Basin
 
-Extract, transform, load using a visual studio that can run Spark jobs on any environment
+Extract, transform, load using visual programming that can run Spark jobs on any environment
 
 Create and debug from your browser and export into pure python code!
 
-# Project setup
+# Install
 
-## Install using docker
+## Install from docker
+
+## Install from source
 ```
 npm install
 ```
@@ -30,6 +32,20 @@ docker run -it -p 9007:8888 superglue/server
 
 ## Getting started
 
-## Configuration
-The first this runs it will pull all dependencies and install locally. 
+# Configuration
+
+# Extending
+## Creating new block types
+
+Each block type consists of:
+
+- Descriptor json
+- code template
+- optional code library template
+- Properties panel
+
+### Descriptor
+### Code template
+### Ccode library template
+### Properties panel
 

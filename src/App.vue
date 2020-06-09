@@ -33,6 +33,8 @@ v-app
     v-spacer
     router-link(to="/catalog")
       | Catalog
+    router-link.ml-3(to="/connector")
+      | Connectors
     router-link.ml-3(to="/flow")
       | Flows
     v-btn.ml-3(icon)

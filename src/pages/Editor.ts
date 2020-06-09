@@ -67,8 +67,14 @@ export default class Editor extends Vue {
     this.selectedBlockProperties=this.selectedBlock.properties
     this.showPropertiesPanel = true
     try {
-      let schema = await this.getInputSchema(this.selectedBlock)
-      this.selectedBlockInputSchema = schema
+      if (this.blockTypes[this.selectedBlock.type].inputs.length>0) {
+        let schema = await this.getInputSchema(this.selectedBlock)
+        this.selectedBlockInputSchema = schema  
+      }
+      else {
+        // this block type has no inputs. return an empty schema
+        this.selectedBlockInputSchema = {}
+      }
     }
     catch (e) {
       if (e.ename) {
@@ -88,12 +94,23 @@ export default class Editor extends Vue {
     // find index of selected block in job contents
     let blockIndex = this.blocks.findIndex(x => x.id == this.selectedBlock.id);
 
+    let properties = (this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()
+    let comment = ""
+    // auto-generate a comment if needed
+    if (this.selectedBlock.comment && this.selectedBlock.comment!='') {
+      comment = this.selectedBlock.comment
+    }
+    else {
+      comment = this.blockTypes[this.selectedBlock.type].commentTemplate.render({
+        props: properties
+      })
+    }
     this.$set(
       this.blocks,
       blockIndex,
       Object.assign({},this.blocks[blockIndex],{
-        "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties(),
-        "comment":this.selectedBlock.comment
+        "properties":properties,
+        "comment":comment,
       })
     )
     this.showPropertiesPanel = false
@@ -165,6 +182,7 @@ export default class Editor extends Vue {
     } 
 
     let jobCommand = this.jobCommands.find( (command) => command.blockId==block.id)
+    console.log(jobCommand)
     let schemas:{[slot:string]:Array<JSON>} = {}
     for (let input of Object.keys(jobCommand.inputs)) {
       schemas[input] = await jupyterUtils.getSchema(this.kernel,jobCommand.inputs[input])
@@ -272,6 +290,7 @@ export default class Editor extends Vue {
     this.persist()
   }
   updateBlocks(blocks:Array<Block>) {
+    this.isRunStateDirty = true
     this.blocks = blocks
     this.persist()
   }
@@ -279,6 +298,7 @@ export default class Editor extends Vue {
     this.$set(arr,index,Object.assign({},arr[index],assignProperty))
   }
   updateLinks(links:Array<Link>) {
+    this.isRunStateDirty = true
     let vm = this
     this.links = links
     for (let i=0; i<this.blocks.length; i++) {
@@ -296,7 +316,6 @@ export default class Editor extends Vue {
   }
   updateJob(job:any) {
     let vm = this
-    this.isRunStateDirty = true
     this.updateBlocks(job.blocks)
     this.updateLinks(job.links)
     this.updateContainer(job.container)
@@ -313,6 +332,13 @@ export default class Editor extends Vue {
     })
 
   }
+  @Watch('jobName')
+  onJobNameChanged(newVal:string,oldVal:string) {
+    this.persist()
+    // delete the old flow. there is no rename, so put and delete
+    this.$idb.table("flows").delete(oldVal)
+  }
+
   exportCode() {
     let text = this.jobCommands.map( (command) => command.code).join("\n\n")
     let encodedUri = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(text)
