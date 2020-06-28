@@ -49,3 +49,13 @@ Each block type consists of:
 ### Ccode library template
 ### Properties panel
 
+# Features
+
+## Dataview inspector
+
+## Auto-generates comments so you don't have to
+
+## Export to Python
+
+## Build for AWS Glue
+
