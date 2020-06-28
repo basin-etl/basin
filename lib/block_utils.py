@@ -9,7 +9,13 @@ def extract(spark,env,source):
     print(catalog)
     properties = catalog[source]
     options = {
-        "inferSchema":  True
+        "inferSchema": True,
+        "quote": "\"",
+        "escape": "\"",
+        "multiLine": "true",
+        "mode":"DROPMALFORMED",
+        "ignoreTrailingWhiteSpace": True,
+        "ignoreLeadingWhiteSpace": True,
     }
     options["delimiter"] = properties["delimiter"]
     options["header"] = properties["header"]

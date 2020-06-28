@@ -29,10 +29,12 @@ v-app
     v-toolbar-title.mr-2.pa-2(style="height:100%")
       router-link(to="/")
         img(src="@/assets/images/logo.png",style="height:100%")
-    span(:style="{'font-weight':'bold'}") SuperGlue Studio
+    span(:style="{'font-weight':'bold'}") Basin Studio
     v-spacer
     router-link(to="/catalog")
       | Catalog
+    router-link.ml-3(to="/connector")
+      | Connectors
     router-link.ml-3(to="/flow")
       | Flows
     v-btn.ml-3(icon)

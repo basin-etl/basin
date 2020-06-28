@@ -2,12 +2,12 @@
 v-row.mt-5(justify="center",align-items="start")
   v-col.table
     v-row.flex-column.pt-5(align="center",v-if="items.length==0")
-        div.headline You haven't created any flow yet
-        a.create-link.headline(@click="newItem") Create your first flow!
+        div.headline You haven't defined any connectors yet
+        router-link.headline(to="create",append) Set up your first connector!
     v-row(no-gutters,v-if="items.length>0")
       //- header toolbar
       v-toolbar.px-0(flat,color="white")
-        v-toolbar-title Flows
+        v-toolbar-title Sources Catalog
         v-spacer
         //- search field
         v-text-field.search-field(
@@ -17,7 +17,7 @@ v-row.mt-5(justify="center",align-items="start")
           single-line
           hide-details
         )
-        v-btn.ml-3(color="success",small,@click="newItem",append) New
+        v-btn.ml-3(color="success",small,to="create",append) New
     v-data-table(
       v-if="items.length>0"
       :headers="headers"
@@ -28,12 +28,13 @@ v-row.mt-5(justify="center",align-items="start")
       template(v-slot:item="props"
       )
         router-link(
-          :to="{ name: 'flow_edit', params: { id: props.item.name } }"
+          :to="{ name: 'connector_edit', params: { id: props.item.name } }"
           tag="tr",
           :style="{ cursor: 'pointer'}"
         )
           td
             h3 {{props.item.name}}
+          td.text-xs-right {{props.item.type}}
           td
             v-menu()
               template(v-slot:activator="{ on }")
@@ -49,14 +50,14 @@ v-row.mt-5(justify="center",align-items="start")
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
-import Job from '@/models/Job'
 
 @Component({
 })
 
-export default class FlowIndex extends Vue {
+export default class ConnectorIndex extends Vue {
   headers = [
-    { text: 'Source', value: 'name' },
+    { text: 'Name', value: 'name' },
+    { text: 'Type', value: 'type' },
     { 
       text: '',
       value: 'name',
@@ -67,31 +68,16 @@ export default class FlowIndex extends Vue {
   search = ''
 
   async deleteItem(id:string) {
-    let response = await this.$root.$confirm.open("Delete flow","Are you sure?")
+    console.log("deleting")
+    let response = await this.$root.$confirm.open("Delete connector","Are you sure?")
     if (response) {
-      await this.$idb.table("flows").delete(id)
+      await this.$idb.table("connectors").delete(id)
       this.items.splice(this.items.findIndex( item => item.name==id), 1);
     }
   }
-  async newItem() {
-    // create a new job. find an available name
-    let newJobPrefix = "new_flow"
-    let jobNames = await this.$idb.table("flows").where("name").startsWith(newJobPrefix).primaryKeys()
-    let i = 1
-    while (true) {
-      if (!jobNames.includes(`${newJobPrefix}_${i}`)) {
-        break
-      }
-      i++
-    }
-    let newJobName = `${newJobPrefix}_${i}`
-    let newJob = new Job()
-    await this.$idb.table("flows").put(Object.assign(newJob,{name:newJobName}))
-    this.$router.push({name:'flow_edit',append:true,params:{id:newJobName}})
-  }
   async created() {
     this.$root.$data.$loading = true
-    this.items = await this.$idb.table("flows").toArray()
+    this.items = await this.$idb.table("connectors").toArray()
     this.$root.$data.$loading = false
   }
 }
@@ -106,8 +92,5 @@ export default class FlowIndex extends Vue {
 }
 .table >>> .v-toolbar__content {
       padding: 0px !important;
-}
-.create-link {
-  text-decoration: underline;
 }
 </style>

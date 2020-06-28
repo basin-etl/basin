@@ -56,8 +56,6 @@
                   @mouseup='slotMouseUp($event, slot.id)',
                   @mousedown.stop="readOnly? inspectSlot('input',slot.id) : slotBreak($event, slot.id)"
                 )
-              //- tooltip (result counts). irrelevant since we can see if from the outputs of previous block
-              //- div.slot-tooltip.input(v-show="completed") {{inputLinks[index]? inputLinks[index].resultCount : '' | numFormat}}
         //-
         //- block comment
         //-
@@ -77,7 +75,7 @@
                   @mousedown.stop="readOnly? inspectSlot('output',slot.id) : slotMouseDown($event, slot.id)"
                 )
               //- tooltip (result counts)
-              div.slot-tooltip.output(v-show="completed") {{outputLinks[slot.id]? outputLinks[slot.id].resultCount : '' | numFormat('0a')}}
+              div.slot-tooltip.output(v-if="completed && outputLinks[slot.id] && outputLinks[slot.id].resultCount") {{outputLinks[slot.id].resultCount | numFormat('0a')}}
 </template>
 
 <style lang="less" scoped>
@@ -100,7 +98,7 @@
     color:white;
     background-color: black;
     opacity: 0.5;
-    font-size: 9px;
+    font-size: 10px;
     border-radius: 3px;
     min-width:35px;
     margin-top: -12px;
@@ -122,7 +120,8 @@
   .block-contents{
     font-size: 12px;
     z-index: 5;
-    color: #666
+    color: #666;
+    word-break: break-word
   }
   .titlebar {
     border-radius: 4px 4px 0 0 

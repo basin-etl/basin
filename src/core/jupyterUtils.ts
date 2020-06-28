@@ -2,7 +2,7 @@ import { Kernel, KernelManager, ServerConnection } from "@jupyterlab/services"
 import { IExecuteReplyMsg, IIOPubMessage, IReplyErrorContent, IStatusMsg, IStreamMsg } from '@jupyterlab/services/lib/kernel/messages';
 async function getKernel() {
 	var settings = ServerConnection.makeSettings({ 'baseUrl': '/ijupyter',
-	'wsUrl': 'ws://127.0.0.1:9007/',
+	'wsUrl': `ws://${process.env.VUE_APP_JUPYTER_SERVER_HOST}:${process.env.VUE_APP_JUPYTER_SERVER_PORT}/`,
 	'token': 'superglue' });
     let kernelManager = new KernelManager({serverSettings: settings})
 	let kernel = await kernelManager.startNew()
@@ -95,6 +95,7 @@ batches = (${expression}).limit(${limit})._collectAsArrow()
 	}
 	code += `
 sink = pa.BufferOutputStream()
+# cos = pa.output_stream(sink,compression='gzip')
 # see if we have any results
 if len(batches)>0:
 	writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
@@ -103,7 +104,7 @@ if len(batches)>0:
 comm = Comm(target_name="inspect_df")
 comm.send(data="test",buffers=[sink.getvalue()])
 comm.close(data="closing comm")
-		`;
+`;
 	
     return sendToPython(kernel,code)
 }

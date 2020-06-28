@@ -35,14 +35,27 @@ export default class CatalogCreate extends Vue {
   files:Array<String> = []
   loadingPreview = false
 
-  fileTypes = [
-    {value:"delimited",label:"Delimited (comma or other)"},
-    {value:"fixedwidth",label:"Fixed width columns"},
-    {value:"json",label:"Json"},
-    {value:"parquet",label:"Parquet"},
-    {value:"avro",label:"Avro"},
-    {value:"VSAM",label:"VSAM (cobol generated) with Copybook template"},
-    {value:"custom",label:"Custom"},
+  connectorTypes = [
+    {value:"redshift",label:"Amazon Redshift"},
+    {value:"s3",label:"Amazon S3"},
+    {value:"fs",label:"Local file system"},
+    {value:"azure_blob_storage",label:"Azure Blob storage"},
+    {value:"azure_datalake_gen1",label:"Azure Data Lake Storage Gen1"},
+    {value:"azure_datalake_gen2",label:"Azure Data Lake Storage Gen2"},
+    {value:"azure_cosmos",label:"Azure Cosmos DB"},
+    {value:"azure_synapse_analytics",label:"Azure Synapse Analytics"},
+    {value:"jdbc",label:"SQL Databases using JDBC"},
+    {value:"cassandra",label:"Cassandra"},
+    {value:"couchbase",label:"Couchbase"},
+    {value:"elasticsearch",label:"ElasticSearch"},
+    {value:"hive_tables",label:"Hive tables"},
+    {value:"mlflow_experiment",label:"MLflow experiment"},
+    {value:"mongodb",label:"MongoDB"},
+    {value:"neo4j",label:"Neo4j"},
+    {value:"oracle",label:"Oracle"},
+    {value:"redis",label:"Redis"},
+    {value:"riak",label:"Riak Time Series"},
+    {value:"snowflake",label:"Snowflake"},
   ]
   id:string = ""
   rules = {

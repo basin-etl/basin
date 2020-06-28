@@ -27,13 +27,12 @@ requireComponent.keys().forEach( (fileName:string) => {
     }
     if (fileName.endsWith(".json")) {
       // json config file
-      Object.assign(blockTypes[componentName],componentConfig)
+      blockTypes[componentName].setProperties(componentConfig)
     }
     else if (fileName.endsWith(".template")) {
       blockTypes[componentName].codeTemplate = new CodeTemplate(componentConfig)
     }
     else if (fileName.endsWith(".vue")) {
-      console.log(componentName)
       Vue.component(
         componentName+"Properties",
         // Look for the component options on `.default`, which will
@@ -43,4 +42,5 @@ requireComponent.keys().forEach( (fileName:string) => {
       )
     }
 })
+console.log(blockTypes)
 export default blockTypes

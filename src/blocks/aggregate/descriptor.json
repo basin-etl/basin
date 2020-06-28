@@ -9,5 +9,6 @@
     ],
     "outputs": [
         {"id":"df","label":"df", "type": "dataframe"}
-    ]
+    ],
+    "comment_template": "aggregate by ${columnNames(props.groupBy)}"
 }

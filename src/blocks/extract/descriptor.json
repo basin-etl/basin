@@ -7,5 +7,6 @@
     "inputs": [],
     "outputs": [
         {"id":"df", "type": "dataframe","name_template":"df_${props.alias}"}
-    ]
+    ],
+    "comment_template": "extract ${props.alias}"
 }

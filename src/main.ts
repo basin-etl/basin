@@ -9,10 +9,15 @@ import numeral from 'numeral';
 import numFormat from 'vue-filter-number-format';
 import Dexie from 'dexie';
 
-const db = new Dexie('superglue');
+const db = new Dexie('basin');
 db.version(2).stores({
   catalog: `name`,
-  flows: `name`
+  flows: `name`,
+});
+db.version(3).stores({
+  catalog: `name`,
+  flows: `name`,
+  connectors: `name`
 });
 
 Vue.filter('numFormat', numFormat(numeral));

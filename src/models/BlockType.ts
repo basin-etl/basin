@@ -10,10 +10,15 @@ export default class BlockType {
     _outputs: Array<any>
     outputNameTemplate: CodeTemplate
     codeTemplate: CodeTemplate
-
+    commentTemplate: CodeTemplate
+    comment_template: string // default comment to use in block
 
     public constructor(init?:Partial<BlockType>) {
-        Object.assign(this, init);
+      if (init) this.setProperties(init)
+    }
+    public setProperties(init?:Partial<BlockType>) {
+      Object.assign(this, init);
+      this.commentTemplate = new CodeTemplate(this.comment_template ? this.comment_template : this.type)
     }
     set outputs(newOutputs:Array<any>) {
       this._outputs = newOutputs
