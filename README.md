@@ -4,6 +4,8 @@ Extract, transform, load using visual programming that can run Spark jobs on any
 
 Create and debug from your browser and export into pure python code!
 
+![Basin screenshot](https://github.com/zalmane/superglue-ui/blob/master/doc/basin_screenshot.png?raw=true)
+
 # Install
 
 ## Install from docker
