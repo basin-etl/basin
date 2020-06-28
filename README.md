@@ -4,6 +4,8 @@ Extract, transform, load using visual programming that can run Spark jobs on any
 
 Create and debug from your browser and export into pure python code!
 
+![Basin screenshot](https://github.com/zalmane/superglue-ui/blob/master/doc/basin_screenshot.png?raw=true)
+
 # Install
 
 ## Install from docker
@@ -48,4 +50,14 @@ Each block type consists of:
 ### Code template
 ### Ccode library template
 ### Properties panel
+
+# Features
+
+## Dataview inspector
+
+## Auto-generates comments so you don't have to
+
+## Export to Python
+
+## Build for AWS Glue
 
