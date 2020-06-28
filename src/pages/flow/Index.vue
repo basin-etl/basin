@@ -3,7 +3,7 @@ v-row.mt-5(justify="center",align-items="start")
   v-col.table
     v-row.flex-column.pt-5(align="center",v-if="items.length==0")
         div.headline You haven't created any flow yet
-        router-link.headline(to="create",append) Create your first flow!
+        a.create-link.headline(@click="newItem") Create your first flow!
     v-row(no-gutters,v-if="items.length>0")
       //- header toolbar
       v-toolbar.px-0(flat,color="white")
@@ -67,8 +67,11 @@ export default class FlowIndex extends Vue {
   search = ''
 
   async deleteItem(id:string) {
-    await this.$idb.table("flows").delete(id)
-    this.items.splice(this.items.findIndex( item => item.name==id), 1);
+    let response = await this.$root.$confirm.open("Delete flow","Are you sure?")
+    if (response) {
+      await this.$idb.table("flows").delete(id)
+      this.items.splice(this.items.findIndex( item => item.name==id), 1);
+    }
   }
   async newItem() {
     // create a new job. find an available name
@@ -103,5 +106,8 @@ export default class FlowIndex extends Vue {
 }
 .table >>> .v-toolbar__content {
       padding: 0px !important;
+}
+.create-link {
+  text-decoration: underline;
 }
 </style>

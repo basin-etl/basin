@@ -1,0 +1,17 @@
+{
+  "name": "basin_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Oren Elias",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "forever": "^3.0.0",
+    "http-proxy-middleware": "^1.0.4"
+  }
+}

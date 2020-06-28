@@ -13,7 +13,7 @@ v-row.mt-5(justify="center",align="start")
         template(
           v-slot:item="{ item }"
         )
-          | {{item.text}} ({{(item.size/1024/1024).toFixed(2)}})
+          | {{item.text}} ({{(item.size/1024/1024).toFixed(2)}}M)
       v-select.flex-grow-0(v-model="properties.type",
               :items="fileTypes"
               item-text="label"

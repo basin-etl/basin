@@ -10,7 +10,7 @@ module.exports = {
     config
       .plugin('html')
       .tap((args) => {
-        args[0].title = 'SuperGlue Studio';
+        args[0].title = 'Basin Studio';
         return args;
       });      
   },
@@ -22,7 +22,7 @@ module.exports = {
     port: 8080,
     proxy: {
         '/ijupyter': {
-            target: 'http://127.0.0.1:9007',
+            target: `http://${process.env.VUE_APP_JUPYTER_SERVER_HOST}:${process.env.VUE_APP_JUPYTER_SERVER_PORT}`,
             pathRewrite: {'^/ijupyter' : ''}
         }
     }

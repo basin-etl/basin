@@ -111,8 +111,9 @@ patcher.start()
 
   async created() {
     this.$root.$data.$loading = true
+    // TODO: take from config
     let settings = ServerConnection.makeSettings({ 'baseUrl': '/ijupyter',
-    'wsUrl': 'ws://127.0.0.1:9007/',
+    'wsUrl': `ws://${process.env.VUE_APP_JUPYTER_SERVER_HOST}:${process.env.VUE_APP_JUPYTER_SERVER_PORT}/`,
     'token': 'superglue' });
     let contentsManager = new ContentsManager({serverSettings: settings})
     console.log(contentsManager)
