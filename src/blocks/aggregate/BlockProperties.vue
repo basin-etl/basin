@@ -19,7 +19,7 @@ v-row(no-gutters).flex-column
     v-row.mt-2.px-2.grey.lighten-3(
       align="center",
       no-gutters,
-      v-for="(agg,index) in aggregations",
+      v-for="(agg,index) in local.aggregations",
       :key="index"
     )
       v-col
@@ -32,8 +32,8 @@ v-row(no-gutters).flex-column
           v-model="agg.agg",
           label="Aggregation",
           :items="Object.entries(aggregationFunctions)",
-          :item-text="item => item[0]",
-          :item-value="item => item[1].title"
+          :item-value="item => item[0]",
+          :item-text="item => item[1].title"
         )
       v-col
         v-text-field.ml-1.flex-grow-1(v-model="agg.alias",label="Alias")
@@ -63,16 +63,19 @@ import aggregationFunctions from './aggregationFunctions'
 })
 
 export default class AggregateBlockProperties extends BlockProperties {
-  @Prop(String) groupBy: string
-  @Prop(String) aggregate: string
-  // @Prop(Array) aggregations:any[] = [{"col":"table.field", "agg":"mean", "alias":"mean_table_field"}]
-  aggregations:any[] = [{"col":"table.field", "agg":"mean", "alias":"mean_table_field"}]
+  // standard data dictionary for supported functions and mapping to pyspark
   aggregationFunctions = aggregationFunctions
+  @Prop({ default: ():string[] => ([]) }) groupBy: string[]
+  @Prop({ default: ():any[] => ([{"col":null,"agg":null,"alias":null}]) }) aggregations:any[]
+
   removeAggregationColumn(index:number) {
-    this.aggregations.splice(index,1)
+    this.local.aggregations.splice(index,1)
   }
   addAggregationColumn() {
-    this.aggregations.push({"col":null,"agg":null,"alias":null})
+    if (!this.local.aggregations) {
+      this.local.aggregations = []
+    }
+    this.local.aggregations.push({"col":null,"agg":null,"alias":null})
   }
 
 }
