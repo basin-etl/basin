@@ -259,8 +259,10 @@ export default class Editor extends Vue {
         // set the result count
         if (getCount) {
           Object.keys(command.outputs).forEach( async output => {
-            // block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
-            block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
+            // verify that we have an outgoing link for this socket since the resultcount is attached to the link
+            if (output in block.outputLinks) {
+              block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
+            }
           })
         }
         console.log(block)
