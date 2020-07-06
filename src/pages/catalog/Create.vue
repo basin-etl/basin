@@ -1,7 +1,7 @@
 
 <template lang="pug">
-v-row.mt-5(justify="center",align="start")
-  v-row.flex-column.table(align="start",no-gutters)
+v-row.mt-5(no-gutters,justify="center",align="start")
+  v-row.flex-column.table-content(align="start",no-gutters)
     v-breadcrumbs.pl-0(:items="breadcrumbs",divider=">")
     v-form(
       v-model="valid"
@@ -65,9 +65,6 @@ v-row.mt-5(justify="center",align="start")
 }
 </style>
 <style scoped>
-.table {
-  max-width: 1150px
-}
 .form-field {
   max-width: 300px
 }

@@ -85,7 +85,7 @@ export default class CatalogIndex extends Vue {
 
 <style scoped>
 .table {
-  max-width: 1150px
+  max-width: 1150px;
 }
 .search-field {
   max-width: 300px

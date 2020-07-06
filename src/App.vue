@@ -95,6 +95,11 @@ export default {
 };
 </script>
 <style>
+.table-content {
+  max-width: 1150px;
+  margin-right: 20px;
+  margin-left: 20px;
+}
 .height-100 {
   height: 100%
 }

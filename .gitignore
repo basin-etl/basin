@@ -27,3 +27,4 @@ venv/
 
 *.csv
 data/
+lib/__pycache__/
