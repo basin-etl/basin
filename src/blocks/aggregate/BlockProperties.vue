@@ -1,23 +1,52 @@
 <template lang="pug">
 v-row(no-gutters).flex-column
-  v-textarea(
-    v-on:drop="fieldDropped($event)"
-    v-on:dragover="allowDrop"
-    v-model="local.groupBy",
-    rows="5",
-    filled,
-    label="group by clause"
-  )
-  v-textarea(
-    v-model="local.aggregate",
-    rows="5",
-    filled,
-    label="aggregate"
-  )
-  v-text-field(v-model="local.alias",label="Alias")
   v-row(no-gutters)
-    | Available fields
-  SchemaChips(:schema="inputSchema.df")
+    v-autocomplete(
+      v-model="local.groupBy",
+      small-chips,
+      deletable-chips,
+      multiple,
+      :item-text="item => item.tablealias +'.'+ item.name"
+      :items="inputSchema.df",
+      label="Columns to group by"
+    )
+  v-row(no-gutters)
+    span Aggregations
+    v-spacer
+    v-btn(icon,small,@click="addAggregationColumn")
+      v-icon add
+  div.mt-3
+    v-row.mt-2.px-2.grey.lighten-3(
+      align="center",
+      no-gutters,
+      v-for="(agg,index) in local.aggregations",
+      :key="index"
+    )
+      v-col
+        v-select(v-model="agg.col",small-chips,
+          :item-text="item => item.tablealias +'.'+ item.name"
+          :items="inputSchema.df",
+          label="Column")
+      v-col
+        v-select.ml-1.flex-grow-1(
+          v-model="agg.agg",
+          label="Aggregation",
+          :items="Object.entries(aggregationFunctions)",
+          :item-value="item => item[0]",
+          :item-text="item => item[1].title"
+        )
+      v-col
+        v-text-field.ml-1.flex-grow-1(v-model="agg.alias",label="Alias")
+      v-col.flex-grow-0
+        v-btn(icon,small)
+          v-icon(small,color="red",@click="removeAggregationColumn(index)") delete
+  //- v-textarea(
+  //-   v-model="local.aggregate",
+  //-   rows="5",
+  //-   filled,
+  //-   label="aggregate"
+  //- )
+  v-text-field.mt-3(v-model="local.alias",label="Output Dataframe Alias")
 
 </template>
 
@@ -27,20 +56,26 @@ import { Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
 import BlockProperties from '@/components/BlockProperties'
 import SchemaChips from '../../components/SchemaChips.vue'
+import aggregationFunctions from './aggregationFunctions'
+
 @Component({
   components: {SchemaChips}
 })
 
 export default class AggregateBlockProperties extends BlockProperties {
-  @Prop(String) groupBy: string
-  @Prop(String) aggregate: string
-  fieldDropped(event:DragEvent) {
-    let field = JSON.parse(event.dataTransfer.getData("text"))
-    let newVal = this.local.groupBy ? this.local.groupBy : ""
-    newVal += this.local.groupBy && this.local.groupBy.length>0 && !this.local.groupBy.endsWith(",") ? ", " : ""
-    newVal += `F.col("${field.name}")`
-    this.$set(this.local,"groupBy",newVal)
+  // standard data dictionary for supported functions and mapping to pyspark
+  aggregationFunctions = aggregationFunctions
+  @Prop({ default: ():string[] => ([]) }) groupBy: string[]
+  @Prop({ default: ():any[] => ([{"col":null,"agg":null,"alias":null}]) }) aggregations:any[]
 
+  removeAggregationColumn(index:number) {
+    this.local.aggregations.splice(index,1)
+  }
+  addAggregationColumn() {
+    if (!this.local.aggregations) {
+      this.local.aggregations = []
+    }
+    this.local.aggregations.push({"col":null,"agg":null,"alias":null})
   }
 
 }
