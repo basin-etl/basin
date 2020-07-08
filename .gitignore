@@ -24,7 +24,7 @@ yarn-error.log*
 venv/
 .ipynb*/
 *.ipynb
-
+.mypy*/
 *.csv
 data/
 lib/__pycache__/
