@@ -8,11 +8,23 @@ on:
 
 jobs:
 
-  build:
-
+  build-dist:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build --file Dockerfile --tag zalmane/basin:$(date +%s) -t zalmane/basin:latest .
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - run: npm install
+    - run: npm run build --if-present
+
+#   build-docker-image:
+
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - uses: actions/checkout@v2
+#     - name: Build the Docker image
+#       run: docker build --file Dockerfile --tag zalmane/basin:$(date +%s) -t zalmane/basin:latest .
