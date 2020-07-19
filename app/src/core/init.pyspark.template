@@ -9,5 +9,5 @@ spark = SparkSession \
   .config("spark.sql.decimalOperations.allowPrecisionLoss",False) \
   .getOrCreate()
 env = {
-  "datafolder": "/opt/superglue/data"
+  "datafolder": "/opt/basin/data"
 }

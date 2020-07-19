@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
-/dist
-app/dist
+
+app/dist/*
 app/node_modules
 
 # local env files
@@ -28,7 +28,7 @@ venv/
 *.ipynb
 .mypy*/
 *.csv
-data/
+data/*
 lib/__pycache__/
 app/lib/__pycache__/
 *.pyc
