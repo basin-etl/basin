@@ -43,13 +43,16 @@ Notes:
 - Metadata is stored in the browser's indexeddb.
 
 ## Install from source
-### Install app
+### Install dev environment with docker
 ```
-npm install
+docker-compose up
 ```
 
+This will set up 2 containers: `basin-client` and `basin-server`
+
+To run npm commands in the basin-client container use:
 ```
-npm run serve
+docker exec basin-client npm <command>
 ```
 
 ### Installing a Jupyter pyspark backend

@@ -8,6 +8,7 @@ import store from './store'
 import numeral from 'numeral';
 import numFormat from 'vue-filter-number-format';
 import Dexie from 'dexie';
+import '@mdi/font/css/materialdesignicons.css'
 
 const db = new Dexie('basin');
 db.version(2).stores({

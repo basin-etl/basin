@@ -1,0 +1,13 @@
+client:
+    build: ./app
+    container_name: basin-client
+    working_dir: /home/node/app
+    volumes:
+      - ./app:/home/node/app
+      - /home/node/app/node_modules
+    ports:
+      - "8860:8080"
+    command: "npm run-script serve"
+    environment:
+       "NODE_ENV": "development"
+
