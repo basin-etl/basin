@@ -21,12 +21,6 @@ jobs:
       working-directory: ./app
     - run: npm run build --if-present
       working-directory: ./app
+    - name: Build the Docker image
+      run: docker build --file Dockerfile --tag zalmane/basin:$(date +%s) -t zalmane/basin:latest .
 
-#   build-docker-image:
-
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - uses: actions/checkout@v2
-#     - name: Build the Docker image
-#       run: docker build --file Dockerfile --tag zalmane/basin:$(date +%s) -t zalmane/basin:latest .
