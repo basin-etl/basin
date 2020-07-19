@@ -63,6 +63,8 @@ export default class Editor extends Vue {
   }
 
   async showProperties(block:Block) {
+    // clear out the old data (properties panel is a singleton and gets reused)
+    this.selectedBlockInputSchema = {}
     this.selectedBlock=this.getBlockById(block.id)
     this.selectedBlockProperties=this.selectedBlock.properties
     this.showPropertiesPanel = true
@@ -206,7 +208,6 @@ export default class Editor extends Vue {
         }
       }
       this.interrupt = false
-
       let commands = jobRenderer.render({blocks:this.blocks,links:this.links, container: {}})
       this.jobCommands = commands
       console.log(commands)
@@ -253,8 +254,8 @@ export default class Editor extends Vue {
               // set it so it forces an update
               this.$set(this.blocks,blockIndex,block)
               this.jobStatus = JobStatus.Completed
-          }
-          return
+              return
+            }
         }
         // set the result count
         if (getCount) {
@@ -304,8 +305,12 @@ export default class Editor extends Vue {
     let vm = this
     this.links = links
     for (let i=0; i<this.blocks.length; i++) {
+      // use the block type descriptor to set empty connectors for inputs and outputs based on the block type
+      let outputLinks = this.blockTypes[this.blocks[i].type].outputs.reduce( (map,obj) => { map[obj.id] = null; return map },{})            
       this.setObjectProperties(this.blocks,i,{outputLinks:{}})
-      this.setObjectProperties(this.blocks,i,{inputLinks:{}})
+
+      let inputLinks = this.blockTypes[this.blocks[i].type].inputs.reduce( (map,obj) => { map[obj.id] = null; return map },{})            
+      this.setObjectProperties(this.blocks,i,{inputLinks:inputLinks})
     }
     // update the block links
     this.links.forEach( (link) => {
@@ -386,7 +391,6 @@ export default class Editor extends Vue {
     // take job name from route
     this.jobName = this.$route.params["id"]
     let job = await this.$idb.table("flows").get(this.jobName)
-
     try {
       let vm = this
       this.updateJob({

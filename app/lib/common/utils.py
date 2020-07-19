@@ -38,7 +38,7 @@ def _schema_from_plan(root,tablealias=None,fields={}):
     while iterator.hasNext():
         node = iterator.next()
         nodeClass = node.getClass().getSimpleName()
-        if (nodeClass=="SubqueryAlias"):
+        if (nodeClass=="SubqueryAlias" and tablealias is None):
             # get the alias and process the subnodes with this alias
             _schema_from_plan(node,node.alias(),fields)
         else:

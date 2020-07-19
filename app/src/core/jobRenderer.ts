@@ -29,8 +29,7 @@ function render(jobContent:Job):Array<JobCommand> {
       let blockType = blockTypes[(<Block>block.node)["type"]]      
       // find the inputs to this block
       let blockNode = (<Block>block.node)
-      const incomingLinks = jobContent.links.filter( (link) => link.targetId==blockNode.id)
-      
+      const incomingLinks = jobContent.links.filter( (link) => link && link.targetId==blockNode.id)
       // name the inputs
       let inputs:{[slot:string]:string} = {}
       incomingLinks.forEach( link => {

@@ -7,8 +7,8 @@ v-dialog(v-model='dialog', :max-width='options.width', @keydown.esc='cancel()')
       v-text-field(v-model="value")
     v-card-actions
       v-spacer
-      v-btn(color='primary darken-1', flat='flat', @click.native='save()') OK
-      v-btn(color='grey', flat='flat', @click.native='cancel()') Cancel
+      v-btn(color='primary darken-1', text, @click.native='save()') OK
+      v-btn(color='grey', text, @click.native='cancel()') Cancel
 </template>
 
 <script>
