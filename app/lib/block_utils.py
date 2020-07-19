@@ -1,7 +1,9 @@
 import os
 import pyspark.sql
 import common.utils
-import decimal
+import os
+import pyspark.sql
+import common.utils
 
 
 def extract(spark,env,source):
@@ -22,6 +24,21 @@ def extract(spark,env,source):
     df = spark.read.options(**options).csv(os.path.join(env["datafolder"],properties["location"]))
     return df
 
-def load():
-    return df
+
+def load(spark,env,df,connection,format,location,column_mapping):
+    # catalog = common.utils.get_catalog()
+    # print(catalog)
+    # properties = catalog[source]
+    options = {
+        "quote": "\"",
+        "escape": "\"",
+        "multiLine": "true",
+    }
+    # options["delimiter"] = properties["delimiter"]
+    # options["header"] = properties["header"]
+    if format=='csv':
+        df.toPandas().to_csv(os.path.join(env["datafolder"],location),index=False)
+    else:
+        df.write.parquet(os.path.join(env["datafolder"],location))
+        
 

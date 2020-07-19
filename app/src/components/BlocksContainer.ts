@@ -193,7 +193,10 @@ export default class BlocksContainer extends Vue {
       })
       // XXX todo - use input port IDs instead of position
       for (let link of Object.keys(block.inputLinks).sort()) {
-        g.setEdge("n"+(block.inputLinks as any)[link].originId,`n${(block.inputLinks as any)[link].targetId}`);
+        let inputLink = (block.inputLinks as any)[link]
+        if (inputLink) {
+          g.setEdge("n"+inputLink.originId,`n${inputLink.targetId}`);
+        }
       }
       // g.setEdge("n"+link.originId,`p_${link.targetId}_${link.targetSlot}`);
     }

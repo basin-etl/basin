@@ -23,3 +23,4 @@ services:
         volumes:
             - ./appserver/config/jupyter_server_config.py:/home/jovyan/.jupyter/jupyter_server_config.py
             - ./data:/opt/basin/data
+            - ./app/lib:/opt/basin/lib
