@@ -1,0 +1,25 @@
+version: "3.1"
+services:
+    client:
+        depends_on: 
+            - server
+        links:
+            - server:server
+        build: ./app
+        container_name: basin-client
+        working_dir: /home/node/app
+        volumes:
+            - ./app:/home/node/app
+            - /home/node/app/node_modules
+        ports:
+            - "8860:8080"
+        command: "npm run-script serve"
+        environment:
+            "NODE_ENV": "development"
+
+    server:
+        build: .
+        container_name: basin-server
+        volumes:
+            - ./appserver/config/jupyter_server_config.py:/home/jovyan/.jupyter/jupyter_server_config.py
+            - ./data:/opt/basin/data

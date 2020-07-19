@@ -35,7 +35,7 @@ This is the folder that will hold all input and output files
 ### Run image
 Run image mapping data directory to your local environment. This is where input/output goes (extract and load)
 
-`docker run --rm -d -v $PWD/data:/opt/superglue/data --name basin_server -p 3000:3000 zalmane/basin:latest`
+`docker run --rm -d -v $PWD/data:/opt/basin/data --name basin_server -p 3000:3000 zalmane/basin:latest`
 
 That's it. Point your browser to [http://localhost:3000](http://localhost:3000) and you're done!
 
@@ -43,28 +43,24 @@ Notes:
 - Metadata is stored in the browser's indexeddb.
 
 ## Install from source
-### Install app
+### Install dev environment with docker
 ```
-npm install
-```
-
-```
-npm run serve
+docker-compose up
 ```
 
-### Installing a Jupyter pyspark backend
+This will set up 2 containers: `basin-client` and `basin-server`
 
-The easiest way to spin up a pyspark container is to use Docker along with the predefined official Jupyter containers.
-A convenience Dockerfile is provided in this repository that extends the Jupyter container to run a preconfigured Jupyter server
+That's it. Point your browser to [http://localhost:8860](http://localhost:8860) and you're done!
 
-To build:
+
+To run npm commands in the basin-client container use:
 ```
-docker build -t superglue/server .
+docker exec basin-client npm <command>
 ```
 
-Then run the server:
+To update changes in py files (block templates, lib), use:
 ```
-docker run -it -p 9007:8888 superglue/server
+docker exec basin-client npm run build-py
 ```
 
 # Getting started

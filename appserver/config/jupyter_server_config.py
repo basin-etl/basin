@@ -259,7 +259,7 @@ c.ServerApp.port = 8888
 #c.ServerApp.reraise_server_extension_failures = False
 
 ## The directory to use for notebooks and kernels.
-c.ServerApp.root_dir = u'/opt/superglue/data'
+c.ServerApp.root_dir = u'/opt/basin/data'
 
 ## The session manager class to use.
 #c.ServerApp.session_manager_class = 'jupyter_server.services.sessions.sessionmanager.SessionManager'

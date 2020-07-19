@@ -1,5 +1,5 @@
 {
-  "name": "superglueui",
+  "name": "basin",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -40,6 +40,7 @@
     "vuex-crud": "^0.3.2"
   },
   "devDependencies": {
+    "@mdi/font": "^5.3.45",
     "@types/cytoscape": "^3.14.0",
     "@types/dagre": "^0.7.43",
     "@types/node": "^12.12.31",
@@ -47,7 +48,7 @@
     "@types/webpack-env": "^1.15.1",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
-    "@vue/cli-plugin-babel": "~4.2.0",
+    "@vue/cli-plugin-babel": "^4.4.6",
     "@vue/cli-plugin-eslint": "~4.2.0",
     "@vue/cli-plugin-router": "^4.2.3",
     "@vue/cli-plugin-typescript": "^4.2.3",
