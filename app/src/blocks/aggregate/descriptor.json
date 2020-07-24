@@ -1,6 +1,7 @@
 {
     "title": "aggregate",
-    "type": "aggregate",
+    "name": "aggregate",
+    "stencil": "basics",
     "description": "groupby",
     "color": "red",
     "icon": "call_merge",

@@ -6,7 +6,9 @@ import '@/core/blockTypes'
 import VueWorker from 'vue-worker'
 import store from './store'
 import numeral from 'numeral';
+
 import numFormat from 'vue-filter-number-format';
+
 import Dexie from 'dexie';
 import '@mdi/font/css/materialdesignicons.css'
 
@@ -22,7 +24,9 @@ db.version(3).stores({
 });
 
 Vue.filter('numFormat', numFormat(numeral));
+// set plugin
 Vue.use(VueWorker)
+
 Vue.prototype.$idb = db
 Vue.config.productionTip = false
 new Vue({

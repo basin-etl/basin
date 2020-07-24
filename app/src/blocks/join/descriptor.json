@@ -1,6 +1,7 @@
 {
     "title": "join",
-    "type": "join",
+    "name": "join",
+    "stencil": "basics",
     "description": "join two dataframes",
     "color": "red",
     "icon": "call_merge",

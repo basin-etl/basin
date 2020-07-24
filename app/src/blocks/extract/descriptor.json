@@ -1,6 +1,7 @@
 {
     "title": "extract",
-    "type": "extract",
+    "name": "extract",
+    "stencil": "basics",
     "description": "extract data from a datasource into a dataframe",
     "color": "grey",
     "icon": "system_update",
