@@ -8,11 +8,10 @@ export class CodeTemplate {
       return (<any>this).inputs[id]
     });
 
-    Handlebars.registerHelper('columnNames', function (this:Handlebars.HelperDelegate,id:string) {
-      let val = (<any>this)[id]
-      let retVal:string = [...val.matchAll(/F.col\\([\'"](.*?)[\'"]\\)/g)].map( x => x[1]).join(", ")
-      console.log(this)
-      console.log("XXX"+retVal)
+    Handlebars.registerHelper('columnNames', function (this:Handlebars.HelperDelegate,obj:any) {
+      let val = obj
+      console.log(val)
+      let retVal:string = [...val.matchAll(/F\.col\([\'"](.*?)[\'"]\)/g)].map( x => x[1]).join(", ")
       return new Handlebars.SafeString(retVal)
     });
 
