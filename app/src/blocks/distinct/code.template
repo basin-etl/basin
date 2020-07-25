@@ -1,2 +1,2 @@
-# distinct ${inputs[0]}
-${output} = ${inputs[0]}.distinct()
+# distinct {{inputs df}}
+{{output}} = {{input df}}.distinct()

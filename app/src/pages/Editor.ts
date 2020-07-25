@@ -69,13 +69,20 @@ export default class Editor extends Vue {
     this.selectedBlockProperties=this.selectedBlock.properties
     this.showPropertiesPanel = true
     try {
-      if (this.blockTypes[this.selectedBlock.type].inputs.length>0) {
-        let schema = await this.getInputSchema(this.selectedBlock)
-        this.selectedBlockInputSchema = schema  
+      
+      // get schema only if our input is connected and the block actually has an input
+      if (this.blockTypes[this.selectedBlock.type].inputs.length>0 &&
+          Object.values(this.selectedBlock.inputLinks)[0]!=null
+      ) {
+          let schema = await this.getInputSchema(this.selectedBlock)
+          this.selectedBlockInputSchema = schema  
       }
       else {
         // this block type has no inputs. return an empty schema
         this.selectedBlockInputSchema = {}
+        for (let inputType of this.blockTypes[this.selectedBlock.type].inputs) {
+          this.selectedBlockInputSchema[inputType.id] = []
+        }
       }
     }
     catch (e) {
@@ -260,10 +267,7 @@ export default class Editor extends Vue {
         // set the result count
         if (getCount) {
           Object.keys(command.outputs).forEach( async output => {
-            // verify that we have an outgoing link for this socket since the resultcount is attached to the link
-            if (output in block.outputLinks) {
-              block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
-            }
+            block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
           })
         }
         console.log(block)
@@ -306,8 +310,8 @@ export default class Editor extends Vue {
     this.links = links
     for (let i=0; i<this.blocks.length; i++) {
       // use the block type descriptor to set empty connectors for inputs and outputs based on the block type
-      let outputLinks = this.blockTypes[this.blocks[i].type].outputs.reduce( (map,obj) => { map[obj.id] = null; return map },{})            
-      this.setObjectProperties(this.blocks,i,{outputLinks:{}})
+      let outputLinks = this.blockTypes[this.blocks[i].type].outputs.reduce( (map,obj) => { map[obj.id] = new Link({}); return map },{})            
+      this.setObjectProperties(this.blocks,i,{outputLinks:outputLinks})
 
       let inputLinks = this.blockTypes[this.blocks[i].type].inputs.reduce( (map,obj) => { map[obj.id] = null; return map },{})            
       this.setObjectProperties(this.blocks,i,{inputLinks:inputLinks})

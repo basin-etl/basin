@@ -70,7 +70,7 @@
               .d-flex.flex-column.flex-grow-1.ma-0(align='center',justify="start")
                 .circle.ma-0(
                   :ref="`output_${slot.id}`",
-                  :class='{active: outputLinks[slot.id],"read-only":readOnly}',
+                  :class='{active: outputLinks[slot.id] && outputLinks[slot.id].targetId,"read-only":readOnly}',
                   :style="{visibility: pendingRun ? 'hidden': 'visible'}"
                   @mousedown.stop="readOnly? inspectSlot('output',slot.id) : slotMouseDown($event, slot.id)"
                 )

@@ -1,7 +1,11 @@
-# aggregating ${inputs[0]}
-${output} = ${inputs['df']}.groupby(
-        ${props.groupBy? props.groupBy.map( prop => 'F.col("'+prop+'")').join(','): []}
-    ).agg(
-        ${props.aggregations? props.aggregations.map( agg => 'F.'+agg.agg+'(F.col("'+agg.col+'")).alias("'+agg.alias+'")').join(','): []}
-    )
-${output} = ${output}.alias("${props.alias}")
+# aggregating {{input 'df'}}
+{{output}} = {{input 'df'}}.groupby(
+{{#if props.groupBy}}
+	{{#each props.groupBy}}F.col("{{this}}"){{#unless @last}},{{/unless}}{{/each}}
+{{else}}
+	[]
+{{/if}}
+).agg(
+	{{#each props.aggregations}}F.{{this.agg}}(F.col("{{this.col}}")).alias("{{this.alias}}"){{#if @first}},{{/if}}{{/each}}
+)
+{{output}} = {{output}}.alias("{{props.alias}}")

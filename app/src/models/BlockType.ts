@@ -29,7 +29,7 @@ export default class BlockType {
           this._outputs[index].outputNameTemplate = new CodeTemplate(output.name_template)
         }
         else {
-          this._outputs[index].outputNameTemplate = new CodeTemplate("output_id${id}_"+output.id)
+          this._outputs[index].outputNameTemplate = new CodeTemplate("output_id{{id}}_"+output.id)
         }
 
       })

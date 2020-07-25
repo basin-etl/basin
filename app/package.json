@@ -24,6 +24,8 @@
     "femtotween": "^1.1.1",
     "fin-hypergrid": "^3.3.2",
     "glob": "^7.1.6",
+    "handlebars": "^4.7.6",
+    "jsrender": "^1.0.7",
     "numeral": "^2.0.6",
     "require-context": "^1.1.0",
     "snakeize": "^0.1.0",
