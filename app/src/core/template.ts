@@ -15,6 +15,17 @@ export class CodeTemplate {
       return new Handlebars.SafeString(retVal)
     });
 
+    Handlebars.registerHelper('json', function (this:Handlebars.HelperDelegate,obj:any) {
+      // pretty print and change false to False to match the python dict format
+      return new Handlebars.SafeString(
+        JSON.stringify(
+          obj,
+          (k,v) => 
+            typeof(v)==="boolean"? (v ?"True":"False") : v,
+          2
+        )
+      )
+    });
 
     this.template = Handlebars.compile(template,{noEscape: true})
   }

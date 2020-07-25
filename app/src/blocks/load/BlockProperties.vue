@@ -24,7 +24,7 @@ div
     )
       v-col
         v-select(v-model="agg.source",small-chips,
-          :item-text="item => item.tablealias +'.'+ item.name"
+          :item-text="item => item.tablealias ? item.tablealias +'.'+ item.name : item.name"
           :items="inputSchema.df",
           label="Source Column")
       v-col
