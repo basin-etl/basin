@@ -268,6 +268,7 @@ export default class Editor extends Vue {
         if (getCount) {
           Object.keys(command.outputs).forEach( async output => {
             block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
+            this.setObjectProperties(this.blocks,blockIndex,{outputLinks:block.outputLinks})
           })
         }
         console.log(block)

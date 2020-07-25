@@ -75,7 +75,7 @@
                   @mousedown.stop="readOnly? inspectSlot('output',slot.id) : slotMouseDown($event, slot.id)"
                 )
               //- tooltip (result counts)
-              div.slot-tooltip.output(v-if="completed && outputLinks[slot.id] && outputLinks[slot.id].resultCount") {{outputLinks[slot.id].resultCount | numFormat('0a')}}
+              div.slot-tooltip.output(v-if="completed && outputLinks[slot.id] && outputLinks[slot.id].resultCount!=-1") {{outputLinks[slot.id].resultCount | numFormat('0a')}}
 </template>
 
 <style lang="less" scoped>

@@ -12,5 +12,5 @@
     "outputs": [
         {"id":"df","label":"df", "type": "dataframe"}
     ],
-    "comment_template": "join by ${columnNames(props.condition)}"
+    "comment_template": "join by {{columnNames props.condition }}"
 }

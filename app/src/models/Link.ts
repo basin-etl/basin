@@ -4,7 +4,7 @@ export default class Link {
     originSlot: string
     targetSlot: string
     // used for display
-    resultCount:number = 0
+    resultCount:number = -1
 
     constructor(jsonData: any) {
         if (jsonData!={}){
