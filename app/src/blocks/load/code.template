@@ -1,6 +1,12 @@
 import json
 
-print("loading {{input 'df'}} to {{props.location}}")
+# load {{input 'df'}} to {{props.location}}
+column_mappings = [
+    {{#each props.columns}}{
+        "source": "{{this.source}}",
+        "target": "{{this.target}}"
+    }{{#unless @last}},{{/unless}}
+    {{/each}}]
 block_utils.load(
     spark,
     env,
@@ -8,5 +14,5 @@ block_utils.load(
     "{{props.connection}}",
     "{{props.format}}",
     "{{props.location}}",
-    json.loads("""{{json props.columns}}""")
+    column_mappings
 )

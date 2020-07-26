@@ -11,5 +11,5 @@
     "outputs": [
         {"id":"df","label":"df", "type": "dataframe"}
     ],
-    "comment_template": "aggregate by ${props.groupBy}"
+    "comment_template": "aggregate by {{props.groupBy}}"
 }

@@ -272,13 +272,15 @@ export default class Editor extends Vue {
           })
         }
         console.log(block)
-        // set it so it forces an update
+        // set it so it forces an update to the UI
         this.$set(this.blocks,blockIndex,block)
+
         // block completed
         if (!silent) {
           this.setBlockStatus(command.blockId,BlockStatus.Completed)
           this.completedBlocks++
         }
+        await Vue.nextTick()
       }
       // job complete
       if (!silent) this.jobStatus = JobStatus.Completed
@@ -352,7 +354,8 @@ export default class Editor extends Vue {
   }
 
   exportCode() {
-    let text = this.jobCommands.map( (command) => command.code).join("\n\n")
+    let commands = jobRenderer.render({blocks:this.blocks,links:this.links, container: {}})
+    let text = commands.map( (command) => command.code).join("\n\n")
     let encodedUri = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(text)
     let link = document.createElement('a');
     link.download = "job.py";
