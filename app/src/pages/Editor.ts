@@ -358,7 +358,7 @@ export default class Editor extends Vue {
     let text = commands.map( (command) => command.code).join("\n\n")
     let encodedUri = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(text)
     let link = document.createElement('a');
-    link.download = "job.py";
+    link.download = `${this.jobName}.py`;
     link.href = encodedUri
     link.click();
   }
