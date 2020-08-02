@@ -4,13 +4,15 @@ export default class Link {
     originSlot: string
     targetSlot: string
     // used for display
-    resultCount:number = 0
+    resultCount:number = -1
 
     constructor(jsonData: any) {
-        this.originId = jsonData.originId
-        this.targetId = jsonData.targetId
-        this.originSlot = jsonData.originSlot
-        this.targetSlot = jsonData.targetSlot
+        if (jsonData!={}){
+            this.originId = jsonData.originId
+            this.targetId = jsonData.targetId
+            this.originSlot = jsonData.originSlot
+            this.targetSlot = jsonData.targetSlot
+        }
     }
     static toJson(link:Link) {
         return {

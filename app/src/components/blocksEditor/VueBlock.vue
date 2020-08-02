@@ -70,12 +70,12 @@
               .d-flex.flex-column.flex-grow-1.ma-0(align='center',justify="start")
                 .circle.ma-0(
                   :ref="`output_${slot.id}`",
-                  :class='{active: outputLinks[slot.id],"read-only":readOnly}',
+                  :class='{active: outputLinks[slot.id] && outputLinks[slot.id].targetId,"read-only":readOnly}',
                   :style="{visibility: pendingRun ? 'hidden': 'visible'}"
                   @mousedown.stop="readOnly? inspectSlot('output',slot.id) : slotMouseDown($event, slot.id)"
                 )
               //- tooltip (result counts)
-              div.slot-tooltip.output(v-if="completed && outputLinks[slot.id] && outputLinks[slot.id].resultCount") {{outputLinks[slot.id].resultCount | numFormat('0a')}}
+              div.slot-tooltip.output(v-if="completed && outputLinks[slot.id] && outputLinks[slot.id].resultCount!=-1") {{outputLinks[slot.id].resultCount | numFormat('0a')}}
 </template>
 
 <style lang="less" scoped>
@@ -127,6 +127,7 @@
     border-radius: 4px 4px 0 0 
   }
   .vue-block {
+    width: 200px;
     user-select:none;
     position: absolute;
     box-sizing: border-box;

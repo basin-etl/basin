@@ -69,13 +69,20 @@ export default class Editor extends Vue {
     this.selectedBlockProperties=this.selectedBlock.properties
     this.showPropertiesPanel = true
     try {
-      if (this.blockTypes[this.selectedBlock.type].inputs.length>0) {
-        let schema = await this.getInputSchema(this.selectedBlock)
-        this.selectedBlockInputSchema = schema  
+      
+      // get schema only if our input is connected and the block actually has an input
+      if (this.blockTypes[this.selectedBlock.type].inputs.length>0 &&
+          Object.values(this.selectedBlock.inputLinks)[0]!=null
+      ) {
+          let schema = await this.getInputSchema(this.selectedBlock)
+          this.selectedBlockInputSchema = schema  
       }
       else {
         // this block type has no inputs. return an empty schema
         this.selectedBlockInputSchema = {}
+        for (let inputType of this.blockTypes[this.selectedBlock.type].inputs) {
+          this.selectedBlockInputSchema[inputType.id] = []
+        }
       }
     }
     catch (e) {
@@ -260,20 +267,20 @@ export default class Editor extends Vue {
         // set the result count
         if (getCount) {
           Object.keys(command.outputs).forEach( async output => {
-            // verify that we have an outgoing link for this socket since the resultcount is attached to the link
-            if (output in block.outputLinks) {
-              block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
-            }
+            block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
+            this.setObjectProperties(this.blocks,blockIndex,{outputLinks:block.outputLinks})
           })
         }
         console.log(block)
-        // set it so it forces an update
+        // set it so it forces an update to the UI
         this.$set(this.blocks,blockIndex,block)
+
         // block completed
         if (!silent) {
           this.setBlockStatus(command.blockId,BlockStatus.Completed)
           this.completedBlocks++
         }
+        await Vue.nextTick()
       }
       // job complete
       if (!silent) this.jobStatus = JobStatus.Completed
@@ -306,8 +313,8 @@ export default class Editor extends Vue {
     this.links = links
     for (let i=0; i<this.blocks.length; i++) {
       // use the block type descriptor to set empty connectors for inputs and outputs based on the block type
-      let outputLinks = this.blockTypes[this.blocks[i].type].outputs.reduce( (map,obj) => { map[obj.id] = null; return map },{})            
-      this.setObjectProperties(this.blocks,i,{outputLinks:{}})
+      let outputLinks = this.blockTypes[this.blocks[i].type].outputs.reduce( (map,obj) => { map[obj.id] = new Link({}); return map },{})            
+      this.setObjectProperties(this.blocks,i,{outputLinks:outputLinks})
 
       let inputLinks = this.blockTypes[this.blocks[i].type].inputs.reduce( (map,obj) => { map[obj.id] = null; return map },{})            
       this.setObjectProperties(this.blocks,i,{inputLinks:inputLinks})
@@ -347,10 +354,11 @@ export default class Editor extends Vue {
   }
 
   exportCode() {
-    let text = this.jobCommands.map( (command) => command.code).join("\n\n")
+    let commands = jobRenderer.render({blocks:this.blocks,links:this.links, container: {}})
+    let text = commands.map( (command) => command.code).join("\n\n")
     let encodedUri = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(text)
     let link = document.createElement('a');
-    link.download = "job.py";
+    link.download = `${this.jobName}.py`;
     link.href = encodedUri
     link.click();
   }
@@ -393,6 +401,9 @@ export default class Editor extends Vue {
     let job = await this.$idb.table("flows").get(this.jobName)
     try {
       let vm = this
+      job.blocks = job.blocks.filter( (block:Block) => {
+        return typeof(block.type)=="string"
+      })
       this.updateJob({
         blocks: job.blocks.map( (block:any) => new Block(block) ),
         links: job.links.map( (link:any) => new Link(link) ),

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Editor from '@/pages/Editor.vue'
 import DataFrameViewerDriver from '@/pages/DataFrameViewerDriver.vue'
+import BlockPickerDriver from '@/pages/BlockPickerDriver.vue'
 import FlowIndex from '@/pages/flow/Index.vue'
 import catalogRoutes from '@/pages/catalog/routes'
 import connectorRoutes from '@/pages/connector/routes'
@@ -34,9 +35,14 @@ export default new Router({
       component: FlowIndex
     },
     {
-      path: '/df',
-      name: 'df',
+      path: '/driver/df',
+      name: 'driver_df',
       component: DataFrameViewerDriver
+    },
+    {
+      path: '/driver/blockpicker',
+      name: 'driver_blockpicker',
+      component: BlockPickerDriver
     },
   ]
 })

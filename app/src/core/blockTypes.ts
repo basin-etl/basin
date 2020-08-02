@@ -1,6 +1,10 @@
 import {CodeTemplate} from '@/core/template'
 import Vue from 'vue'
 import BlockType from '@/models/BlockType';
+import * as path from 'path';
+
+let blockTypes:{[component:string]:BlockType} = {}
+let blockFolders:{[component:string]:BlockType} = {}
 //
 // traverse the block type tree and load the components
 // .json - config file
@@ -13,34 +17,57 @@ const requireComponent = require.context(
   // Whether or not to look in subfolders
   true,
   // The regular expression used to match base component filenames
-  /.*\.(json|template|vue)/
+  /(descriptor.json)/
 )
-let blockTypes:{[component:string]:BlockType} = {}
+// first we load all of the descriptor.json files
 requireComponent.keys().forEach( (fileName:string) => {
     // Get component config
     const componentConfig = requireComponent(fileName)
-    const path:Array<string> = fileName.split("/")
-    const componentName = path[path.length-2]
-    let blockType = {}
-    if (!(componentName in blockTypes)) {
-      blockTypes[componentName] = new BlockType()
-    }
-    if (fileName.endsWith(".json")) {
-      // json config file
-      blockTypes[componentName].setProperties(componentConfig)
-    }
-    else if (fileName.endsWith(".template")) {
-      blockTypes[componentName].codeTemplate = new CodeTemplate(componentConfig)
-    }
-    else if (fileName.endsWith(".vue")) {
-      Vue.component(
-        componentName+"Properties",
-        // Look for the component options on `.default`, which will
-        // exist if the component was exported with `export default`,
-        // otherwise fall back to module's root.
-        componentConfig.default || componentConfig
-      )
-    }
+    let blockType:BlockType = new BlockType(componentConfig)
+    const componentPaths:Array<string> = fileName.split("/")
+    const componentPath = componentPaths[componentPaths.length-2]
+    blockFolders[componentPath] = new BlockType(componentConfig)
+  })
+
+//
+// load all of the vue and template files from the blocks folder and add to the dict
+//
+const requireSubComponents = require.context(
+  '../blocks',
+  // path.join('..','blocks',componentPath),
+  // '.', // we are already in the context of the block folder
+  true,
+  // The regular expression used to match base component filenames
+  /.*\.(template|vue)/
+)
+
+// traverse the files and load templates and vue components
+requireSubComponents.keys().forEach( (fileName:string) => {
+  const componentConfig = requireSubComponents(fileName)
+
+  const componentPaths:Array<string> = fileName.split("/")
+  const componentPath = componentPaths[componentPaths.length-2]
+  // Get component config
+  if (fileName.endsWith(".template")) {
+    blockFolders[componentPath].codeTemplate = new CodeTemplate(componentConfig)
+  }
+  else if (fileName.endsWith(".vue")) {
+    // register the vue component for properties panel
+    Vue.component(
+      blockFolders[componentPath].name+"Properties",
+      // Look for the component options on `.default`, which will
+      // exist if the component was exported with `export default`,
+      // otherwise fall back to module's root.
+      componentConfig.default || componentConfig
+    )
+  }
 })
+// rename the blocktypes by the .name property instead of the folder name
+blockTypes = Object.values(blockFolders).reduce( 
+  (result:{[component:string]:BlockType}, item:BlockType) => {
+    result[item.name] = item;
+    return result;
+  },{}
+)
 console.log(blockTypes)
 export default blockTypes

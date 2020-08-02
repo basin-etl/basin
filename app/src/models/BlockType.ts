@@ -2,7 +2,8 @@ import { CodeTemplate } from '@/core/template';
 
 export default class BlockType {
     title: string // used for display in menus
-    type: string // unique id
+    name: string // unique id
+    stencil: string // stencil (category) id
     description: string // used for display in menus
     color: string // used for display in menus
     icon: string // name of material icon
@@ -18,7 +19,7 @@ export default class BlockType {
     }
     public setProperties(init?:Partial<BlockType>) {
       Object.assign(this, init);
-      this.commentTemplate = new CodeTemplate(this.comment_template ? this.comment_template : this.type)
+      this.commentTemplate = new CodeTemplate(this.comment_template ? this.comment_template : this.name)
     }
     set outputs(newOutputs:Array<any>) {
       this._outputs = newOutputs
@@ -28,12 +29,18 @@ export default class BlockType {
           this._outputs[index].outputNameTemplate = new CodeTemplate(output.name_template)
         }
         else {
-          this._outputs[index].outputNameTemplate = new CodeTemplate("output_id${id}_"+output.id)
+          this._outputs[index].outputNameTemplate = new CodeTemplate("output_id{{id}}_"+output.id)
         }
 
       })
     }
     get outputs(): Array<any> {
         return this._outputs
+    }
+    get type(): string {
+      return this.name
+    }
+    set type(type:string) {
+      return
     }
 }

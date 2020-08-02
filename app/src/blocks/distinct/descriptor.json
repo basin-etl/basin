@@ -1,8 +1,8 @@
 {
     "title": "Distinct",
-    "type": "distinct",
+    "name": "distinct",
+    "stencil": "basics",
     "description": "unique records",
-    "category": "dataframe",
     "color": "red",
     "icon": "call_merge",
     "inputs": [

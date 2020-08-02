@@ -10,7 +10,7 @@ import { JobStatus } from '@/models/Job';
   components: {
   },
 })
-export default class Editor extends Vue {
+export default class VueBlock extends Vue {
   @Prop({
       type: Number,
       default: 0,
@@ -65,6 +65,7 @@ export default class Editor extends Vue {
     this.$parent.$el.addEventListener('mousemove', this.handleMove, true)
   }
   beforeDestroy () {
+    // cleanup
     // we handle mouse move at the document level to have smooth dragging when dragging outside of container
     this.$parent.$el.removeEventListener('mousemove', this.handleMove, true)
   }
@@ -103,11 +104,14 @@ export default class Editor extends Vue {
 
         this.lastMouseX = this.mouseX
         this.lastMouseY = this.mouseY
-
-        this.moveWithDiff(diffX, diffY)
+        let vm = this
+        requestAnimationFrame(function() {
+          vm.moveWithDiff(diffX, diffY)
+        })
 
         this.hasDragged = true
       }
+      return false
     }
     handleDown (e:MouseEvent) {
       if (this.readOnly) return
@@ -176,7 +180,6 @@ export default class Editor extends Vue {
       return {
         top: this.options.center.y + this.y * this.options.scale + 'px',
         left: this.options.center.x + this.x * this.options.scale + 'px',
-        width: this.options.width + 'px',
         transform: 'scale(' + (this.options.scale + '') + ')',
         transformOrigin: 'top left'
       }

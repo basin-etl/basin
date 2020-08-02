@@ -1,6 +1,7 @@
 {
     "title": "join",
-    "type": "join",
+    "name": "join",
+    "stencil": "basics",
     "description": "join two dataframes",
     "color": "red",
     "icon": "call_merge",
@@ -11,5 +12,5 @@
     "outputs": [
         {"id":"df","label":"df", "type": "dataframe"}
     ],
-    "comment_template": "join by ${columnNames(props.condition)}"
+    "comment_template": "join by {{columnNames props.condition }}"
 }

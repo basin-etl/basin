@@ -1,0 +1,14 @@
+{
+    "title": "date",
+    "name": "fe_date",
+    "stencil": "feature_engineering",
+    "description": "date manipulation and feature engineering",
+    "color": "lightblue",
+    "icon": "event",
+    "inputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ],
+    "outputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ]
+}

@@ -24,7 +24,7 @@ div
     )
       v-col
         v-select(v-model="agg.source",small-chips,
-          :item-text="item => item.tablealias +'.'+ item.name"
+          :item-text="item => item.tablealias ? item.tablealias +'.'+ item.name : item.name"
           :items="inputSchema.df",
           label="Source Column")
       v-col
@@ -48,8 +48,10 @@ export default class LoadBlockProperties extends BlockProperties {
   @Prop({ default: ():any[] => ([]) }) columns:any[]
   @Prop({ default: "csv"}) format: string
   formats:Array<any> = [
-    {"name":"csv","value":"csv"},
-    {"name":"Apache Parquet","value":"parquet"},
+    {"text":"Delimited (csv)","value":"csv"},
+    {"text":"Apache Parquet","value":"parquet"},
+    {"text":"JSON","value":"json"},
+    {"text":"Apache Avro","value":"avro"},
   ]
 
   removeColumn(index:number) {
@@ -64,7 +66,7 @@ export default class LoadBlockProperties extends BlockProperties {
 
   @Watch('inputSchema', { immediate: true})
   onInputSchemaChanged(newVal:string,oldVal:string) {
-    if (this.local.columns && this.local.columns.length==0) {
+    if (this.local.columns && this.local.columns.length==0 && this.inputSchema.df) {
       // set a default value by adding all columns with alias
       this.local.columns = this.inputSchema.df.map( field => {
         return {

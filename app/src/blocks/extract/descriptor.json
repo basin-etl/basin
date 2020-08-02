@@ -1,12 +1,13 @@
 {
     "title": "extract",
-    "type": "extract",
+    "name": "extract",
+    "stencil": "basics",
     "description": "extract data from a datasource into a dataframe",
     "color": "grey",
     "icon": "system_update",
     "inputs": [],
     "outputs": [
-        {"id":"df", "type": "dataframe","name_template":"df_${props.alias}"}
+        {"id":"df", "type": "dataframe","name_template":"df_{{props.alias}}"}
     ],
-    "comment_template": "extract ${props.alias}"
+    "comment_template": "extract {{props.alias}}"
 }

@@ -1,6 +1,7 @@
 {
     "title": "load",
-    "type": "load",
+    "name": "load",
+    "type": "basics",
     "description": "load data into a datasource",
     "color": "lightgreen",
     "icon": "cloud_upload",
