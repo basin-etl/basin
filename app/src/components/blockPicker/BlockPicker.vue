@@ -1,14 +1,21 @@
 <script src="./BlockPicker.ts">
 </script>
 <template lang="pug">
-v-card.d-flex.flex-column.picker()
-  div.px-2
+v-card.d-flex.flex-column.picker(
+  @keydown.esc="close"
+)
+  div.pl-2.d-flex.flex-row
+    //- search field
     v-text-field(
       v-model="searchText",
       placeholder="Search for blocks"
+      autofocus
     )
+    v-btn.mt-1.mr-1(icon,@click="close")
+      v-icon close
   .flex-grow-1.d-flex.flex-column.block-results
     .not-found-wrapper(v-if="matches.length==0") No blocks found
+    //- search results
     v-list(two-line,dense,v-if="matches.length>0")
       v-list-item(
         v-for="block in matches",

@@ -340,6 +340,7 @@ export default class BlocksContainer extends Vue {
   }
   handleUp (e:MouseEvent) {
     e.preventDefault()
+    // e.stopPropagation()
     const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
     if (this.dragging && !this.linking) {
       this.dragging = false
@@ -437,6 +438,10 @@ export default class BlocksContainer extends Vue {
         this.updateLinks()
       }
     }
+    this.clearLinkingState()
+  }
+  clearLinkingState() {
+
     this.linking = false
     this.tempLink = null
     this.linkStartData = null
@@ -552,6 +557,11 @@ export default class BlocksContainer extends Vue {
         return b.id !== block.id
       })
       this.updateScene()
+  }
+  cancelNewBlock() {
+    this.menuDisplayed=false
+    this.clearLinkingState()
+
   }
   async importScene() {
       const vm = this
