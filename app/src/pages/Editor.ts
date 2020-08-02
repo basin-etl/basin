@@ -401,6 +401,9 @@ export default class Editor extends Vue {
     let job = await this.$idb.table("flows").get(this.jobName)
     try {
       let vm = this
+      job.blocks = job.blocks.filter( (block:Block) => {
+        return typeof(block.type)=="string"
+      })
       this.updateJob({
         blocks: job.blocks.map( (block:any) => new Block(block) ),
         links: job.links.map( (link:any) => new Link(link) ),

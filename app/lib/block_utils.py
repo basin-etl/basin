@@ -28,7 +28,7 @@ def extract(spark,env,source):
     return df
 
 
-def load(spark,env,df,connection,format,location,column_mapping):
+def ef_date(spark,env,df,connection,format,location,column_mapping):
     # catalog = common.utils.get_catalog()
     # print(catalog)
     # properties = catalog[source]
