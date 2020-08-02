@@ -2,6 +2,8 @@
 .vue-container(
   v-on:drop="blockDropped($event)"
   v-on:dragover="dragOver($event)"
+  @click.stop.prevent="clickHandler"
+  @contextmenu.prevent="showMenu($event)"
   @wheel.stop="handleWheel($event)"
   id="blockscontainer"
 )
@@ -29,10 +31,13 @@
     :position-x="menuX",
     :position-y="menuY",
     v-model="menuDisplayed",
-    :close-on-click="false",
+    :blockInputType="menuBlockInputType"
+    :close-on-click="true",
     :close-on-content-click="false"
   )
-    BlockPicker(@selected="addNewBlockFromMenu($event.type)")
+    BlockPicker(
+      @selected="addNewBlockFromMenu($event.type)"
+    )
   img.onboarding-arrow(v-if="s_blocks.length==0",src="@/assets/images/arrow.png")
   div.headline(v-if="s_blocks.length==0") Start by dragging you first block here. An Extract block is a good first choice
 </template>

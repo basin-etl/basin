@@ -9,10 +9,13 @@ import blockTypes from '@/core/blockTypes'
 })
 
 export default class BlockPicker extends Vue {
+  @Prop() inputType: String
   blockTypes = blockTypes
   searchText = ''
 
   selectBlock(blockType:string) {
+    // resetthe form
+    this.searchText = ''
     this.$emit("selected",{type:blockType})
   }
   //
@@ -20,13 +23,9 @@ export default class BlockPicker extends Vue {
   //
   get matches() {
     let vm = this
-    if (vm.searchText!='') {
-      return Object.values(this.blockTypes).filter( (block) => {
-        return block.description.match(vm.searchText)
-      })
-    }
-    else {
-      return Object.values(this.blockTypes)
-    }
+    return Object.values(this.blockTypes).filter( (block) => {
+      return  (block.inputs.filter( (input) => input.type==vm.inputType || !vm.inputType).length>0) &&
+              (block.description.match(vm.searchText) || vm.searchText=='')
+    })
   }
 }

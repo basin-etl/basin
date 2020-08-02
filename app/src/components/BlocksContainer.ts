@@ -1,6 +1,4 @@
 import { gsap } from "gsap";
-import {tween } from 'femtotween'
-import { linear, easeOutQuint } from 'femtotween/ease'
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import mouseHelper from '../helpers/mouse'
@@ -45,13 +43,13 @@ export default class BlocksContainer extends Vue {
   // data
   //
   dragging = false
-
   // popup menu
   menuDisplayed = false
   menuX = 0
   menuY = 0
   menuOffsetX = 0
   menuOffsetY = 0
+  menuBlockInputType:string = null
   //
   centerX = 0
   centerY = 0
@@ -90,23 +88,27 @@ export default class BlocksContainer extends Vue {
     document.documentElement.removeEventListener('mousedown', this.handleDown, true)
     document.documentElement.removeEventListener('mouseup', this.handleUp, true)
   }
+  clickHandler() {
+    // dummy placeholder to prevent the click handler since it interferes with the mouseup event
+  }
   created () {
   }
   showMenu(e:MouseEvent) {
-    e.preventDefault()
+    // e.preventDefault()
     console.log("menu")
-    this.menuDisplayed = true
-    this.menuX = e.clientX
-    this.menuY = e.clientY
+    this.menuDisplayed = false
+    this.menuX = e.clientX-5
+    this.menuY = e.clientY-20
     this.menuOffsetX = e.offsetX
     this.menuOffsetY = e.offsetY
+    if (this.linkStartData) this.menuBlockInputType = this.getSlotType(this.linkStartData.block.type,this.linkStartData.slot)
+    else this.menuBlockInputType = null
     this.$nextTick(() => {
       this.menuDisplayed = true
     })
   }
   get optionsForChild () {
       return {
-          width: 200,
           titleHeight: 20,
           scale: this.scale,
           inputSlotClassName: this.inputSlotClassName,
@@ -216,7 +218,7 @@ export default class BlocksContainer extends Vue {
     
     for (let block of this.s_blocks) {
       g.setNode("n"+block.id,{
-          width: this.optionsForChild.width,
+          width: 200,
           height: 100,
       })
       // XXX todo - use input port IDs instead of position
@@ -236,6 +238,7 @@ export default class BlocksContainer extends Vue {
         for (var i=0; i<vm.s_blocks.length; i++) {
           (<any>vm.s_blocks[i])._gsap = null
         }
+        vm.updateBlocks()
       }
     })
     
@@ -243,10 +246,18 @@ export default class BlocksContainer extends Vue {
     for (let node of g.nodes()) {
       // reposition the node
       // use tween for animation
-      let blockIndex = this.s_blocks.findIndex( (block) => block.id==parseInt(node.substring(1)))
+      let blockIndex = vm.s_blocks.findIndex( (block:any) => block.id==parseInt(node.substring(1)))
+      timeline.to(vm.s_blocks[blockIndex],
+        { duration:1,
+          ease: "linear",
+          x: g.node(node).x-vm.centerX/vm.scale 
+        },
+        0
+      );
       timeline.to(this.s_blocks[blockIndex],
-        { duration:1.5, ease: "linear",
-          x: g.node(node).x-this.container.centerX/this.scale 
+        { duration:1, 
+          ease: "linear",
+          y: g.node(node).y-vm.centerY/vm.scale 
         },
         0
       );
@@ -296,7 +307,8 @@ export default class BlocksContainer extends Vue {
       })
 
       this.hasDragged = true
-    } else if (this.linking && this.linkStartData) {
+    } 
+    if (this.linking && this.linkStartData) {
       let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
       this.mouseX = mouse.x
       this.mouseY = mouse.y
@@ -311,12 +323,13 @@ export default class BlocksContainer extends Vue {
     }
   }
   handleDown (e:MouseEvent) {
-      const target = e.target || e.srcElement
-      if ((target === this.$el || (<Element>target).matches('svg, svg *')) && e.which === 1) {
+    const target = e.target || e.srcElement
+    let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
+    this.mouseX = mouse.x
+    this.mouseY = mouse.y
+    if ((target === this.$el || (<Element>target).matches('svg, svg *')) && e.which === 1) {
+        // we are panning the canvas
         this.dragging = true
-        let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
-        this.mouseX = mouse.x
-        this.mouseY = mouse.y
 
         this.lastMouseX = this.mouseX
         this.lastMouseY = this.mouseY
@@ -326,31 +339,31 @@ export default class BlocksContainer extends Vue {
       }
   }
   handleUp (e:MouseEvent) {
-      const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
-      if (this.dragging && !this.linking) {
-        this.dragging = false
+    e.preventDefault()
+    const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
+    if (this.dragging && !this.linking) {
+      this.dragging = false
 
-        if (this.hasDragged) {
-          this.updateScene()
-          this.hasDragged = false
+      if (this.hasDragged) {
+        this.updateScene()
+        this.hasDragged = false
+      }
+    }
+
+    if (this.$el.contains(target) && (typeof target.className !== 'string' || target.className.indexOf(this.inputSlotClassName) === -1)) {
+      if (this.linking) {
+        if (!this.breakingLink) {
+          this.showMenu(e)
+        }
+        else {
+          // dud link. did not connect to any point. discard.
+          this.tempLink = null
+          this.breakingLink = false
         }
       }
-
-      if (this.$el.contains(target) && (typeof target.className !== 'string' || target.className.indexOf(this.inputSlotClassName) === -1)) {
-        if (this.linking) {
-          if (!this.breakingLink) {
-            this.showMenu(e)
-          }
-          else {
-            // dud link. did not connect to any point. discard.
-            this.tempLink = null
-            this.breakingLink = false
-          }
-        }
-        this.linking = false
-        this.dragging = false
-        // this.linkStartData = null
-      }
+      this.linking = false
+      this.dragging = false
+    }
   }
   handleWheel (e:MouseWheelEvent) {
       const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
@@ -468,7 +481,25 @@ export default class BlocksContainer extends Vue {
     const BLOCKHEIGHT = 58
     let newBlock = this.addNewBlock(blockType,this.menuOffsetX,this.menuOffsetY-BLOCKHEIGHT/2)
     await Vue.nextTick()
-    this.linkingStop(newBlock,"df")
+    // we arbitrarily link to the first socket that fits
+    let outputType = this.getSlotType(this.linkStartData.block.type,this.linkStartData.slot)
+    for (let input of this.blockTypes[blockType].inputs) {
+      if (input.type==outputType) {
+        this.linkingStop(newBlock,input.id)
+        return
+      }
+    }
+    // if we are here then something strange is going on. we are adding a link that can't connect to the one we just put
+    console.log("no target slot found!")
+  }
+  getSlotType(blockType:string,slot:string) {
+    let output = this.blockTypes[this.linkStartData.block.type].outputs.find( (output) => output.id==this.linkStartData.slot)
+    if (output) {
+      return output.type
+    }
+    else {
+      return null
+    }
   }
   addNewBlock (blockType:string, x:number, y:number) {
       let maxId = Math.max(0, ...this.s_blocks.map(function (o) {

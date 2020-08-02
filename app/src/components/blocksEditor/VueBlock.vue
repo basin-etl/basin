@@ -127,6 +127,7 @@
     border-radius: 4px 4px 0 0 
   }
   .vue-block {
+    width: 200px;
     user-select:none;
     position: absolute;
     box-sizing: border-box;

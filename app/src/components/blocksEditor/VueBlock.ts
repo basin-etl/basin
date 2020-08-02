@@ -180,7 +180,6 @@ export default class VueBlock extends Vue {
       return {
         top: this.options.center.y + this.y * this.options.scale + 'px',
         left: this.options.center.x + this.x * this.options.scale + 'px',
-        // width: this.options.width + 'px',
         transform: 'scale(' + (this.options.scale + '') + ')',
         transformOrigin: 'top left'
       }
