@@ -1,5 +1,5 @@
 <template>
-  <svg style="display:block" width="100%" height="100%">
+  <svg style="display:block" id="lines" width="100%" height="100%">
     <g v-for="(p,index) in renderedPaths" :key="index">
       <path v-if="outline" :d="p.data" :style="p.outlineStyle"></path>
       <path :d="p.data" :style="p.style"></path>

@@ -291,6 +291,13 @@ export default class BlocksContainer extends Vue {
       // wait for refresh for better animation
       let vm = this
       requestAnimationFrame(function() {
+        // XXX TODO: this is an alternate way that avoids rerendering for performance
+        // for (let o of document.documentElement.getElementsByClassName("vue-block")) {
+        
+        //   o.style.left = `${o.offsetLeft+diffX}px`
+        //   o.style.top = `${o.offsetTop+diffY}px`
+        // }
+        // document.getElementById("lines").style.transform = `translate(${})`
         vm.left += diffX/vm.scale
         vm.top += diffY/vm.scale
       })
@@ -582,7 +589,7 @@ export default class BlocksContainer extends Vue {
       }
   }
   updateScene () {
-      this.$emit('update:scene', this.exportScene())
+      // this.$emit('update:scene', this.exportScene())
   }
   updateBlocks () {
     this.$emit('update:blocks', this.s_blocks)
