@@ -24,6 +24,7 @@ v-row.mt-5(justify="center",align-items="start")
       :items="items"
       :search="search"
       hide-default-footer
+      :items-per-page="-1"
     )
       template(v-slot:item="props"
       )

@@ -1,6 +1,3 @@
-import snakeize from 'snakeize'
-import { tween } from 'femtotween'
-import { easeOutCubic } from 'femtotween/ease'
 import jupyterUtils from '@/core/jupyterUtils.ts'
 import blockTypes from '@/core/blockTypes'
 // components

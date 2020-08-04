@@ -19,6 +19,7 @@ v-card.d-flex.flex-column.picker(
     v-list(two-line,dense,v-if="matches.length>0")
       v-list-item(
         v-for="block in matches",
+        :key="block.type",
         @click="selectBlock(block.type)"
       )
         v-list-item-avatar

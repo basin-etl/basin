@@ -12,18 +12,20 @@ import { JobStatus } from '@/models/Job';
 })
 export default class VueBlock extends Vue {
   @Prop({
-      type: Number,
-      default: 0,
-      validator: function (val) {
-        return typeof val === 'number'
-      }}) x:number
+    type: Number,
+    default: 0}) x:number
   @Prop({
       type: Number,
-      default: 0,
-      validator: function (val) {
-        return typeof val === 'number'
-      }
-    }) y:number
+      default: 0}) y:number
+  @Prop({
+      type: Number,
+      default: 0}) containerTop:number
+  @Prop({
+    type: Number,
+    default: 0}) containerLeft:number
+  @Prop({
+      type: Number,
+      default: 1}) scale:number
   @Prop({
       type: Boolean,
       default: false
@@ -33,7 +35,6 @@ export default class VueBlock extends Vue {
   @Prop() properties: Object
   @Prop() comment: String
   @Prop() error: String
-  @Prop() options: any
   @Prop({
       type: Object,
       default: () => { return {} }
@@ -80,8 +81,8 @@ export default class VueBlock extends Vue {
   }
   getConnectionPos (socketType:string, socket:string) {
     return {
-      'x': this.x + (<Array<HTMLElement>>this.$refs[`${socketType}_${socket}`])[0].offsetLeft + circleSize/2,
-      'y': this.y + (<Array<HTMLElement>>this.$refs[`${socketType}_${socket}`])[0].offsetTop + circleSize/2
+      'x': (this.containerLeft + this.x + (<Array<HTMLElement>>this.$refs[`${socketType}_${socket}`])[0].offsetLeft + circleSize/2)*this.scale,
+      'y': (this.containerTop + this.y + (<Array<HTMLElement>>this.$refs[`${socketType}_${socket}`])[0].offsetTop + circleSize/2)*this.scale
     }
   }
     showProperties(e:Event) {
@@ -170,17 +171,17 @@ export default class VueBlock extends Vue {
       this.$emit('delete')
     }
     moveWithDiff (diffX:number, diffY:number) {
-      let left = this.x + diffX / this.options.scale
-      let top = this.y + diffY / this.options.scale
+      let left = this.x + diffX / this.scale
+      let top = this.y + diffY / this.scale
 
       this.$emit('update:x', left)
       this.$emit('update:y', top)
     }
     get style() {
+      let newTop = (this.y)+this.containerTop
+      let newLeft = (this.x)+this.containerLeft
       return {
-        top: this.options.center.y + this.y * this.options.scale + 'px',
-        left: this.options.center.x + this.x * this.options.scale + 'px',
-        transform: 'scale(' + (this.options.scale + '') + ')',
+        transform: `scale(${this.scale}) translate(${newLeft}px,${newTop}px)`,
         transformOrigin: 'top left'
       }
     }

@@ -50,16 +50,18 @@ export default class BlocksContainer extends Vue {
   menuOffsetX = 0
   menuOffsetY = 0
   menuBlockInputType:string = null
-  //
-  centerX = 0
-  centerY = 0
+
+  // container positioning
+  top = 0
+  left = 0
   scale = 1
+
   mouseX = 0
   mouseY = 0
   lastMouseX = 0
   lastMouseY = 0
   minScale = 0.2
-  maxScale = 5
+  maxScale = 2
   linking = false
   breakingLink = false // indication that we are dragging to disconnect a link
   linkStartData:{block: Block, slot: string} = null
@@ -78,9 +80,6 @@ export default class BlocksContainer extends Vue {
       document.documentElement.addEventListener('mousedown', this.handleDown, true)
       document.documentElement.addEventListener('mouseup', this.handleUp, true)
 
-      this.centerX = this.$el.clientWidth / 2
-      this.centerY = this.$el.clientHeight / 2
-
       this.importScene()
   }
   beforeDestroy () {
@@ -94,6 +93,7 @@ export default class BlocksContainer extends Vue {
   created () {
   }
   showMenu(e:MouseEvent) {
+    // show blockpicker menu
     // e.preventDefault()
     console.log("menu")
     this.menuDisplayed = false
@@ -106,17 +106,6 @@ export default class BlocksContainer extends Vue {
     this.$nextTick(() => {
       this.menuDisplayed = true
     })
-  }
-  get optionsForChild () {
-      return {
-          titleHeight: 20,
-          scale: this.scale,
-          inputSlotClassName: this.inputSlotClassName,
-          center: {
-              x: this.centerX,
-              y: this.centerY
-          }
-      }
   }
   // Links calculate
   get lines () {
@@ -250,14 +239,14 @@ export default class BlocksContainer extends Vue {
       timeline.to(vm.s_blocks[blockIndex],
         { duration:1,
           ease: "linear",
-          x: g.node(node).x-vm.centerX/vm.scale 
+          x: g.node(node).x//-vm.centerX/vm.scale 
         },
         0
       );
       timeline.to(this.s_blocks[blockIndex],
         { duration:1, 
           ease: "linear",
-          y: g.node(node).y-vm.centerY/vm.scale 
+          y: g.node(node).y//-vm.centerY/vm.scale 
         },
         0
       );
@@ -302,8 +291,8 @@ export default class BlocksContainer extends Vue {
       // wait for refresh for better animation
       let vm = this
       requestAnimationFrame(function() {
-        vm.centerX += diffX
-        vm.centerY += diffY
+        vm.left += diffX/vm.scale
+        vm.top += diffY/vm.scale
       })
 
       this.hasDragged = true
@@ -346,7 +335,7 @@ export default class BlocksContainer extends Vue {
       this.dragging = false
 
       if (this.hasDragged) {
-        this.updateScene()
+        this.updateContainer()
         this.hasDragged = false
       }
     }
@@ -387,22 +376,22 @@ export default class BlocksContainer extends Vue {
           y: this.mouseY
         }
 
-        let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
-        let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
+        // let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
+        // let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
 
-        this.centerX -= deltaOffsetX
-        this.centerY -= deltaOffsetY
+        // this.centerX -= deltaOffsetX
+        // this.centerY -= deltaOffsetY
 
         this.updateContainer()
       }
   }
     // Processing
   scalePosition(position:any) {
-      let x = position.x * this.scale
-      let y = position.y * this.scale
+      let x = position.x// * this.scale
+      let y = position.y// * this.scale
 
-      x += this.centerX
-      y += this.centerY
+      // x += this.left
+      // y += this.top
 
       return {x:x,y:y}
   }
@@ -512,13 +501,13 @@ export default class BlocksContainer extends Vue {
       }))
       let block = new vBlock({id:maxId+1,type:blockType})
 
-      // if x or y not set, place block to center
+      // if x or y not set, place block top left
       if (x === undefined || y === undefined) {
-        x = (this.$el.clientWidth / 2 - this.centerX) / this.scale
-        y = (this.$el.clientHeight / 2 - this.centerY) / this.scale
+        x = 100
+        y = 100
       } else {
-        x = (x - this.centerX) / this.scale
-        y = (y - this.centerY) / this.scale
+        x = (x  / this.scale - this.left)
+        y = (y  / this.scale - this.top)
       }
 
       block.x = x
@@ -571,11 +560,11 @@ export default class BlocksContainer extends Vue {
       this.s_links = JSON.parse(JSON.stringify(this.links))
       
       let container = this.container
-      if (container.centerX) {
-        this.centerX = container.centerX
+      if (container.top) {
+        this.left = container.left
       }
-      if (container.centerY) {
-        this.centerY = container.centerY
+      if (container.top) {
+        this.top = container.top
       }
       if (container.scale) {
         this.scale = container.scale
@@ -586,8 +575,8 @@ export default class BlocksContainer extends Vue {
           blocks: this.s_blocks,
           links: this.s_links,
           container: {
-              centerX: this.centerX,
-              centerY: this.centerY,
+              top: this.top,
+              left: this.left,
               scale: this.scale
           }
       }
@@ -603,8 +592,8 @@ export default class BlocksContainer extends Vue {
   }
   updateContainer () {
     this.$emit('update:container', {
-      centerX: this.centerX,
-      centerY: this.centerY,
+      left: this.left,
+      top: this.top,
       scale: this.scale
     })
   }
