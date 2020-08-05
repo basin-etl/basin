@@ -285,21 +285,15 @@ export default class BlocksContainer extends Vue {
       let diffX = this.mouseX - this.lastMouseX
       let diffY = this.mouseY - this.lastMouseY
 
-      this.lastMouseX = this.mouseX
-      this.lastMouseY = this.mouseY
+      // this.lastMouseX = this.mouseX
+      // this.lastMouseY = this.mouseY
 
       // wait for refresh for better animation
       let vm = this
       requestAnimationFrame(function() {
-        // XXX TODO: this is an alternate way that avoids rerendering for performance
-        // for (let o of document.documentElement.getElementsByClassName("vue-block")) {
-        
-        //   o.style.left = `${o.offsetLeft+diffX}px`
-        //   o.style.top = `${o.offsetTop+diffY}px`
-        // }
-        // document.getElementById("lines").style.transform = `translate(${})`
-        vm.left += diffX/vm.scale
-        vm.top += diffY/vm.scale
+        // this is an alternate way that avoids rerendering for performance
+        // we will set the actual container position onmouse up
+        vm.setAllHTMLChildrenPosition(diffX,diffY)
       })
 
       this.hasDragged = true
@@ -317,6 +311,17 @@ export default class BlocksContainer extends Vue {
         y2: this.mouseY
       }
     }
+  }
+  // this is a hack to move the contents without rerendering.
+  // used for smooth drag
+  setAllHTMLChildrenPosition(newX:number,newY:number) {
+    for (let o of document.documentElement.getElementsByClassName("vue-block")) {
+      (<HTMLElement>o).style.left = `${newX}px`;
+      (<HTMLElement>o).style.top = `${newY}px`;
+    }
+    document.getElementById("lines").style.left = `${newX}px`
+    document.getElementById("lines").style.top = `${newY}px`
+
   }
   handleDown (e:MouseEvent) {
     const target = e.target || e.srcElement
@@ -342,6 +347,11 @@ export default class BlocksContainer extends Vue {
       this.dragging = false
 
       if (this.hasDragged) {
+        let diffX = this.mouseX - this.lastMouseX
+        let diffY = this.mouseY - this.lastMouseY
+        this.setAllHTMLChildrenPosition(0,0)
+        this.left += diffX/this.scale
+        this.top += diffY/this.scale
         this.updateContainer()
         this.hasDragged = false
       }
@@ -589,7 +599,7 @@ export default class BlocksContainer extends Vue {
       }
   }
   updateScene () {
-      // this.$emit('update:scene', this.exportScene())
+    this.$emit('update:scene', this.exportScene())
   }
   updateBlocks () {
     this.$emit('update:blocks', this.s_blocks)
