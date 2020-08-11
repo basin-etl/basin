@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@conjurelabs/dot-template": "^2.2.0",
+    "@finos/perspective-viewer": "^0.5.2",
+    "@finos/perspective-viewer-d3fc": "^0.5.2",
+    "@finos/perspective-viewer-datagrid": "^0.5.2",
     "@jupyterlab/services": "^5.0.2",
     "apache-arrow": "^0.16.0",
     "axios": "^0.19.2",

@@ -30,10 +30,11 @@ export default {
             console.log("shutting down kernel")
             this.kernel.shutdown()
         }, false)
+        console.log("created")
         let kernel = await jupyterUtils.getKernel()
         let code = `
 import pandas as pd
-df = pd.read_csv("./public/calendar.csv")
+df = pd.read_csv("/opt/basin/data/calendar.csv")
 `;
         await kernel.requestExecute({ code: code }).done;
         this.kernel = kernel

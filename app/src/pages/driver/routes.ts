@@ -1,9 +1,8 @@
-// import Html2CanvasDriver from './Html2CanvasDriver.vue'
-
+import PerspectiveDriver from './PerspectiveDriver.vue'
 export default [
-    // {
-    //   path: '/driver/html2canvas',
-    //   name: 'driver_html2canvas',
-    //   component: Html2CanvasDriver
-    // },
+    {
+      path: '/driver/perspective',
+      name: 'driver_perspective',
+      component: PerspectiveDriver
+    },
 ]

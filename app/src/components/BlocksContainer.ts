@@ -277,7 +277,7 @@ export default class BlocksContainer extends Vue {
       this.$emit('inspectsocket',socket)
   }
 
-  handleMove (e:MouseEvent) {
+  async handleMove (e:MouseEvent) {
     if (this.dragging) {
       let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
       this.mouseX = mouse.x
@@ -290,11 +290,10 @@ export default class BlocksContainer extends Vue {
 
       // wait for refresh for better animation
       let vm = this
-      requestAnimationFrame(function() {
-        // this is an alternate way that avoids rerendering for performance
-        // we will set the actual container position onmouse up
-        vm.setAllHTMLChildrenPosition(diffX,diffY)
-      })
+      // this is an alternate way that avoids rerendering for performance
+      // we will set the actual container position onmouse up
+      await vm.$nextTick()
+      vm.setAllHTMLChildrenPosition(diffX,diffY)
 
       this.hasDragged = true
     } 
@@ -339,7 +338,7 @@ export default class BlocksContainer extends Vue {
         if (e.preventDefault) e.preventDefault()
       }
   }
-  handleUp (e:MouseEvent) {
+  async handleUp (e:MouseEvent) {
     e.preventDefault()
     // e.stopPropagation()
     const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
@@ -347,8 +346,10 @@ export default class BlocksContainer extends Vue {
       this.dragging = false
 
       if (this.hasDragged) {
-        let diffX = this.mouseX - this.lastMouseX
-        let diffY = this.mouseY - this.lastMouseY
+        let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
+        await this.$nextTick()
+        let diffX = mouse.x - this.lastMouseX
+        let diffY = mouse.y - this.lastMouseY
         this.setAllHTMLChildrenPosition(0,0)
         this.left += diffX/this.scale
         this.top += diffY/this.scale
@@ -378,31 +379,23 @@ export default class BlocksContainer extends Vue {
         if (e.preventDefault) e.preventDefault()
 
         let deltaScale = Math.pow(1.1, e.deltaY * -0.01)
+        // safeguard minimum and maximum scale
+        if (
+          this.scale*deltaScale < this.minScale ||
+          this.scale*deltaScale > this.maxScale) return
+
         this.scale *= deltaScale
 
-        if (this.scale < this.minScale) {
-          this.scale = this.minScale
-          return
-        } else if (this.scale > this.maxScale) {
-          this.scale = this.maxScale
-          return
-        }
-
-        let zoomingCenter = {
-          x: this.mouseX,
-          y: this.mouseY
-        }
-
-        // let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
-        // let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
-
-        // this.centerX -= deltaOffsetX
-        // this.centerY -= deltaOffsetY
+        // make sure we zoom around the position of the mouse
+        let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
+    
+        this.left-=mouse.x/this.scale*(deltaScale-1)
+        this.top-=mouse.y/this.scale*(deltaScale-1)
 
         this.updateContainer()
       }
   }
-    // Processing
+
   scalePosition(position:any) {
       let x = position.x// * this.scale
       let y = position.y// * this.scale
