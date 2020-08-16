@@ -7,7 +7,6 @@ def extract(spark,env,source):
     print(catalog)
     properties = catalog[source]
     options = {
-        "inferSchema": True,
         "quote": "\"",
         "escape": "\"",
         "multiLine": "true",
@@ -17,5 +16,15 @@ def extract(spark,env,source):
     }
     options["delimiter"] = properties["delimiter"]
     options["header"] = properties["header"]
-    df = spark.read.options(**options).csv(os.path.join(env["datafolder"],properties["location"]))
+    file_location = os.path.join(env["datafolder"],properties["location"])
+    # read as text then deduce schema for better performance and ability to skip lines
+    rdd = spark.read.text(file_location).rdd
+    # read the schema based on a sample
+    df_schema = spark.read.options(**options).option("inferSchema",True).csv(
+        rdd.map(lambda x: (x.value, )).toDF().limit(properties.get("schema_sample",500)).\
+        rdd.map(lambda x: x[0])
+    ).schema
+    # read the csv without inferring schema
+    df = spark.read.options(**options).csv(file_location,df_schema)
     return df
+

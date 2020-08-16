@@ -37,8 +37,8 @@ export default class DataFrameViewer extends Vue {
     errorMessage:string = null
     showErrorSnackbar = false
     initialized = false
-    recordCount:number = 1
-    columnCount:number = 1
+    recordCount:number = null
+    columnCount:number = null
     expanded = false
     
     @Watch('dataframe', { immediate: true})
@@ -71,21 +71,19 @@ export default class DataFrameViewer extends Vue {
                 let t = Table.from((<DataView>msg.buffers[0]).buffer)
                 console.log(t.count())
                 vm.data = msg
-                if (t.count()==0) {
-                    vm.recordCount = 0
-                    vm.columnCount = 0
-                }
-                else {
+                vm.recordCount = t.count()
+                vm.columnCount = t.numCols
+                if (t.count()>0) {
                     vm.data = t
-                var viewer = <HTMLPerspectiveViewerElement>document.getElementById("view1");
-                
-                let worker = perspective.worker();
-                viewer.addEventListener('perspective-view-update', () => { console.log('updated')})
-                viewer.load(worker.table(<any>(<DataView>msg.buffers[0]).buffer))
-                await viewer.toggleConfig()
-                // viewer.on_up viewer.notifyResize()
-                await vm.$nextTick()
-                vm.loading = false
+                    var viewer = <HTMLPerspectiveViewerElement>document.getElementById("view1");
+                    
+                    let worker = perspective.worker();
+                    viewer.addEventListener('perspective-view-update', () => { console.log('updated')})
+                    viewer.load(worker.table(<any>(<DataView>msg.buffers[0]).buffer))
+                    await viewer.toggleConfig()
+                    // viewer.on_up viewer.notifyResize()
+                    await vm.$nextTick()
+                    vm.loading = false
                 }
             };
             comm.onClose = msg => {
