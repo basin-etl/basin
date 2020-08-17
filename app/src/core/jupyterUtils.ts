@@ -89,22 +89,25 @@ batches = [batch]
 `
 	}
 	else {
+// 		code += `
+// batches = (${expression}).limit(${limit})._collectAsArrow()
+// 		`
 		code += `
-batches = (${expression}).limit(${limit})._collectAsArrow()
+common.utils.stream_df_as_arrow(${expression}.limit(${limit}))
 		`
 	}
-	code += `
-sink = pa.BufferOutputStream()
-# cos = pa.output_stream(sink,compression='gzip')
-# see if we have any results
-if len(batches)>0:
-	writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-	for batch in batches:
-		writer.write_batch(batch)
-comm = Comm(target_name="inspect_df")
-comm.send(data="test",buffers=[sink.getvalue()])
-comm.close(data="closing comm")
-`;
+// 	code += `
+// sink = pa.BufferOutputStream()
+// # cos = pa.output_stream(sink,compression='gzip')
+// # see if we have any results
+// if len(batches)>0:
+// 	writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
+// 	for batch in batches:
+// 		writer.write_batch(batch)
+// comm = Comm(target_name="inspect_df")
+// comm.send(data="test",buffers=[sink.getvalue()])
+// comm.close(data="closing comm")
+// `;
 	
     return sendToPython(kernel,code)
 }

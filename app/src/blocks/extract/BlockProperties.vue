@@ -3,6 +3,7 @@ div
   v-select(v-model="local.source",
           :items="sources"
           label="Source name")
+  v-text-field(v-model="local.previewLimit",label="Row limit in preview mode")
   v-text-field(v-model="local.alias",label="Alias")
 </template>
 
@@ -17,12 +18,13 @@ import BlockProperties from '@/components/BlockProperties'
 export default class ExtractBlockProperties extends BlockProperties {
   @Prop(String) source: string
   @Prop(String) alias: string
+  @Prop({default: 50000}) previewLimit: number
   sources:Array<any> = []
 
   async created() {
     let catalog = await this.$idb.table("catalog").toArray()
-    this.sources = catalog.map( item => item.name)
-    console.log(this.sources)
+    this.sources = catalog.map( (item:any) => item.name)
+
   }
 
   @Watch('local.source', { immediate: true})

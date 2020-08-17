@@ -70,6 +70,7 @@ export default class DataFrameViewer extends Vue {
                 console.log("got msg callback")
                 let t = Table.from((<DataView>msg.buffers[0]).buffer)
                 console.log(t.count())
+                console.log(t)
                 vm.data = msg
                 vm.recordCount = t.count()
                 vm.columnCount = t.numCols

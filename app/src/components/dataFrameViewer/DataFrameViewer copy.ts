@@ -122,13 +122,6 @@ export default class DataFrameViewer extends Vue {
                 console.log(msg.content.data);
             };
         });
-        let code = `
-from ipykernel.comm import Comm
-
-import pyarrow as pa
-import pandas as pd
-`;
-        await this.kernel.requestExecute({ code: code }).done;
         console.log("kernel callbacks initialized")
         // load the dataframe unfiltered
         this.initialized = true

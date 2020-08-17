@@ -262,11 +262,11 @@ export default class Editor extends Vue {
             }
         }
         // add caching for better response times
-        // TODO only do this in preview mode
+        // TODO only do this in preview mode and optionally take from the properties of the block
         Object.keys(command.outputs).forEach( async output => {
           await jupyterUtils.sendToPython(
             this.kernel,
-            `${command.outputs[output]}=${command.outputs[output]}.limit(10000).unpersist().cache()`)
+            `${command.outputs[output]}=${command.outputs[output]}.limit(50000).unpersist().cache()`)
         })
 
         // set the result count
