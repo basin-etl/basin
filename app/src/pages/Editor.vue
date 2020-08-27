@@ -28,6 +28,8 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       v-btn(small,@click="stop",color="red",v-if="!isJobStopped")
           v-progress-circular(v-show="!isJobComplete",small,indeterminate,color="white",size="14",width="2")
           v-icon(color="white") stop
+      v-btn.ml-2(@click="",small,color="success",title="publish")
+        v-icon(color="white") backup
 
     v-divider
   v-row.ma-0

@@ -81,7 +81,9 @@ export default class DataFrameViewer extends Vue {
                     let worker = perspective.worker();
                     viewer.addEventListener('perspective-view-update', () => { console.log('updated')})
                     viewer.load(worker.table(<any>(<DataView>msg.buffers[0]).buffer))
-                    await viewer.toggleConfig()
+                    await viewer.toggleConfig();
+                    //TODO find a better place for this
+                    (<any>window).getPlugin("d3_treemap").max_cells=200;
                     // viewer.on_up viewer.notifyResize()
                     await vm.$nextTick()
                     vm.loading = false

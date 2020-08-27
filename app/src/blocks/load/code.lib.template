@@ -1,5 +1,7 @@
 import os
 import pyspark.sql
+import pyspark.sql.functions as F
+import pyspark.sql.types as T
 import common.utils
 
 def load(spark,env,df,connection,format,location,column_mapping):
@@ -13,8 +15,10 @@ def load(spark,env,df,connection,format,location,column_mapping):
     }
     # options["delimiter"] = properties["delimiter"]
     # options["header"] = properties["header"]
+
+    df_out  = df.select([F.col(mapping["source"]).alias(mapping.get("target")) for mapping in column_mapping])
     if format=='csv':
-        df.toPandas().to_csv(os.path.join(env["datafolder"],location),index=False)
+        df_out.toPandas().to_csv(os.path.join(env["datafolder"],location),index=False)
     else:
-        df.write.parquet(os.path.join(env["datafolder"],location))
+        df_out.write.parquet(os.path.join(env["datafolder"],location))
         
