@@ -52,6 +52,12 @@ export default class Editor extends Vue {
   links:Array<Link> = []
   container:any = {}
   jobName:string = "New Job"
+  runMode:string = "preview"
+  runModes:{text:string, value:string}[] = [
+    {text:"Preview mode",value:"preview"},
+    {text:"Live mode",value:"live"},
+    {text:"Test mode",value:"test"},
+  ]
 
   @Ref('container') readonly blocksContainer!: BlocksContainerRef
 
@@ -157,7 +163,7 @@ export default class Editor extends Vue {
       comment: draftBlock.comment,
       props: draftBlock.properties,
       inputs: jobCommand.inputs,
-      output: 'df'
+      outputs: {'df':'df'}
     })
     console.log(code)
     try {

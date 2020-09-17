@@ -22,14 +22,22 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       v-icon(small,v-if="connectionStatus=='connecting'",color="green",title="connecting...") more_horiz
       v-icon(small,v-if="connectionStatus=='disconnected'",color="red",title="disconnected") link_off
       v-divider.mx-3(vertical)
+      //- preview configuration
+      div.ml-2(:style="{'width':'140px'}")
+        v-select(
+          v-model="runMode",
+          :items="runModes",
+          hide-details
+        )
       //- run buttons
-      v-btn(@click="run()",small,color="success",v-if="isJobStopped",:disabled="!kernel",title="run")
-        v-icon(color="white") play_arrow
-      v-btn(small,@click="stop",color="red",v-if="!isJobStopped")
-          v-progress-circular(v-show="!isJobComplete",small,indeterminate,color="white",size="14",width="2")
-          v-icon(color="white") stop
-      v-btn.ml-2(@click="",small,color="success",title="publish")
-        v-icon(color="white") backup
+      div.ml-2
+        v-btn(@click="run()",small,color="success",v-if="isJobStopped",:disabled="!kernel",title="run")
+          v-icon(color="white") play_arrow
+        v-btn(small,@click="stop",color="red",v-if="!isJobStopped")
+            v-progress-circular(v-show="!isJobComplete",small,indeterminate,color="white",size="14",width="2")
+            v-icon(color="white") stop
+        v-btn.ml-2(@click="",small,color="success",title="publish")
+          v-icon(color="white") backup
 
     v-divider
   v-row.ma-0

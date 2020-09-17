@@ -92,7 +92,7 @@ export default class CatalogCreate extends Vue {
       comment: "",
       props: {source:this.name},
       inputs: null,
-      output: 'df'
+      outputs: {'df':'df'}
     })
     let setMock = 
 `

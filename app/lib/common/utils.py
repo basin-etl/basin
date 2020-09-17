@@ -1,5 +1,4 @@
 import json
-import pyarrow as pa
 from ipykernel.comm import Comm
 import pyarrow as pa
 

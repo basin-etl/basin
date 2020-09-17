@@ -1,0 +1,2 @@
+# split into test and train sets
+{{output 'df_train'}},{{output 'df_test'}} = {{input 'df'}}.randomSplit([0.7, 0.3], seed = 2018)

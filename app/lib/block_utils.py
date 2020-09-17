@@ -1,15 +1,8 @@
 import os
 import pyspark.sql
 import common.utils
-import os
-import pyspark.sql
-import common.utils
-import os
-import pyspark.sql
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
-import common.utils
-
 
 def extract(spark,env,source):
     catalog = common.utils.get_catalog()

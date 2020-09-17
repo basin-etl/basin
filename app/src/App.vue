@@ -37,6 +37,8 @@ v-app
       | Connectors
     router-link.ml-3(to="/flow")
       | Flows
+    router-link.ml-3(to="/")
+      | Lineage
     v-btn.ml-3(icon)
       v-icon settings
     //- authentication

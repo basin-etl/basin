@@ -1,5 +1,5 @@
 # aggregating {{input 'df'}}
-{{output}} = {{input 'df'}}.groupby(
+{{output 'df'}} = {{input 'df'}}.groupby(
 {{#if props.groupBy}}
 	{{#each props.groupBy}}F.col("{{this}}"){{#unless @last}},{{/unless}}{{/each}}
 {{else}}
@@ -8,4 +8,4 @@
 ).agg(
 	{{#each props.aggregations}}F.{{this.agg}}(F.col("{{this.col}}")).alias("{{this.alias}}"){{#if @first}},{{/if}}{{/each}}
 )
-{{output}} = {{output}}.alias("{{props.alias}}")
+{{output 'df'}} = {{output 'df'}}.alias("{{props.alias}}")

@@ -9,7 +9,6 @@ export default class BlockType {
     icon: string // name of material icon
     inputs: Array<any>
     _outputs: Array<any>
-    outputNameTemplate: CodeTemplate
     codeTemplate: CodeTemplate
     commentTemplate: CodeTemplate
     comment_template: string // default comment to use in block
@@ -25,7 +24,7 @@ export default class BlockType {
       this._outputs = newOutputs
       this._outputs.forEach( (output, index) => {
         // see if we have a custom name
-        if (output.name) {
+        if (output.name_template) {
           this._outputs[index].outputNameTemplate = new CodeTemplate(output.name_template)
         }
         else {

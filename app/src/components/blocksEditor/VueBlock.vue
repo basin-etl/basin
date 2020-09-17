@@ -19,8 +19,7 @@
       )
         .typeicon
           v-icon(color="white",small,dense) {{blockType.icon}}
-        .pl-2 {{blockType.title}}
-        v-spacer
+        .block-title.pl-2(:title="blockType.title") {{blockType.title}}
         div(v-show="!readOnly")
           //- settings button
           v-btn(icon,small,
@@ -125,6 +124,12 @@
   }
   .titlebar {
     border-radius: 4px 4px 0 0 
+  }
+  .block-title {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow:hidden;
+    flex:1;
   }
   .vue-block {
     width: 200px;

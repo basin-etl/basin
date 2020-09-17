@@ -3,5 +3,5 @@
 {{else}}
 # extract {{props.source}}
 {{/if}}
-{{output}} = block_utils.extract(spark,env,"{{props.source}}")
-{{output}} = {{output}}.alias("{{props.alias}}")
+{{output 'df'}} = block_utils.extract(spark,env,"{{props.source}}")
+{{output 'df'}} = {{output 'df'}}.alias("{{props.alias}}")

@@ -145,7 +145,7 @@ export default class DataFrameViewer extends Vue {
         this.errorMessage = null
         console.log(`loading ${this.expression}`)
         try {
-            await jupyterUtils.inspectDataframe(this.kernel,vm.expression,this.dataframeType)
+            await jupyterUtils.inspectDataframe(this.kernel,vm.expression,this.dataframeType,10000)
         }
         catch (e) {
             this.errorMessage = `${e.ename}: ${e.evalue}`

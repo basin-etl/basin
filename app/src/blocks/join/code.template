@@ -1,2 +1,2 @@
 # joining {{input 'df1'}} to {{input 'df2'}}
-{{output}} = {{input 'df1'}}.join({{input 'df2'}},{{props.condition}},how="{{props.how}}")
+{{output 'df'}} = {{input 'df1'}}.join({{input 'df2'}},{{props.condition}},how="{{props.how}}")
