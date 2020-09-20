@@ -9,11 +9,13 @@ v-row.mt-5(no-gutters,justify="center",align="start")
   
       v-text-field.form-field.flex-grow-0(@keydown.space.prevent,v-model="name",label="source name",:rules="[rules.required]")
       //- v-text-field.form-field.flex-grow-0(v-model="properties.location",label="file name regexp",:rules="[rules.required]")
-      v-autocomplete.form-field.flex-grow-0(v-model="properties.location",:items="files",label="file name regexp",:rules="[rules.required]")
-        template(
-          v-slot:item="{ item }"
-        )
-          | {{item.text}} ({{(item.size/1024/1024).toFixed(2)}}M)
+      v-combobox.form-field.flex-grow-0(
+        v-model="properties.location",
+        :items="files.map( (f) => { return {text:`${f.text} (${(f.size/1024/1024).toFixed(2)}M)`, value:f.text }})",
+        label="file name regexp",
+        :return-object="false",
+        :rules="[rules.required]"
+      )
       v-select.flex-grow-0(v-model="properties.type",
               :items="fileTypes"
               item-text="label"

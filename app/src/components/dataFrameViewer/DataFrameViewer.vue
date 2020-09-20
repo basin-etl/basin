@@ -19,11 +19,11 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
         //-
         //- div.flex-grow-1.grid(v-show="kernel && data && !loading && recordCount>0",ref="dataGrid")
         perspective-viewer.flex-grow-1.grid(
-            v-show="kernel && data && !loading"
+            v-show="kernel && !loading"
             id="view1",
             ref="dataGrid"
         )
-        v-row.overlay(no-gutters,justify="center",align="center",v-show="!kernel || !data || loading")
+        v-row.overlay(no-gutters,justify="center",align="center",v-show="!kernel || loading")
             v-progress-circular(v-if="!errorMessage",indeterminate)
             v-icon(v-if="errorMessage") error_outline
         v-row.overlay(no-gutters,justify="center",align="center",v-show="!loading && recordCount==0")

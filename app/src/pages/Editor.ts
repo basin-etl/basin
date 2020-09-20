@@ -222,8 +222,6 @@ export default class Editor extends Vue {
       this.jobCommands = commands
       console.log(commands)
       // start running
-      let initCode = jobRenderer.renderInitCode()
-      await jupyterUtils.sendToPython(this.kernel,initCode)
       this.completedBlocks = 0
 
       // send catalog to server
@@ -269,10 +267,11 @@ export default class Editor extends Vue {
         }
         // add caching for better response times
         // TODO only do this in preview mode and optionally take from the properties of the block
+        // TODO unpersist only computations or 'isDirty' indication
         Object.keys(command.outputs).forEach( async output => {
           await jupyterUtils.sendToPython(
             this.kernel,
-            `${command.outputs[output]}=${command.outputs[output]}.limit(50000).unpersist().cache()`)
+            `${command.outputs[output]}=${command.outputs[output]}.cache()`)
         })
 
         // set the result count

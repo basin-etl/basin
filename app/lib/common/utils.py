@@ -1,6 +1,7 @@
 import json
 from ipykernel.comm import Comm
 import pyarrow as pa
+import logging
 
 from typing import Dict, List, Any, Tuple, Pattern, Match, Optional, Set
 def get_catalog() -> Dict[str,Any]:
@@ -28,12 +29,12 @@ def get_schema_with_aliases(df,format=None):
         })
 
     if format=="json":
-        return json.dumps({"fields":output_fields})
+        return json.dumps({"fields":sorted(output_fields,key=lambda k: k['name'])})
     else:
         return output_fields
 
-def stream_df_as_arrow(df):
-    sink = pa.BufferOutputStream()
+def stream_df_as_arrow(df,spark,limit=5000):
+    # df = df.repartition(2000)#.cache()
     # cos = pa.output_stream(sink,compression='gzip')
     # get the aliases and change the names of the columns to show the aliases
     # this avoids duplicate columns
@@ -47,12 +48,38 @@ def stream_df_as_arrow(df):
         else:
             fieldname = aliased_field["name"]
         renamed_schema_fields.append(fieldname)
+
+    comm = Comm(target_name="inspect_df")
+
     # see if we have any results
-    batches = df.toDF(*renamed_schema_fields)._collectAsArrow()
+    renamed_df = df.toDF(*renamed_schema_fields)
+    row_iterator = renamed_df.toLocalIterator()
+    row_num = 0
+    row_buff = []
+    chunk_size = 500
+    for row in row_iterator:
+        if (row_num>2000):
+            break
+        row_num += 1
+        logging.debug(row_num)
+        row_buff.append(row)
+        if row_num%chunk_size==0:
+            batches = spark.createDataFrame(row_buff,renamed_df.schema)._collectAsArrow()
+            if len(batches)>0:
+                sink = pa.BufferOutputStream()
+                writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
+                for batch in batches:
+                    writer.write_batch(batch)
+                comm.send(data="test",buffers=[sink.getvalue()])
+            row_buff = []
+    # send the last batch
+    batches = spark.createDataFrame(row_buff,renamed_df.schema)._collectAsArrow()
     if len(batches)>0:
+        sink = pa.BufferOutputStream()
         writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
         for batch in batches:
             writer.write_batch(batch)
-    comm = Comm(target_name="inspect_df")
-    comm.send(data="test",buffers=[sink.getvalue()])
+        comm.send(data="test",buffers=[sink.getvalue()])
+
     comm.close(data="closing comm")
+

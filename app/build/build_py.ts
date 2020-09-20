@@ -4,7 +4,7 @@
 //
 import * as glob from 'fast-glob'
 import fs from 'fs'
-let files = glob.sync("./src/**/*.lib.template")
+let files = glob.sync("./src/blocks/**/*.py")
 let moduleText = ''
 let importArr = new Set()
 console.log("compiling python lib for blocks")

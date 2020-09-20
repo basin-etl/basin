@@ -11,3 +11,7 @@ spark = SparkSession \
 env = {
   "datafolder": "/opt/basin/data"
 }
+
+spark.conf.set("spark.sql.execution.arrow.maxRecordsPerBatch",200)
+spark.conf.set("spark.sql.parquet.columnarReaderBatchSize",200)
+spark.conf.set("spark.sql.files.maxPartitionBytes", 200000)

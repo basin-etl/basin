@@ -6,7 +6,6 @@ import blockTypes from '@/core/blockTypes'
 import jobRenderer from '@/core/jobRenderer'
 import snakeize from 'snakeize'
 import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
-import { Int } from 'apache-arrow';
 import { ContentsManager, ServerConnection } from '@jupyterlab/services'
 
 @Component({
