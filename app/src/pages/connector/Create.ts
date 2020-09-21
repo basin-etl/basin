@@ -51,6 +51,7 @@ export default class CatalogCreate extends Vue {
     {value:"hive_tables",label:"Hive tables"},
     {value:"mlflow_experiment",label:"MLflow experiment"},
     {value:"mongodb",label:"MongoDB"},
+    {value:"gcs",label:"GCS"},
     {value:"neo4j",label:"Neo4j"},
     {value:"oracle",label:"Oracle"},
     {value:"redis",label:"Redis"},
@@ -74,7 +75,7 @@ export default class CatalogCreate extends Vue {
     this.showDataframePanelExpanded = false
   }
   async validate() {
-    let existing = await this.$idb.table("catalog").get(this.name)
+    let existing = await this.$idb.table("connectors").get(this.name)
     if (existing) {
       this.error = 'Name already exists in catalog'
       this.showError = true
@@ -141,9 +142,9 @@ patcher.start()
 
     this.breadcrumbs = [
       {
-        text: 'Catalog',
+        text: 'Connections',
         disabled: false,
-        to: '/catalog',
+        to: '/connector',
         exact: true,
       },
       {
@@ -157,7 +158,7 @@ patcher.start()
     if (this.$route.path.endsWith("edit")) {
       // we are editing. fetch the record
       this.name = this.$route.params["id"]
-      this.properties = await this.$idb.table("catalog").get(this.name)
+      this.properties = await this.$idb.table("connectors").get(this.name)
     }
     this.$root.$data.$loading = false
 
@@ -170,10 +171,10 @@ patcher.start()
       }
       else {
         // delete the old entry before putting this new entry
-        this.$idb.table("catalog").delete(this.$route.params["id"])
+        this.$idb.table("connectors").delete(this.$route.params["id"])
       }
     }
-    this.$idb.table("catalog").put(Object.assign({name:this.name},this.properties))
+    this.$idb.table("connectors").put(Object.assign({name:this.name},this.properties))
     this.id = this.name
     this.success = true
   }

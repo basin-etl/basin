@@ -7,6 +7,10 @@ export class CodeTemplate {
     Handlebars.registerHelper('input', function (this:Handlebars.HelperDelegate,id:string) {
       return (<any>this).inputs[id]
     });
+    Handlebars.registerHelper('output', function (this:Handlebars.HelperDelegate,id:string) {
+      return (<any>this).outputs[id]
+    });
+
 
     Handlebars.registerHelper('columnNames', function (this:Handlebars.HelperDelegate,obj:any) {
       let val = obj

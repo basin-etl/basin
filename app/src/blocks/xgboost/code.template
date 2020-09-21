@@ -1,0 +1,3 @@
+# split into test and train sets
+{{output 'df_test'}} = {{input 'df'}}
+{{output 'df_train'}} = {{input 'df'}}

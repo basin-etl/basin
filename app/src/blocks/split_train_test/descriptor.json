@@ -1,0 +1,16 @@
+{
+    "title": "Split train/test",
+    "name": "split_train_test",
+    "stencil": "machine learning",
+    "description": "Split dataset into test set and training set",
+    "color": "orange",
+    "icon": "model_training",
+    "inputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ],
+    "outputs": [
+        {"id":"df_train","label":"train set", "type": "dataframe","name_template":"df_train{{id}}"},
+        {"id":"df_test","label":"test set", "type": "dataframe","name_template":"df_test{{id}}"}
+    ],
+    "comment_template": "Split into test and train sets"
+}

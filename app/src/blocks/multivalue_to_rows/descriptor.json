@@ -1,0 +1,15 @@
+{
+    "title": "multivalue to rows",
+    "name": "multivalue_to_rows",
+    "type": "basics",
+    "description": "split a delimited column into multiple rows. All row values are duplicated",
+    "color": "lightgreen",
+    "icon": "horizontal_split",
+    "comment_template": "split {{props.column}} by {{props.delimiter}} and explode to multiple rows",
+    "inputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ],
+    "outputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ]
+}

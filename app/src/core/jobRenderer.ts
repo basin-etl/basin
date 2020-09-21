@@ -49,7 +49,7 @@ function render(jobContent:Job):Array<JobCommand> {
           output: null
         })
       })
-      console.log("output:"+(Object.keys(outputs).length==1)? Object.values(outputs)[0] : null)
+      console.log("output:"+((Object.keys(outputs).length==1)? Object.values(outputs) : null))
       jobCommands.push({
         blockId: blockNode.id,
         inputs: inputs,

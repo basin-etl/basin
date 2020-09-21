@@ -1,6 +1,3 @@
-import snakeize from 'snakeize'
-import { tween } from 'femtotween'
-import { easeOutCubic } from 'femtotween/ease'
 import jupyterUtils from '@/core/jupyterUtils.ts'
 import blockTypes from '@/core/blockTypes'
 // components
@@ -55,6 +52,12 @@ export default class Editor extends Vue {
   links:Array<Link> = []
   container:any = {}
   jobName:string = "New Job"
+  runMode:string = "preview"
+  runModes:{text:string, value:string}[] = [
+    {text:"Preview mode",value:"preview"},
+    {text:"Live mode",value:"live"},
+    {text:"Test mode",value:"test"},
+  ]
 
   @Ref('container') readonly blocksContainer!: BlocksContainerRef
 
@@ -160,7 +163,7 @@ export default class Editor extends Vue {
       comment: draftBlock.comment,
       props: draftBlock.properties,
       inputs: jobCommand.inputs,
-      output: 'df'
+      outputs: {'df':'df'}
     })
     console.log(code)
     try {
@@ -219,8 +222,6 @@ export default class Editor extends Vue {
       this.jobCommands = commands
       console.log(commands)
       // start running
-      let initCode = jobRenderer.renderInitCode()
-      await jupyterUtils.sendToPython(this.kernel,initCode)
       this.completedBlocks = 0
 
       // send catalog to server
@@ -264,6 +265,15 @@ export default class Editor extends Vue {
               return
             }
         }
+        // add caching for better response times
+        // TODO only do this in preview mode and optionally take from the properties of the block
+        // TODO unpersist only computations or 'isDirty' indication
+        Object.keys(command.outputs).forEach( async output => {
+          await jupyterUtils.sendToPython(
+            this.kernel,
+            `${command.outputs[output]}=${command.outputs[output]}.cache()`)
+        })
+
         // set the result count
         if (getCount) {
           Object.keys(command.outputs).forEach( async output => {

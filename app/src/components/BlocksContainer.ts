@@ -50,16 +50,18 @@ export default class BlocksContainer extends Vue {
   menuOffsetX = 0
   menuOffsetY = 0
   menuBlockInputType:string = null
-  //
-  centerX = 0
-  centerY = 0
+
+  // container positioning
+  top = 0
+  left = 0
   scale = 1
+
   mouseX = 0
   mouseY = 0
   lastMouseX = 0
   lastMouseY = 0
   minScale = 0.2
-  maxScale = 5
+  maxScale = 2
   linking = false
   breakingLink = false // indication that we are dragging to disconnect a link
   linkStartData:{block: Block, slot: string} = null
@@ -78,9 +80,6 @@ export default class BlocksContainer extends Vue {
       document.documentElement.addEventListener('mousedown', this.handleDown, true)
       document.documentElement.addEventListener('mouseup', this.handleUp, true)
 
-      this.centerX = this.$el.clientWidth / 2
-      this.centerY = this.$el.clientHeight / 2
-
       this.importScene()
   }
   beforeDestroy () {
@@ -94,6 +93,7 @@ export default class BlocksContainer extends Vue {
   created () {
   }
   showMenu(e:MouseEvent) {
+    // show blockpicker menu
     // e.preventDefault()
     console.log("menu")
     this.menuDisplayed = false
@@ -106,17 +106,6 @@ export default class BlocksContainer extends Vue {
     this.$nextTick(() => {
       this.menuDisplayed = true
     })
-  }
-  get optionsForChild () {
-      return {
-          titleHeight: 20,
-          scale: this.scale,
-          inputSlotClassName: this.inputSlotClassName,
-          center: {
-              x: this.centerX,
-              y: this.centerY
-          }
-      }
   }
   // Links calculate
   get lines () {
@@ -250,14 +239,14 @@ export default class BlocksContainer extends Vue {
       timeline.to(vm.s_blocks[blockIndex],
         { duration:1,
           ease: "linear",
-          x: g.node(node).x-vm.centerX/vm.scale 
+          x: g.node(node).x//-vm.centerX/vm.scale 
         },
         0
       );
       timeline.to(this.s_blocks[blockIndex],
         { duration:1, 
           ease: "linear",
-          y: g.node(node).y-vm.centerY/vm.scale 
+          y: g.node(node).y//-vm.centerY/vm.scale 
         },
         0
       );
@@ -288,7 +277,7 @@ export default class BlocksContainer extends Vue {
       this.$emit('inspectsocket',socket)
   }
 
-  handleMove (e:MouseEvent) {
+  async handleMove (e:MouseEvent) {
     if (this.dragging) {
       let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
       this.mouseX = mouse.x
@@ -296,15 +285,15 @@ export default class BlocksContainer extends Vue {
       let diffX = this.mouseX - this.lastMouseX
       let diffY = this.mouseY - this.lastMouseY
 
-      this.lastMouseX = this.mouseX
-      this.lastMouseY = this.mouseY
+      // this.lastMouseX = this.mouseX
+      // this.lastMouseY = this.mouseY
 
       // wait for refresh for better animation
       let vm = this
-      requestAnimationFrame(function() {
-        vm.centerX += diffX
-        vm.centerY += diffY
-      })
+      // this is an alternate way that avoids rerendering for performance
+      // we will set the actual container position onmouse up
+      await vm.$nextTick()
+      vm.setAllHTMLChildrenPosition(diffX,diffY)
 
       this.hasDragged = true
     } 
@@ -322,6 +311,17 @@ export default class BlocksContainer extends Vue {
       }
     }
   }
+  // this is a hack to move the contents without rerendering.
+  // used for smooth drag
+  setAllHTMLChildrenPosition(newX:number,newY:number) {
+    for (let o of document.documentElement.getElementsByClassName("vue-block")) {
+      (<HTMLElement>o).style.left = `${newX}px`;
+      (<HTMLElement>o).style.top = `${newY}px`;
+    }
+    document.getElementById("lines").style.left = `${newX}px`
+    document.getElementById("lines").style.top = `${newY}px`
+
+  }
   handleDown (e:MouseEvent) {
     const target = e.target || e.srcElement
     let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
@@ -338,7 +338,7 @@ export default class BlocksContainer extends Vue {
         if (e.preventDefault) e.preventDefault()
       }
   }
-  handleUp (e:MouseEvent) {
+  async handleUp (e:MouseEvent) {
     e.preventDefault()
     // e.stopPropagation()
     const target = <HTMLElement>e.target || <HTMLElement>e.srcElement
@@ -346,7 +346,14 @@ export default class BlocksContainer extends Vue {
       this.dragging = false
 
       if (this.hasDragged) {
-        this.updateScene()
+        let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
+        await this.$nextTick()
+        let diffX = mouse.x - this.lastMouseX
+        let diffY = mouse.y - this.lastMouseY
+        this.setAllHTMLChildrenPosition(0,0)
+        this.left += diffX/this.scale
+        this.top += diffY/this.scale
+        this.updateContainer()
         this.hasDragged = false
       }
     }
@@ -372,37 +379,29 @@ export default class BlocksContainer extends Vue {
         if (e.preventDefault) e.preventDefault()
 
         let deltaScale = Math.pow(1.1, e.deltaY * -0.01)
+        // safeguard minimum and maximum scale
+        if (
+          this.scale*deltaScale < this.minScale ||
+          this.scale*deltaScale > this.maxScale) return
+
         this.scale *= deltaScale
 
-        if (this.scale < this.minScale) {
-          this.scale = this.minScale
-          return
-        } else if (this.scale > this.maxScale) {
-          this.scale = this.maxScale
-          return
-        }
-
-        let zoomingCenter = {
-          x: this.mouseX,
-          y: this.mouseY
-        }
-
-        let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
-        let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
-
-        this.centerX -= deltaOffsetX
-        this.centerY -= deltaOffsetY
+        // make sure we zoom around the position of the mouse
+        let mouse = mouseHelper.getMousePosition(<HTMLElement>this.$el, e)
+    
+        this.left-=mouse.x/this.scale*(deltaScale-1)
+        this.top-=mouse.y/this.scale*(deltaScale-1)
 
         this.updateContainer()
       }
   }
-    // Processing
-  scalePosition(position:any) {
-      let x = position.x * this.scale
-      let y = position.y * this.scale
 
-      x += this.centerX
-      y += this.centerY
+  scalePosition(position:any) {
+      let x = position.x// * this.scale
+      let y = position.y// * this.scale
+
+      // x += this.left
+      // y += this.top
 
       return {x:x,y:y}
   }
@@ -512,13 +511,13 @@ export default class BlocksContainer extends Vue {
       }))
       let block = new vBlock({id:maxId+1,type:blockType})
 
-      // if x or y not set, place block to center
+      // if x or y not set, place block top left
       if (x === undefined || y === undefined) {
-        x = (this.$el.clientWidth / 2 - this.centerX) / this.scale
-        y = (this.$el.clientHeight / 2 - this.centerY) / this.scale
+        x = 100
+        y = 100
       } else {
-        x = (x - this.centerX) / this.scale
-        y = (y - this.centerY) / this.scale
+        x = (x  / this.scale - this.left)
+        y = (y  / this.scale - this.top)
       }
 
       block.x = x
@@ -571,11 +570,11 @@ export default class BlocksContainer extends Vue {
       this.s_links = JSON.parse(JSON.stringify(this.links))
       
       let container = this.container
-      if (container.centerX) {
-        this.centerX = container.centerX
+      if (container.top) {
+        this.left = container.left
       }
-      if (container.centerY) {
-        this.centerY = container.centerY
+      if (container.top) {
+        this.top = container.top
       }
       if (container.scale) {
         this.scale = container.scale
@@ -586,14 +585,14 @@ export default class BlocksContainer extends Vue {
           blocks: this.s_blocks,
           links: this.s_links,
           container: {
-              centerX: this.centerX,
-              centerY: this.centerY,
+              top: this.top,
+              left: this.left,
               scale: this.scale
           }
       }
   }
   updateScene () {
-      this.$emit('update:scene', this.exportScene())
+    this.$emit('update:scene', this.exportScene())
   }
   updateBlocks () {
     this.$emit('update:blocks', this.s_blocks)
@@ -603,8 +602,8 @@ export default class BlocksContainer extends Vue {
   }
   updateContainer () {
     this.$emit('update:container', {
-      centerX: this.centerX,
-      centerY: this.centerY,
+      left: this.left,
+      top: this.top,
       scale: this.scale
     })
   }

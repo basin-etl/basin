@@ -6,7 +6,6 @@ import blockTypes from '@/core/blockTypes'
 import jobRenderer from '@/core/jobRenderer'
 import snakeize from 'snakeize'
 import DataFrameViewer from '@/components/dataFrameViewer/DataFrameViewer.vue'
-import { Int } from 'apache-arrow';
 import { ContentsManager, ServerConnection } from '@jupyterlab/services'
 
 @Component({
@@ -92,7 +91,7 @@ export default class CatalogCreate extends Vue {
       comment: "",
       props: {source:this.name},
       inputs: null,
-      output: 'df'
+      outputs: {'df':'df'}
     })
     let setMock = 
 `

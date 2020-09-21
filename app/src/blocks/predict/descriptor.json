@@ -1,0 +1,16 @@
+{
+    "title": "Predict",
+    "name": "predict",
+    "stencil": "machine learning",
+    "description": "predict using model",
+    "color": "orange",
+    "icon": "online_prediction",
+    "inputs": [
+        {"id":"model","label":"model", "type": "model"},
+        {"id":"df","label":"df", "type": "dataframe"}
+    ],
+    "outputs": [
+        {"id":"df","label":"df", "type": "dataframe"}
+    ],
+    "comment_template": "Predict using pretrained model"
+}

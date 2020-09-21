@@ -3,12 +3,17 @@ import jupyterUtils from '@/core/jupyterUtils'
 import axios from 'axios'
 import { Table, Data } from 'apache-arrow';
 import RowDetails from './RowDetails.vue'
-var DatasaurBase = require('datasaur-base');
-const ArrowDataModel = require('./ArrowDataModel.js')
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import { Kernel } from "@jupyterlab/services"
+import perspective from "@finos/perspective";
+import "@finos/perspective-viewer";
+import {HTMLPerspectiveViewerElement, PerspectiveElement} from "@finos/perspective-viewer";
+import "@finos/perspective-viewer-datagrid";
+import "@finos/perspective-viewer-d3fc";
+import "@finos/perspective-viewer/themes/material.css";
+
 @Component({
     name: 'DataFrameViewer',
     components: {
@@ -24,7 +29,6 @@ export default class DataFrameViewer extends Vue {
     //
     expression:string = this.dataframe
     grid:any = null
-    data:any = null
     showDetails = false
     loading = false
     details = {} // details of the selected row
@@ -32,8 +36,8 @@ export default class DataFrameViewer extends Vue {
     errorMessage:string = null
     showErrorSnackbar = false
     initialized = false
-    recordCount:number = 0
-    columnCount:number = 0
+    recordCount:number = null
+    columnCount:number = null
     expanded = false
     
     @Watch('dataframe', { immediate: true})
@@ -49,74 +53,54 @@ export default class DataFrameViewer extends Vue {
         this.expanded = false
         this.$emit("contract")
     }
+    destroyed() {
+        console.log("destroying")
+        this.kernel.removeCommTarget('inspect_df',() => { console.log('removed')})
+        this.kernel.interrupt()
+
+    }
     async mounted() {
         this.expression = this.dataframe
+        const vm = this
         console.log("kernel initializing")
-        //
-        // init arrow data model and grid
-        //
-        this.dataModel = new ArrowDataModel(new DatasaurBase,{},null)
-        console.log("dataframe viewer mounted")
-        let HyperGrid = (await import("fin-hypergrid")).default;
-        console.log(HyperGrid)
-        this.grid = new HyperGrid(this.$refs["dataGrid"],
-            {
-                boundingRect: {
-                    height: "100%"
-                },
-            }
-        );
-        this.grid.canvas.stopPaintLoop()
-        this.grid.canvas.stopResizeLoop()
-        this.grid.canvas.restartPaintLoop()
-        this.grid.canvas.restartResizeLoop()
-        // we must set the datamodel after restarting the paint loop to get around an internal hypergrid bug if we unload the stoppaint when unmounting the component
-        this.grid.setBehavior({
-                dataModel : this.dataModel,
-        })
-        this.grid.properties.rowHeaderCheckboxes = false
-        this.grid.addEventListener('fin-double-click', (event:CustomEvent) => {
+        let viewer = <HTMLPerspectiveViewerElement>document.getElementById("view1");
+        viewer.addEventListener("dblclick", async (event:any) => {
             console.log(event)
-            this.openRow(event.detail.row.toJSON())
-        });
-        // override default stylesheet for grid
-        var defaultStylesheet = document.getElementById("injected-stylesheet-finbar-base");
-        var myStylesheet = document.createElement('style');
-        myStylesheet.innerText = `
-            div.finbar-vertical > .thumb {
-                background-color: black;
-                opacity:0.65
-            }
-            div.finbar-horizontal > .thumb {
-                background-color: black;
-                opacity:0.65
-            }
-            `
-        defaultStylesheet.parentElement.insertBefore(myStylesheet, defaultStylesheet.nextElementSibling);
-
+            let table = viewer.getElementsByTagName("regular-table")[0]
+            // fetch metadata containing the selected column and row
+            // TODO: handle click of headers
+            let metaData = (<any>table).get_meta(event.target)
+            let rows = await (<any>viewer).table.view().to_json({start_row:metaData.ridx,end_row:metaData.ridx+1})
+            vm.details = rows[0]
+            vm.showDetails = true
+        })
         //
         // register comm target for callback of object inspection
         //
-        const vm = this
         this.kernel.registerCommTarget('inspect_df', (comm, commMsg) => {
             if (commMsg.content.target_name !== 'inspect_df') {
                 return;
             }
-            comm.onMsg = msg => {
+            comm.onMsg = async msg => {
                 console.log("got msg callback")
-                let t = Table.from((<DataView>msg.buffers[0]).buffer)
-                console.log(t.count())
-                if (t.count()==0) {
-                    vm.recordCount = 0
-                    vm.columnCount = 0
-                }
-                else {
-                    vm.data = t
-                    vm.dataModel.setData(t)
-                    vm.recordCount = vm.dataModel.getRowCount()
-                    vm.columnCount = vm.dataModel.getColumnCount()    
-                }
+                var viewer = <HTMLPerspectiveViewerElement>document.getElementById("view1");
+                    
+                // let worker = perspective.worker();
+                // viewer.addEventListener('perspective-view-update', () => { console.log('updated')})
+                if (!viewer) return
+                await viewer.update(<any>(<DataView>msg.buffers[0]).buffer)
+                // viewer.update(<any>worker.table(<any>(<DataView>msg.buffers[0]).buffer))
+                if (!(<any>viewer)._show_config) await viewer.toggleConfig();
+                //TODO find a better place for this. limit treemap to less cells otherwise chokes on large datasets
+                (<any>window).getPlugin("d3_treemap").max_cells=200;
+                // viewer.on_up viewer.notifyResize()
+                // await vm.$nextTick()
                 vm.loading = false
+                let recordCount = await viewer.table.size()
+                let columnCount = (await viewer.table.columns()).length
+                console.log(recordCount)
+                vm.recordCount = recordCount
+                vm.columnCount = columnCount
             };
             comm.onClose = msg => {
                 console.log(msg.content.data);
@@ -133,13 +117,6 @@ import pandas as pd
         // load the dataframe unfiltered
         this.initialized = true
         this.loadData()
-    }
-    beforeDestroy() {
-        console.log("dataframe viewer cleanup")
-        // we need to stop these loops since they are not cleaned up and take up cpu
-        this.grid.canvas.stopPaintLoop()
-        this.grid.canvas.stopResizeLoop()
-        this.grid.terminate()
     }
     openRow(row:object) {
         this.details = row

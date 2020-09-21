@@ -13,7 +13,9 @@
               :ref="`block${block.id}`"
               :readOnly="readOnly"
               v-bind.sync="block"
-              :options="optionsForChild"
+              :scale="scale",
+              :containerTop="top",
+              :containerLeft="left",
               :jobStatus="jobStatus"
               :linking="linking"
               @update="updateScene"
@@ -52,8 +54,8 @@
     position: relative;
     overflow: auto;
     display:flex;
-    align-items:center;
-    justify-content:center;
+    align-items:flex-start;
+    justify-content:flex-start;
   }
   .onboarding-arrow {
     height: 300px;

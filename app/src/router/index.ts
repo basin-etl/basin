@@ -6,6 +6,7 @@ import BlockPickerDriver from '@/pages/BlockPickerDriver.vue'
 import FlowIndex from '@/pages/flow/Index.vue'
 import catalogRoutes from '@/pages/catalog/routes'
 import connectorRoutes from '@/pages/connector/routes'
+import driverRoutes from '@/pages/driver/routes'
 Vue.use(Router)
 
 export default new Router({
@@ -19,6 +20,7 @@ export default new Router({
     },
     ...catalogRoutes,
     ...connectorRoutes,
+    ...driverRoutes,
     {
       path: '/flow/:id',
       name: 'flow_edit',

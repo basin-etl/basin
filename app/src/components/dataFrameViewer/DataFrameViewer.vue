@@ -14,8 +14,16 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
         v-btn(icon,v-if="expanded",@click="contract")
             v-icon() expand_more
     v-row(no-gutters).flex-column
-        div.flex-grow-1.grid(v-show="kernel && data && !loading && recordCount>0",ref="dataGrid")
-        v-row.overlay(no-gutters,justify="center",align="center",v-show="!kernel || !data || loading")
+        //-
+        //- actual datagrid
+        //-
+        //- div.flex-grow-1.grid(v-show="kernel && data && !loading && recordCount>0",ref="dataGrid")
+        perspective-viewer.flex-grow-1.grid(
+            v-show="kernel && !loading"
+            id="view1",
+            ref="dataGrid"
+        )
+        v-row.overlay(no-gutters,justify="center",align="center",v-show="!kernel || loading")
             v-progress-circular(v-if="!errorMessage",indeterminate)
             v-icon(v-if="errorMessage") error_outline
         v-row.overlay(no-gutters,justify="center",align="center",v-show="!loading && recordCount==0")
@@ -62,7 +70,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
 }
 .grid {
     background-color: lightgray;
-    height: 100%
+    height:200px /* this just needs to be smaller than the canvas. it resizes to height */
 }
 .overlay {
     background-color:gray;
