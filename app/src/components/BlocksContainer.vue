@@ -33,7 +33,6 @@
     :position-x="menuX",
     :position-y="menuY",
     v-model="menuDisplayed",
-    :blockInputType="menuBlockInputType"
     :close-on-click="false",
     :close-on-content-click="false"
   )
@@ -41,9 +40,11 @@
       @selected="addNewBlockFromMenu($event.type)"
       @close="cancelNewBlock"
       :open="menuDisplayed"
+      :inputType="menuBlockInputType"
     )
   img.onboarding-arrow(v-if="s_blocks.length==0",src="@/assets/images/arrow.png")
-  div.headline(v-if="s_blocks.length==0") Start by dragging you first block here. An Extract block is a good first choice
+  v-row(justify="center")
+    .mt-5.headline(v-if="s_blocks.length==0",align="center") Right click to create your first block here. An Extract block is a good first choice!
 </template>
 
 <script lang="ts" src="./BlocksContainer.ts">

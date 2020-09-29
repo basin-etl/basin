@@ -1,5 +1,6 @@
 import { Kernel, KernelManager, ServerConnection } from "@jupyterlab/services"
 import { IExecuteReplyMsg, IIOPubMessage, IReplyErrorContent, IStatusMsg, IStreamMsg } from '@jupyterlab/services/lib/kernel/messages';
+import { logger } from 'handlebars';
 async function getKernel() {
 	var settings = ServerConnection.makeSettings({ 'baseUrl': '/ijupyter',
 	// 'wsUrl': `ws://${process.env.VUE_APP_JUPYTER_SERVER_HOST}:${process.env.VUE_APP_JUPYTER_SERVER_PORT}/`,
@@ -33,6 +34,7 @@ print(${df}.to_json(orient='records'))
     }
 }
 async function sendToPython(kernel:Kernel.IKernelConnection,cmd:string) {
+	console.debug(cmd)
 	let future = await kernel.requestExecute({ code: cmd });
 	let result = ''
 	while (true) {

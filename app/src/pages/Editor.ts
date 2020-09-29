@@ -58,6 +58,7 @@ export default class Editor extends Vue {
     {text:"Live mode",value:"live"},
     {text:"Test mode",value:"test"},
   ]
+  sources:number[] = []
 
   @Ref('container') readonly blocksContainer!: BlocksContainerRef
 
@@ -152,7 +153,7 @@ export default class Editor extends Vue {
   async testSelectedBlock() {
 
     // we run only this block before saving. used for testing / preview
-    if (this.isRunStateDirty) await this.run(true,this.selectedBlock.id,false,true)
+    if (this.isRunStateDirty) await this.run(true,this.selectedBlock.id,false,true,"preview")
 
     let draftBlock = Object.assign({},this.selectedBlock,{
         "properties":(this.$refs.propertiesPanel as BlockPropertiesRef).getProperties()
@@ -204,7 +205,8 @@ export default class Editor extends Vue {
 
   // silent - no updates of status
   // stopBeforeBlock - used to run only up to a certain block (not including)
-  async run(silent:boolean=false,stopBeforeBlock:number=null,getCount:boolean=true,getSchema:boolean=false) {
+  async run(silent:boolean=false,stopBeforeBlock:number=null,getCount:boolean=true,getSchema:boolean=false,mode:string="live") {
+    console.log(mode)
       //
       // run this job in jupyter notebook
       //
@@ -242,54 +244,70 @@ export default class Editor extends Vue {
         //
         // run command
         //
-        console.log("running command")
-        console.log(command.code)
+
         // find block
         let blockIndex = this.blocks.findIndex( (block) => block.id===command.blockId)
         let block = this.blocks[blockIndex]
 
         if (!silent) this.setBlockStatus(command.blockId,BlockStatus.Running)
-        try {
-          let response = await jupyterUtils.sendToPython(this.kernel,command.code)
-          console.log(response)
-        }
-        catch (e) {
-          console.log(e)
-          if (e.ename && !silent) {
-              this.error = `${e.ename}: ${e.evalue}`
-              block.error = this.error
-              this.showError = true
-              // set it so it forces an update
-              this.$set(this.blocks,blockIndex,block)
-              this.jobStatus = JobStatus.Completed
-              return
-            }
-        }
+        // run the block
+
         // add caching for better response times
         // TODO only do this in preview mode and optionally take from the properties of the block
         // TODO unpersist only computations or 'isDirty' indication
-        Object.keys(command.outputs).forEach( async output => {
-          await jupyterUtils.sendToPython(
-            this.kernel,
-            `${command.outputs[output]}=${command.outputs[output]}.cache()`)
-        })
+        if (block.type=="extract" && mode=="preview") {
+          // load a sample and cache the result
+          if (!this.sources.includes(block.id)) {
+            // load and cache
+            let response = await jupyterUtils.sendToPython(this.kernel,command.code)
+            for (let output of Object.keys(command.outputs)) {
+              await jupyterUtils.sendToPython(
+                this.kernel,
+                `${command.outputs[output]}=${command.outputs[output]}.limit(10000).cache()`)
+              block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])                
+            }
 
-        // set the result count
-        if (getCount) {
-          Object.keys(command.outputs).forEach( async output => {
-            block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
-            this.setObjectProperties(this.blocks,blockIndex,{outputLinks:block.outputLinks})
-          })
+            this.sources.push(block.id)
+    
+          }
         }
-        console.log(block)
-        // set it so it forces an update to the UI
-        this.$set(this.blocks,blockIndex,block)
+        else {
+          // run the block
+          try {
+            let response = await jupyterUtils.sendToPython(this.kernel,command.code)
+            console.log(response)
+          }
+          catch (e) {
+            console.log(e)
+            if (e.ename && !silent) {
+                this.error = `${e.ename}: ${e.evalue}`
+                block.error = this.error
+                this.showError = true
+                // set it so it forces an update
+                this.$set(this.blocks,blockIndex,block)
+                this.jobStatus = JobStatus.Completed
+                return
+              }
+          }
 
-        // block completed
+          // // set the result count
+          if (getCount) {
+            for (let output of Object.keys(command.outputs)) {
+              if (this.blockTypes[block.type].outputs.find( (o) => o.id==output).type=='dataframe') {
+                block.outputLinks[output].resultCount = await jupyterUtils.getDataframeCount(this.kernel,command.outputs[output])
+              }
+              // this.setObjectProperties(this.blocks,blockIndex,{outputLinks:block.outputLinks})
+            }
+          }
+        }
+      // block completed
         if (!silent) {
           this.setBlockStatus(command.blockId,BlockStatus.Completed)
           this.completedBlocks++
         }
+        // set it so it forces an update to the UI
+        this.$set(this.blocks,blockIndex,block)
+        
         await Vue.nextTick()
       }
       // job complete

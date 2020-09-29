@@ -1,14 +1,10 @@
 // TODO: history of commands 
 import jupyterUtils from '@/core/jupyterUtils'
-import axios from 'axios'
-import { Table, Data } from 'apache-arrow';
 import RowDetails from './RowDetails.vue'
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
 import { Kernel } from "@jupyterlab/services"
-import perspective from "@finos/perspective";
-import "@finos/perspective-viewer";
 import {HTMLPerspectiveViewerElement, PerspectiveElement} from "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";

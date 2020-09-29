@@ -21,6 +21,7 @@ export default class CatalogCreate extends Vue {
     header?:boolean,
     skipHeaderLines?:number
     skipFooterLines?:number,
+    multiLine?:boolean,
   } = {
     type:"delimited"
   }
@@ -82,6 +83,7 @@ export default class CatalogCreate extends Vue {
       "catalog",
       snakeize(catalog)
     )
+    console.log(catalog)
     // init kernel
     let initCode = jobRenderer.renderInitCode()
     await jupyterUtils.sendToPython(this.$store.state.job.kernel,initCode)
@@ -167,6 +169,10 @@ patcher.start()
   get kernel() {
     return this.$store.state.job.kernel
   }
+  get kernelStatus() {
+    return this.$store.state.job.kernelStatus
+  }
+
   @Watch('properties.type', { immediate: true})
   onPropertiesTypeChanged(newVal:string,oldVal:string) {
     if (newVal=='delimited') {

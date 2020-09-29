@@ -1,4 +1,3 @@
-
 <template lang="pug">
 v-row.mt-5(no-gutters,justify="center",align="start")
   v-row.flex-column.table-content(align="start",no-gutters)
@@ -21,15 +20,16 @@ v-row.mt-5(no-gutters,justify="center",align="start")
               item-text="label"
               item-value="value"
               label="Type of file")
-        
+
       template(v-if="properties.type=='delimited'")
         v-switch(v-model="properties.header",label="File has a header")
         v-text-field.form-field.flex-grow-0(v-model="properties.delimiter",label="Delimiter")
+        v-switch.form-field.flex-grow-0(v-model="properties.multiLine",label="Multi line")
         v-text-field.form-field.flex-grow-0(v-model="properties.skipHeaderLines",label="# of header rows to skip")
         v-text-field.form-field.flex-grow-0(v-model="properties.skipFooterLines",label="# of footer rows to ignore")
     div
       v-btn(
-        :disabled="!valid || loadingPreview",
+        :disabled="!valid || loadingPreview || kernelStatus!='idle'",
         @click="preview",
         :loading="loadingPreview"
       ) Preview

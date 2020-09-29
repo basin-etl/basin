@@ -1,44 +1,35 @@
 // For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.117.1/containers/docker-existing-docker-compose
-// If you want to run as a non-root user in the container, see .devcontainer/docker-compose.yml.
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.117.1/containers/docker-existing-dockerfile
 {
-	"name": "Existing Docker Compose (Extend)",
-
-	// Update the 'dockerComposeFile' list if you have more compose files or use different names.
-	// The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
-	"dockerComposeFile": [
-		"../docker-compose.yml",
-		"docker-compose.yml"
-	],
-
-	// The 'service' property is the name of the service for the container that VS Code should
-	// use. Update this value and .devcontainer/docker-compose.yml to the real service name.
-	"service": "client",
-
-	// The optional 'workspaceFolder' property is the path VS Code should open by default when
-	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
-	"workspaceFolder": "/workspace",
-
+	"name": "App devcontainer",
+	// Sets the run context to one level up instead of the .devcontainer folder.
+	"context": "..",
+	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+	// "dockerFile": "../Dockerfile",
 	// Set *default* container specific settings.json values on container create.
-	"settings": { 
+	"settings": {
 		"terminal.integrated.shell.linux": null
 	},
-
+	"shutdownAction": "none",
+	"dockerComposeFile": [
+		"../docker-compose.yml"
+	],
+	"service": "client",
+	"workspaceFolder": "/home/node/app",
 	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": []
-
+	"extensions": [
+		"octref.vetur",
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode"
+	]
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
-	// Uncomment the next line if you want start specific services in your Docker Compose config.
-	// "runServices": [],
-
-	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
-	// "shutdownAction": "none",
-
 	// Uncomment the next line to run commands after the container is created - for example installing git.
 	// "postCreateCommand": "apt-get update && apt-get install -y git",
-
+	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
+	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-in-docker.
+	// "mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	// "remoteUser": "vscode"
 }

@@ -1,5 +1,5 @@
 # {{comment}}
 {{output 'df'}} = {{input 'df'}}.withColumn(
-    "{{props.column}}",
-    F.explode_outer(F.split(F.col("{{props.column}}"),"[{{props.delimiter}}]"))
+    "{{props.targetColumn}}",
+    F.explode_outer(F.split(F.col("{{props.sourceColumn}}"),"[{{props.delimiter}}]"))
 )

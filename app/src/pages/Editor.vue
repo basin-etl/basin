@@ -44,8 +44,8 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
     //-
     //- side bar
     //-
-    .flex-grow-0.block-picker-bar
-      EditorBlocksBar
+    //- .flex-grow-0.block-picker-bar
+      //- EditorBlocksBar
     //-
     //- blocks editor
     //-
@@ -87,17 +87,18 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
       right
       width="600"
   )
-    v-row.mb-1(no-gutters,align="center")
-      div {{blockTypes[selectedBlock.type].title}} Properties
-      v-spacer
-      v-btn(icon,@click="showPropertiesPanel=false")
-          v-icon close
-    v-row(no-gutters)
-      v-textarea(v-model="selectedBlock.comment",filled,label="comment")
-    component(
-      v-if="showPropertiesPanel"
-      ref="propertiesPanel",
-      v-bind:is="`${selectedBlock.type}Properties`",v-bind="selectedBlockProperties",:blockId="selectedBlock.id",:inputSchema="selectedBlockInputSchema")
+    .d-flex.flex-column(:style="{'min-height':'100%'}")
+      v-row.flex-grow-0.mb-1(no-gutters,align="center")
+        div {{blockTypes[selectedBlock.type].title}} Properties
+        v-spacer
+        v-btn(icon,@click="showPropertiesPanel=false")
+            v-icon close
+      v-row.flex-grow-0(no-gutters)
+        v-textarea(v-model="selectedBlock.comment",filled,label="comment")
+      component.flex-grow-1(
+        v-if="showPropertiesPanel"
+        ref="propertiesPanel",
+        v-bind:is="`${selectedBlock.type}Properties`",v-bind="selectedBlockProperties",:blockId="selectedBlock.id",:inputSchema="selectedBlockInputSchema")
     template(v-slot:append)
       v-row.py-3(justify="center")
         v-btn(@click.stop="saveProperties()") Save

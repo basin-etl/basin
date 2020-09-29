@@ -1,3 +1,5 @@
+const MonacoEditorPlugin = require('monaco-editor-webpack-plugin')
+
 module.exports = {
   chainWebpack: config => {
     // template loader
@@ -12,7 +14,13 @@ module.exports = {
       .tap((args) => {
         args[0].title = 'Basin Studio';
         return args;
-      });      
+      });
+    config.plugin('monaco-editor').use(MonacoEditorPlugin, [
+      {
+        // Languages are loaded on demand at runtime
+        languages: ['javascript']
+      }
+    ])            
   },
   devServer: { 
     watchOptions: {

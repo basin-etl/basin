@@ -10,6 +10,14 @@ export class CodeTemplate {
     Handlebars.registerHelper('output', function (this:Handlebars.HelperDelegate,id:string) {
       return (<any>this).outputs[id]
     });
+    Handlebars.registerHelper('indent', function (this:Handlebars.HelperDelegate,text:string) {
+      let indent = '    '
+      if (text) {
+        let lines = text.split(/\r?\n/)
+        return lines.map( (l) => indent+l).join('\n')  
+      }
+      else return null;
+    });
 
 
     Handlebars.registerHelper('columnNames', function (this:Handlebars.HelperDelegate,obj:any) {

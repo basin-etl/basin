@@ -6,23 +6,6 @@ v-app
   confirm(ref="confirm")
   prompt(ref="prompt")
   //-
-  //- navigation drawer
-  //-
-  //- v-navigation-drawer(left,floating,v-model="drawer",persistent="false",clipped,temporary,app)
-  //-   v-list
-  //-     v-list-tile(:to="{name: 'admin-loans-list'}",@click="drawer=false")
-  //-       v-list-tile-content
-  //-         v-list-tile-title Option 1
-  //-     v-list-tile(:to="{name: 'admin-loans-list'}",@click="drawer=false")
-  //-       v-list-tile-content
-  //-         v-list-tile-title Option 2
-  //-     v-list-tile(:to="{name: 'admin-loans-list'}",@click="drawer=false")
-  //-       v-list-tile-content
-  //-         v-list-tile-title Option 3
-  //-     v-list-tile(:to="{name: 'admin-loans-list'}",@click="drawer=false")
-  //-       v-list-tile-content
-  //-         v-list-tile-title Option 4
-  //-
   //- main layout
   //-
   v-app-bar(app,dense,color="white",:clipped-left="drawer")

@@ -29,8 +29,12 @@ export default class BlockPicker extends Vue {
   get matches() {
     let vm = this
     return Object.values(this.blockTypes).filter( (block) => {
-      return  (block.inputs.filter( (input) => input.type==vm.inputType || !vm.inputType).length>0) &&
-              (block.description.match(vm.searchText) || vm.searchText=='')
+      // if we don't have an inputType, show only start blocks like 'extract'
+      return (block.inputs.length==0 && vm.inputType==null) ||
+        (
+          (block.inputs.filter( (input) => input.type==vm.inputType).length>0) &&
+          (block.description.match(vm.searchText) || vm.searchText=='')
+        )
     })
   }
 

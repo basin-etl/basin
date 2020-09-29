@@ -9,17 +9,17 @@ def extract(spark,env,source):
     print(catalog)
     properties = catalog[source]
     file_location = os.path.join(env["datafolder"],properties["location"])
-    if properties["type"]=="csv":
+    if properties["type"]=="delimited":
         options = {
             "quote": "\"",
             "escape": "\"",
-            "multiLine": "false",
             "mode":"DROPMALFORMED",
             "ignoreTrailingWhiteSpace": True,
             "ignoreLeadingWhiteSpace": True,
         }
         options["delimiter"] = properties["delimiter"]
         options["header"] = properties["header"]
+        options["multiLine"] = properties.get("multi_line",False)
         # read as text then deduce schema for better performance and ability to skip lines
         rdd = spark.read.text(file_location).rdd
         # read the schema based on a sample

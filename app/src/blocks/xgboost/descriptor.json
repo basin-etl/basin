@@ -9,7 +9,7 @@
         {"id":"df","label":"df", "type": "dataframe"}
     ],
     "outputs": [
-        {"id":"model","label":"model", "type": "model"}
+        {"id":"model","label":"model", "type": "dataframe"}
     ],
     "comment_template": "train an XGBoost classifier"
 }

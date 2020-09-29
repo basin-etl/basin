@@ -1,0 +1,10 @@
+# {{comment}}
+@F.udf()
+def udf_{{output 'df'}}({{#each props.parameters}}{{this}}{{#unless @last}},{{/unless}}{{/each}}):
+{{indent props.code}}
+{{output 'df'}} = {{input 'df'}}.withColumn(
+    "{{props.alias}}",
+    udf_{{output 'df'}}(
+        {{#each props.input_columns}}F.col("{{this}}"){{#unless @last}},{{/unless}}{{/each}}
+    )
+)

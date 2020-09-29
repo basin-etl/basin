@@ -95,12 +95,12 @@ export default class BlocksContainer extends Vue {
   showMenu(e:MouseEvent) {
     // show blockpicker menu
     // e.preventDefault()
-    console.log("menu")
     this.menuDisplayed = false
     this.menuX = e.clientX-5
     this.menuY = e.clientY-20
     this.menuOffsetX = e.offsetX
     this.menuOffsetY = e.offsetY
+    // if we are linking, filter to only show blocks we can link to
     if (this.linkStartData) this.menuBlockInputType = this.getSlotType(this.linkStartData.block.type,this.linkStartData.slot)
     else this.menuBlockInputType = null
     this.$nextTick(() => {

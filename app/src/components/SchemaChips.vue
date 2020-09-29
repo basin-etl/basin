@@ -23,7 +23,6 @@ import Vue from 'vue'
 
 export default class SchemaChips extends Vue {
   @Prop(Array) schema: Array<JSON>
-  @Prop(String) alias: string
 
   dragChip(event:DragEvent,name:string,tablealias:string) {
     let fullname = ""
@@ -31,7 +30,7 @@ export default class SchemaChips extends Vue {
       fullname += tablealias+"."
     }
     fullname += name
-    event.dataTransfer.setData("text/plain",JSON.stringify({"name":fullname,"alias":this.alias}));
+    event.dataTransfer.setData("text/plain",JSON.stringify({"name":fullname,"alias":tablealias}));
   }
 }
 </script>

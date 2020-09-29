@@ -13,7 +13,10 @@ services:
             - /home/node/app/node_modules
         ports:
             - "8860:8080"
-        command: "npm run-script serve"
+        # command: "npm run-script serve"
+        stdin_open: true # docker run -i
+        tty: true        # docker run -t
+        command: "bash"
         environment:
             "NODE_ENV": "development"
 

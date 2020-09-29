@@ -15,11 +15,9 @@ v-row(no-gutters).flex-column
     filled,
     label="join condition"
   )
-  h3 Left dataframe fields
-  SchemaChips(:schema="inputSchema.df1",alias="df1")
+  SchemaPicker(:schema="inputSchema.df1",title="Left dataframe fields")
+  SchemaPicker(:schema="inputSchema.df2",title="Right dataframe fields")
 
-  h3.mt-3 Right dataframe fields
-  SchemaChips(:schema="inputSchema.df2",alias="df2")
 
 </template>
 
@@ -29,16 +27,18 @@ import { Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
 import BlockProperties from '@/components/BlockProperties'
 import SchemaChips from '@/components/SchemaChips.vue'
+import SchemaPicker from '@/components/SchemaPicker.vue'
 @Component({
   components: {
-    SchemaChips
+    SchemaChips,
+    SchemaPicker
   }
 })
 
 export default class JoinBlockProperties extends BlockProperties {
   @Prop({default:"inner"}) how: string
   @Prop(String) condition: string
-
+  filterLeft = ""
   joinTypes = [
     {value:"inner",label:"Inner join - records in both dataframes"},
     {value:"left_outer",label:"Left outer join - all records in first dataframe"},
