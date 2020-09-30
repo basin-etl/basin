@@ -81,4 +81,7 @@ v-row.ma-0.fill-height.flex-column.flex-nowrap
 .row-detail-dialog {
     height: 90%
 }
+:host #active_columns {
+    background-color: yellow
+}
 </style>

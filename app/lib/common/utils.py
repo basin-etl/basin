@@ -54,45 +54,44 @@ def stream_df_as_arrow(df,spark,limit=5000):
     # see if we have any results
     renamed_df = df.toDF(*renamed_schema_fields)
 
-    max_rows = 300
-    batches = spark.createDataFrame(renamed_df.take(500),renamed_df.schema)._collectAsArrow()
-    if len(batches)>0:
-        sink = pa.BufferOutputStream()
-        writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-        for batch in batches:
-            writer.write_batch(batch)
-        comm.send(data="test",buffers=[sink.getvalue()])
-
-    comm.close(data="closing comm")
-    return
-
-
-    # row_iterator = renamed_df.toLocalIterator()
-    # row_num = 0
-    # row_buff = []
-    # chunk_size = 500
-    # for row in row_iterator:
-    #     if (row_num>2000):
-    #         break
-    #     row_num += 1
-    #     logging.debug(row_num)
-    #     row_buff.append(row)
-    #     if row_num%chunk_size==0:
-    #         batches = spark.createDataFrame(row_buff,renamed_df.schema)._collectAsArrow()
-    #         if len(batches)>0:
-    #             sink = pa.BufferOutputStream()
-    #             writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-    #             for batch in batches:
-    #                 writer.write_batch(batch)
-    #             comm.send(data="test",buffers=[sink.getvalue()])
-    #         row_buff = []
-    # # send the last batch
-    # batches = spark.createDataFrame(row_buff,renamed_df.schema)._collectAsArrow()
+    # max_rows = 300
+    # batches = spark.createDataFrame(renamed_df.take(500),renamed_df.schema)._collectAsArrow()
     # if len(batches)>0:
     #     sink = pa.BufferOutputStream()
     #     writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
     #     for batch in batches:
     #         writer.write_batch(batch)
     #     comm.send(data="test",buffers=[sink.getvalue()])
+
+    # comm.close(data="closing comm")
+    # return
+
+
+    row_iterator = renamed_df.toLocalIterator()
+    row_num = 0
+    row_buff = []
+    chunk_size = 500
+    for row in row_iterator:
+        if (row_num>2000):
+            break
+        row_num += 1
+        row_buff.append(row)
+        if row_num%chunk_size==0:
+            batches = spark.createDataFrame(row_buff,renamed_df.schema)._collect_as_arrow()
+            if len(batches)>0:
+                sink = pa.BufferOutputStream()
+                writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
+                for batch in batches:
+                    writer.write_batch(batch)
+                comm.send(data="test",buffers=[sink.getvalue()])
+            row_buff = []
+    # send the last batch
+    batches = spark.createDataFrame(row_buff,renamed_df.schema)._collect_as_arrow()
+    if len(batches)>0:
+        sink = pa.BufferOutputStream()
+        writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
+        for batch in batches:
+            writer.write_batch(batch)
+        comm.send(data="test",buffers=[sink.getvalue()])
 
 

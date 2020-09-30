@@ -11,8 +11,18 @@ v-app
   v-app-bar(app,dense,color="white",:clipped-left="drawer")
     v-toolbar-title.mr-2.pa-2(style="height:100%")
       router-link(to="/")
-        img(src="@/assets/images/logo.png",style="height:100%")
-    span(:style="{'font-weight':'bold'}") Basin Studio
+        div(:style="{'position':'relative','height':'100%'}")
+          inline-svg.logo(
+            :src="require('@/assets/images/yoga.svg')",height="100%",
+            :fill="connectionStatus=='connected'?'#4654A3':'grey'"
+            v-bind:class="{ 'logo-busy': kernelStatus=='busy' }"
+          )
+          inline-svg(
+            :src="require('@/assets/images/yoga.svg')",
+            fill="#4654A3",
+            height="100%",
+          )
+    span(:style="{'font-weight':'bold'}",:title="`kernel: ${kernelStatus} ${connectionStatus}`") DataYoga 
     v-spacer
     router-link(to="/catalog")
       | Catalog
@@ -46,38 +56,7 @@ v-app
     div.text-xs-left &copy; 2020
 </template>
 
-<script>
-import Confirm from '@/components/confirm/Confirm.vue'
-import Prompt from '@/components/prompt.vue'
-export default {
-  name: 'App',
-  data: () => ({
-    //
-    drawer: false
-  }),
-  components: {
-    Confirm,
-    Prompt,
-  },
-  mounted() {
-    this.$root.$confirm = this.$refs.confirm;
-    this.$root.$prompt = this.$refs.prompt;
-
-    // cleanup active kernel
-    window.addEventListener('beforeunload', () => {
-      this.$store.dispatch('job/destroy')
-    }, false)
-  },
-  beforeDestroy() {
-    // cleanup active kernel
-    this.$store.dispatch('job/destroy')
-  },
-  async created() {
-    // initialize kernel
-    this.$store.dispatch('job/initialize')
-  }
-
-};
+<script lang="ts" src="./App.ts">
 </script>
 <style>
 .table-content {
@@ -87,5 +66,17 @@ export default {
 }
 .height-100 {
   height: 100%
+}
+.logo {
+  position: absolute
+}
+.logo-busy {
+    animation: logo-blur 1s linear infinite;
+    animation-direction: alternate-reverse;
+}
+@keyframes logo-blur {
+  0% { -webkit-filter: blur(0px);}
+  50% { -webkit-filter: blur(5px);}
+  100% { -webkit-filter: blur(0px);}
 }
 </style>

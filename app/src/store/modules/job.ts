@@ -23,18 +23,18 @@ export default class JobModule extends VuexModule {
     async initialize() {
         // start a new kernel
         let kernel = await jupyterUtils.getKernel()  
-        let initCode = jobRenderer.renderInitCode()
-        await jupyterUtils.sendToPython(kernel,initCode)
 
         let vm = this
+        kernel.connectionStatusChanged.connect((_, status) => {
+            vm.context.commit('setConnectionStatus',status)
+        });
         // Register callbacks for when the kernel changes state.
         kernel.statusChanged.connect((_, status) => {
             vm.context.commit('setKernelStatus',status)
         });  
-        kernel.connectionStatusChanged.connect((_, status) => {
-            vm.context.commit('setConnectionStatus',status)
-        });
         this.context.commit('setKernel',kernel)
+        let initCode = jobRenderer.renderInitCode()
+        await jupyterUtils.sendToPython(kernel,initCode)
     }
     @Action
     destroy() {

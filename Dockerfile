@@ -9,6 +9,8 @@ COPY ./app/dist /srv/app/dist
 WORKDIR /srv/app
 
 COPY ./appserver/start.sh /srv/app
+COPY ./appserver/spark-defaults.conf /usr/local/spark/spark-defaults.conf
+
 RUN chmod +x /srv/app/start.sh
 RUN chown -R jovyan:users /srv/app
 RUN npm install -g forever

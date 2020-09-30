@@ -8,7 +8,7 @@ import { Kernel } from "@jupyterlab/services"
 import {HTMLPerspectiveViewerElement, PerspectiveElement} from "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import "@finos/perspective-viewer/themes/material.css";
+// import "@finos/perspective-viewer/themes/material.css";
 
 @Component({
     name: 'DataFrameViewer',

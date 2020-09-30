@@ -53,7 +53,7 @@
 <style lang="less" scoped>
   .vue-container {
     position: relative;
-    overflow: auto;
+    overflow: hidden;
     display:flex;
     align-items:flex-start;
     justify-content:flex-start;
