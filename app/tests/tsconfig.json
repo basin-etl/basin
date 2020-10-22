@@ -1,0 +1,20 @@
+{
+
+  "compilerOptions": {
+    "module": "commonjs",
+    "baseUrl": "../src",
+    "target": "es2020",
+    "lib": ["es2017"],
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "inlineSourceMap": true,
+    "moduleResolution": "node",
+    "paths": {
+      "@/*": [
+        "../src/*"
+      ],
+    }
+  },
+  "include": ["../src/**/*.ts", "node_modules/lodash-es/**/*.js"]
+}

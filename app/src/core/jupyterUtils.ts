@@ -1,8 +1,8 @@
 import { Kernel, KernelManager, ServerConnection } from "@jupyterlab/services"
 import { IExecuteReplyMsg, IIOPubMessage, IReplyErrorContent, IStatusMsg, IStreamMsg } from '@jupyterlab/services/lib/kernel/messages';
 import { logger } from 'handlebars';
-async function getKernel() {
-	var settings = ServerConnection.makeSettings({ 'baseUrl': '/ijupyter',
+async function getKernel(baseUrl='/ijupyter') {
+	var settings = ServerConnection.makeSettings({ 'baseUrl': baseUrl,
 	// 'wsUrl': `ws://${process.env.VUE_APP_JUPYTER_SERVER_HOST}:${process.env.VUE_APP_JUPYTER_SERVER_PORT}/`,
 	'token': 'superglue' });
     let kernelManager = new KernelManager({serverSettings: settings})

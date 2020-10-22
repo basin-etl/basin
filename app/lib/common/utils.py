@@ -1,7 +1,9 @@
+import sys
 import json
 from ipykernel.comm import Comm
 import pyarrow as pa
 import logging
+from pyspark.sql.pandas.types import to_arrow_schema # this keeps moving around in pyspark versions
 
 from typing import Dict, List, Any, Tuple, Pattern, Match, Optional, Set
 def get_catalog() -> Dict[str,Any]:
@@ -54,44 +56,57 @@ def stream_df_as_arrow(df,spark,limit=5000):
     # see if we have any results
     renamed_df = df.toDF(*renamed_schema_fields)
 
-    # max_rows = 300
-    # batches = spark.createDataFrame(renamed_df.take(500),renamed_df.schema)._collectAsArrow()
-    # if len(batches)>0:
-    #     sink = pa.BufferOutputStream()
-    #     writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-    #     for batch in batches:
-    #         writer.write_batch(batch)
-    #     comm.send(data="test",buffers=[sink.getvalue()])
-
-    # comm.close(data="closing comm")
-    # return
-
-
     row_iterator = renamed_df.toLocalIterator()
-    row_num = 0
+    total_size = 0
+    last_total_chunk = 0
+    MAX_SIZE_MB = 40
     row_buff = []
-    chunk_size = 500
+    CHUNK_SIZE_MB = 5
+
+    schema = to_arrow_schema(renamed_df.schema)
+
     for row in row_iterator:
-        if (row_num>2000):
+        if (total_size/1024/1024>MAX_SIZE_MB):
             break
-        row_num += 1
+        total_size += sys.getsizeof(row)
         row_buff.append(row)
-        if row_num%chunk_size==0:
-            batches = spark.createDataFrame(row_buff,renamed_df.schema)._collect_as_arrow()
-            if len(batches)>0:
-                sink = pa.BufferOutputStream()
-                writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-                for batch in batches:
-                    writer.write_batch(batch)
-                comm.send(data="test",buffers=[sink.getvalue()])
+
+        if total_size>last_total_chunk+CHUNK_SIZE_MB*1024*1024:
+            # flush an arrow batch to client
+            buffer = _rdd_list_to_arrowbuffer(row_buff,schema)
+            # the buffer size is likely smaller since it is compressed, so we can read more rows with same client memory limit
+            total_size = last_total_chunk + buffer.size
+            last_total_chunk = total_size
+            comm.send(data="test",buffers=[buffer])
             row_buff = []
+
     # send the last batch
-    batches = spark.createDataFrame(row_buff,renamed_df.schema)._collect_as_arrow()
-    if len(batches)>0:
-        sink = pa.BufferOutputStream()
-        writer = pa.RecordBatchStreamWriter(sink, batches[0].schema)
-        for batch in batches:
-            writer.write_batch(batch)
-        comm.send(data="test",buffers=[sink.getvalue()])
+    if len(row_buff)>0:
+        comm.send(data="test",buffers=[_rdd_list_to_arrowbuffer(row_buff,schema)])
+    del row_iterator
 
 
+def _rdd_list_to_arrowbuffer(rdd_list,schema):
+    # transpose the rdd list
+    columnar = list(map(list,zip(*rdd_list)))
+    record_batch = pa.RecordBatch.from_arrays(columnar,schema=schema)
+    sink = pa.BufferOutputStream()
+    writer = pa.RecordBatchStreamWriter(sink, schema)
+    writer.write_batch(record_batch)
+    return sink.getvalue()
+
+def repartition_by_size(df,max_partition_size_mb=20):
+    """Utility method to repartition based on a maximum size of partition (in MB)
+    """
+    
+    total_rows = df.count()
+    total_size = 0 
+    sample_size = 20
+    for row in df.take(sample_size):
+        total_size += sys.getsizeof(row)
+    
+    avg_row_size = total_size//sample_size
+    total_df_size = avg_row_size*total_rows
+    num_partitions = total_df_size//(max_partition_size_mb*1024*1024)
+    print(num_partitions)
+    return df.repartition(num_partitions)

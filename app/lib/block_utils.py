@@ -29,6 +29,11 @@ def extract(spark,env,source):
         ).schema
         # read the csv without inferring schema
         df = spark.read.options(**options).csv(file_location,df_schema)
+
+        # multiLine produces one big partition. repartition for performance purposes
+        if options["multiLine"]:
+            df = common.utils.repartition_by_size(df)
+
     elif properties["type"]=="parquet":
         df = spark.read.parquet(file_location)
     return df
