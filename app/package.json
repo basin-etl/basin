@@ -27,7 +27,7 @@
     "femtotween": "^1.1.1",
     "fin-hypergrid": "^3.3.2",
     "glob": "^7.1.6",
-    "gsap": "^3.4.2",
+    "gsap": "^3.6.0",
     "handlebars": "^4.7.6",
     "jsrender": "^1.0.7",
     "numeral": "^2.0.6",
